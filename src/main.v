@@ -4,16 +4,15 @@ import os
 import json
 
 struct Generator {
-	api_dump string @[required]
 mut:
+	api      GodotAPI
 	classes  map[string]GodotAPIClass
 	builtins map[string]GodotAPIClass
 	type_map map[string]string
 }
 
-fn Generator.new(api_dump string) Generator {
+fn Generator.new() Generator {
 	return Generator{
-		api_dump: api_dump
 		type_map: {
 			'bool':       'bool'
 			'int':        'int'
@@ -96,20 +95,20 @@ struct GodotAPIClass {
 
 }
 
-struct GodotApi {
+struct GodotAPI {
 mut:
 	classes []GodotAPIClass
 }
 
-fn (mut g Generator) parse_api() {
-	api_json := os.read_file(g.api_dump) or { panic('Failed to read API dump file: ${err}') }
-	api := json.decode(GodotApi, api_json) or { panic('Failed to parse API dump JSON: ${err}') }
+fn (mut g Generator) parse_api(api_dump_file string) {
+	// parse file
+	api_json := os.read_file(api_dump_file) or { panic('Failed to read API dump file: ${err}') }
+	g.api = json.decode(GodotAPI, api_json) or { panic('Failed to parse API dump JSON: ${err}') }
 
-	for class in api.classes {
+	// fill convenience data structures
+	for class in g.api.classes {
 		g.classes[class.name] = class
 	}
-
-	dump(g.classes)
 }
 
 fn (g &Generator) generate_bindings() {
@@ -117,14 +116,14 @@ fn (g &Generator) generate_bindings() {
 
 fn main() {
 	println('\nGenerating V bindings...')
-	mut api_dump := 'extension_api.json'
+	mut api_dump_file := 'extension_api.json'
 
 	if os.args.len > 1 {
-		api_dump = os.args[1]
+		api_dump_file = os.args[1]
 	}
 
-	mut generator := Generator.new(api_dump)
-	generator.parse_api()
+	mut generator := Generator.new()
+	generator.parse_api(api_dump_file)
 	generator.generate_bindings()
 
 	// println("V bindings generated successfully.")
