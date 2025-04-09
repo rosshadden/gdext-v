@@ -1,3 +1,5 @@
+module gdext
+
 import os
 
 fn main() {

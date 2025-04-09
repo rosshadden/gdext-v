@@ -1,3 +1,5 @@
+module gdext
+
 import json
 import godot
 import os
@@ -27,7 +29,11 @@ fn (g &Generator) gen_classes() ! {
 
 		buf.writeln('module gd')
 		buf.writeln('')
-		buf.writeln('pub struct ${class.name} {}')
+		buf.writeln('pub struct ${class.name} {')
+		if class.inherits.len > 0 {
+			buf.writeln('\t${class.inherits}')
+		}
+		buf.writeln('}')
 
 		f.write(buf)!
 	}

@@ -5,7 +5,7 @@ pub:
 	name            string @[required]
 	is_refcounted   bool   @[required]
 	is_instantiable bool   @[required]
-	inherits        string // @[required]
+	inherits        string
 	api_type        string @[required]
 
 	enums []struct {
@@ -15,8 +15,7 @@ pub:
 			name  string @[required]
 			value f64    @[required]
 		} @[required]
-	} // @[required]
-
+	}
 
 	methods []struct {
 		name       string @[required]
@@ -40,8 +39,7 @@ pub:
 
 		hash_compatibility []f64
 		is_required        bool
-	} // @[required]
-
+	}
 
 	properties []struct {
 		type   string @[required]
@@ -49,8 +47,7 @@ pub:
 		setter string
 		getter string @[required]
 		index  f64
-	} // @[required]
-
+	}
 
 	signals []struct {
 		name      string @[required]
@@ -58,14 +55,12 @@ pub:
 			name string @[required]
 			type string @[required]
 		}
-	} // @[required]
-
+	}
 
 	constants []struct {
 		name  string @[required]
 		value f64    @[required]
-	} // @[required]
-
+	}
 }
 
 pub struct API {
