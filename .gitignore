@@ -20,5 +20,8 @@ gdext
 *.db
 *.js
 
-# static files
+# static
 data/
+
+# generated
+src/gd/

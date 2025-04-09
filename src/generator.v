@@ -1,5 +1,6 @@
 import json
 import godot
+import os
 
 struct Generator {
 mut:
@@ -14,5 +15,16 @@ fn Generator.new(api_dump string) Generator {
 	}
 }
 
-fn (g &Generator) bindings() {
+fn (g &Generator) run() ! {
+	g.gen_classes()!
+}
+
+fn (g &Generator) gen_classes() ! {
+	for class in g.api.classes {
+		mut f := os.create('src/gd/${class.name}.v')!
+
+		f.writeln('module gd')!
+		f.writeln('')!
+		f.writeln('pub struct ${class.name} {}')!
+	}
 }
