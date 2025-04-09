@@ -8,7 +8,9 @@ fn main() {
 		api_dump_file = os.args[1]
 	}
 
-	generator := Generator.new(api_dump_file)
+	api_dump := os.read_file(api_dump_file) or { panic('Failed to read API dump file: ${err}') }
+
+	generator := Generator.new(api_dump)
 	generator.bindings()
 
 	// println("V bindings generated successfully.")
