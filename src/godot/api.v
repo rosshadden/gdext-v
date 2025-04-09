@@ -70,5 +70,117 @@ pub:
 
 pub struct API {
 pub mut:
-	classes []APIClass
+	header struct {
+		version_major     f64    @[required]
+		version_minor     f64    @[required]
+		version_patch     f64    @[required]
+		version_status    string @[required]
+		version_build     string @[required]
+		version_full_name string @[required]
+		precision         string @[required]
+	} @[required]
+
+	builtin_class_sizes []struct {
+		build_configuration string           @[required]
+		sizes               []struct {
+			name string @[required]
+			size f64    @[required]
+		} @[required]
+	} @[required]
+
+	builtin_class_member_offsets []struct {
+		build_configuration string           @[required]
+		classes             []struct {
+			name    string           @[required]
+			members []struct {
+				member string @[required]
+				offset f64    @[required]
+				meta   string @[required]
+			} @[required]
+		} @[required]
+	} @[required]
+
+	global_constants []struct {}
+
+
+	global_enums []struct {
+		name        string           @[required]
+		is_bitfield bool             @[required]
+		values      []struct {
+			name  string @[required]
+			value f64    @[required]
+		} @[required]
+	} @[required]
+
+	utility_functions []struct {
+		name        string @[required]
+		return_type string
+		category    string @[required]
+		is_vararg   bool   @[required]
+		hash        f64    @[required]
+		arguments   []struct {
+			name string @[required]
+			type string @[required]
+		}
+	} @[required]
+
+	builtin_classes []struct {
+		name                 string           @[required]
+		is_keyed             bool             @[required]
+		operators            []struct {
+			name        string @[required]
+			right_type  string
+			return_type string @[required]
+		} @[required]
+		constructors         []struct {
+			index     f64 @[required]
+			arguments []struct {
+				name string @[required]
+				type string @[required]
+			}
+		} @[required]
+		has_destructor       bool @[required]
+		indexing_return_type string
+		methods              []struct {
+			name        string @[required]
+			return_type string
+			is_vararg   bool @[required]
+			is_const    bool @[required]
+			is_static   bool @[required]
+			hash        f64  @[required]
+			arguments   []struct {
+				name          string @[required]
+				type          string @[required]
+				default_value string
+			}
+		}
+		members              []struct {
+			name string @[required]
+			type string @[required]
+		}
+		constants            []struct {
+			name  string @[required]
+			type  string @[required]
+			value string @[required]
+		}
+		enums                []struct {
+			name   string           @[required]
+			values []struct {
+				name  string @[required]
+				value f64    @[required]
+			} @[required]
+		}
+	} @[required]
+
+	classes []APIClass @[required]
+
+	singletons []struct {
+		name string @[required]
+		type string @[required]
+	} @[required]
+
+	native_structures []struct {
+		name   string @[required]
+		format string @[required]
+	} @[required]
 }

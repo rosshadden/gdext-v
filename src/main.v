@@ -8,9 +8,8 @@ fn main() {
 		api_dump_file = os.args[1]
 	}
 
-	mut generator := Generator.new()
-	generator.parse_api(api_dump_file)
-	generator.generate_bindings()
+	generator := Generator.new(api_dump_file)
+	generator.bindings()
 
 	// println("V bindings generated successfully.")
 }
