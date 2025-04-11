@@ -12,9 +12,7 @@ mut:
 pub fn Generator.new(api_dump string) Generator {
 	api := json.decode(API, api_dump) or { panic('Failed to parse API dump JSON: ${err}') }
 
-	return Generator{
-		api: api
-	}
+	return Generator{api}
 }
 
 pub fn (g &Generator) run() ! {
@@ -31,6 +29,33 @@ fn (g &Generator) gen_builtin_classes() ! {
 		buf.writeln('')
 		buf.writeln('pub struct ${class.name} {')
 		buf.writeln('}')
+
+		for constructor in class.constructors {
+			suffix := if constructor.index == 0 { '' } else { '${constructor.index}' }
+			buf.writeln('')
+
+			buf.write_string('pub fn ${class.name}.new${suffix}(')
+			for a, arg in constructor.arguments {
+				if a != 0 {
+					buf.write_string(', ')
+				}
+				buf.write_string('${arg.name} &${arg.type}')
+			}
+			buf.writeln(') ${class.name} {')
+			buf.writeln('\tmut inst := ${class.name}{}')
+			buf.writeln('\tconstructor := gdf.variant_get_ptr_constructor(GDExtensionVariantType.type_${class.name.to_lower()}, ${constructor.index})')
+			if constructor.arguments.len > 0 {
+				buf.writeln('\tmut args := unsafe { [${constructor.arguments.len}]voidptr{} }')
+				for a, arg in constructor.arguments {
+					buf.writeln('\targs[$a] = ${arg.name}')
+				}
+				buf.writeln('\tconstructor(voidptr(&inst), voidptr(&args[0]))')
+			} else {
+				buf.writeln('\tconstructor(voidptr(&inst), unsafe {nil})')
+			}
+			buf.writeln('\treturn inst')
+			buf.writeln('}')
+		}
 
 		if class.has_destructor {
 			buf.writeln('')
