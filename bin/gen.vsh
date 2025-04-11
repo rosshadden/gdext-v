@@ -1,3 +1,5 @@
+#!/usr/bin/env -S v run
+
 module main
 
 import os
