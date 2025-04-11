@@ -1,5 +1,53 @@
 module generator
 
+struct APIBuiltinClass {
+	name                 string          @[required]
+	is_keyed             bool            @[required]
+	operators            []struct {
+		name        string @[required]
+		right_type  string
+		return_type string @[required]
+	} @[required]
+	constructors         []struct {
+		index     f64 @[required]
+		arguments []struct {
+			name string @[required]
+			type string @[required]
+		}
+	} @[required]
+	has_destructor       bool @[required]
+	indexing_return_type string
+	methods              []struct {
+		name        string @[required]
+		return_type string
+		is_vararg   bool @[required]
+		is_const    bool @[required]
+		is_static   bool @[required]
+		hash        f64  @[required]
+		arguments   []struct {
+			name          string @[required]
+			type          string @[required]
+			default_value string
+		}
+	}
+	members              []struct {
+		name string @[required]
+		type string @[required]
+	}
+	constants            []struct {
+		name  string @[required]
+		type  string @[required]
+		value string @[required]
+	}
+	enums                []struct {
+		name   string          @[required]
+		values []struct {
+			name  string @[required]
+			value f64    @[required]
+		} @[required]
+	}
+}
+
 struct APIClass {
 pub:
 	name            string @[required]
@@ -9,8 +57,8 @@ pub:
 	api_type        string @[required]
 
 	enums []struct {
-		name        string          @[required]
-		is_bitfield bool            @[required]
+		name        string           @[required]
+		is_bitfield bool             @[required]
 		values      []struct {
 			name  string @[required]
 			value f64    @[required]
@@ -119,53 +167,7 @@ pub mut:
 		}
 	} @[required]
 
-	builtin_classes []struct {
-		name                 string           @[required]
-		is_keyed             bool             @[required]
-		operators            []struct {
-			name        string @[required]
-			right_type  string
-			return_type string @[required]
-		} @[required]
-		constructors         []struct {
-			index     f64 @[required]
-			arguments []struct {
-				name string @[required]
-				type string @[required]
-			}
-		} @[required]
-		has_destructor       bool @[required]
-		indexing_return_type string
-		methods              []struct {
-			name        string @[required]
-			return_type string
-			is_vararg   bool @[required]
-			is_const    bool @[required]
-			is_static   bool @[required]
-			hash        f64  @[required]
-			arguments   []struct {
-				name          string @[required]
-				type          string @[required]
-				default_value string
-			}
-		}
-		members              []struct {
-			name string @[required]
-			type string @[required]
-		}
-		constants            []struct {
-			name  string @[required]
-			type  string @[required]
-			value string @[required]
-		}
-		enums                []struct {
-			name   string           @[required]
-			values []struct {
-				name  string @[required]
-				value f64    @[required]
-			} @[required]
-		}
-	} @[required]
+	builtin_classes []APIBuiltinClass @[required]
 
 	classes []APIClass @[required]
 
