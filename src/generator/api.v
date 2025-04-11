@@ -9,7 +9,7 @@ struct APIBuiltinClass {
 		return_type string @[required]
 	} @[required]
 	constructors         []struct {
-		index     f64 @[required]
+		index     int @[required]
 		arguments []struct {
 			name string @[required]
 			type string @[required]
@@ -23,7 +23,7 @@ struct APIBuiltinClass {
 		is_vararg   bool @[required]
 		is_const    bool @[required]
 		is_static   bool @[required]
-		hash        f64  @[required]
+		hash        u64  @[required]
 		arguments   []struct {
 			name          string @[required]
 			type          string @[required]
@@ -43,7 +43,7 @@ struct APIBuiltinClass {
 		name   string          @[required]
 		values []struct {
 			name  string @[required]
-			value f64    @[required]
+			value i64    @[required]
 		} @[required]
 	}
 }
@@ -61,17 +61,18 @@ pub:
 		is_bitfield bool             @[required]
 		values      []struct {
 			name  string @[required]
-			value f64    @[required]
+			value i64    @[required]
 		} @[required]
 	}
 
 	methods []struct {
-		name       string @[required]
-		is_const   bool   @[required]
-		is_vararg  bool   @[required]
-		is_static  bool   @[required]
-		is_virtual bool   @[required]
-		hash       f64    @[required]
+		name        string @[required]
+		is_const    bool   @[required]
+		is_vararg   bool   @[required]
+		is_static   bool   @[required]
+		is_virtual  bool   @[required]
+		hash        u64    @[required]
+		is_required bool
 
 		return_value struct {
 			type string @[required]
@@ -84,9 +85,6 @@ pub:
 			default_value string
 			meta          string
 		}
-
-		hash_compatibility []f64
-		is_required        bool
 	}
 
 	properties []struct {
@@ -94,7 +92,7 @@ pub:
 		name   string @[required]
 		setter string
 		getter string @[required]
-		index  f64
+		index  int
 	}
 
 	signals []struct {
@@ -107,16 +105,16 @@ pub:
 
 	constants []struct {
 		name  string @[required]
-		value f64    @[required]
+		value int    @[required]
 	}
 }
 
 pub struct API {
 pub mut:
 	header struct {
-		version_major     f64    @[required]
-		version_minor     f64    @[required]
-		version_patch     f64    @[required]
+		version_major     int    @[required]
+		version_minor     int    @[required]
+		version_patch     int    @[required]
 		version_status    string @[required]
 		version_build     string @[required]
 		version_full_name string @[required]
@@ -127,7 +125,7 @@ pub mut:
 		build_configuration string           @[required]
 		sizes               []struct {
 			name string @[required]
-			size f64    @[required]
+			size int    @[required]
 		} @[required]
 	} @[required]
 
@@ -137,7 +135,7 @@ pub mut:
 			name    string           @[required]
 			members []struct {
 				member string @[required]
-				offset f64    @[required]
+				offset int    @[required]
 				meta   string @[required]
 			} @[required]
 		} @[required]
@@ -151,7 +149,7 @@ pub mut:
 		is_bitfield bool             @[required]
 		values      []struct {
 			name  string @[required]
-			value f64    @[required]
+			value i64    @[required]
 		} @[required]
 	} @[required]
 
@@ -160,7 +158,7 @@ pub mut:
 		return_type string
 		category    string @[required]
 		is_vararg   bool   @[required]
-		hash        f64    @[required]
+		hash        u64    @[required]
 		arguments   []struct {
 			name string @[required]
 			type string @[required]
