@@ -24,4 +24,4 @@ gdext
 data/
 
 # generated
-src/gd/
+src/*.v

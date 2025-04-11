@@ -23,7 +23,7 @@ pub fn (g &Generator) run() ! {
 
 fn (g &Generator) gen_classes() ! {
 	for class in g.api.classes {
-		mut f := os.create('src/gd/${class.name}.v')!
+		mut f := os.create('src/${class.name}.v')!
 		mut buf := strings.new_builder(1024)
 
 		buf.writeln('module gd')
