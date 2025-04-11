@@ -18,7 +18,22 @@ pub fn Generator.new(api_dump string) Generator {
 }
 
 pub fn (g &Generator) run() ! {
+	g.gen_builtin_classes()!
 	g.gen_classes()!
+}
+
+fn (g &Generator) gen_builtin_classes() ! {
+	for class in g.api.builtin_classes {
+		mut f := os.create('src/_${class.name}.v')!
+		mut buf := strings.new_builder(1024)
+
+		buf.writeln('module gd')
+		buf.writeln('')
+		buf.writeln('pub struct ${class.name} {')
+		buf.writeln('}')
+
+		f.write(buf)!
+	}
 }
 
 fn (g &Generator) gen_classes() ! {
