@@ -22,6 +22,10 @@ pub fn (g &Generator) run() ! {
 
 fn (g &Generator) gen_builtin_classes() ! {
 	for class in g.api.builtin_classes {
+		if class.name.is_lower() {
+			continue
+		}
+
 		mut f := os.create('src/_${class.name}.v')!
 		mut buf := strings.new_builder(1024)
 
@@ -47,7 +51,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 			if constructor.arguments.len > 0 {
 				buf.writeln('\tmut args := unsafe { [${constructor.arguments.len}]voidptr{} }')
 				for a, arg in constructor.arguments {
-					buf.writeln('\targs[$a] = ${arg.name}')
+					buf.writeln('\targs[${a}] = ${arg.name}')
 				}
 				buf.writeln('\tconstructor(voidptr(&inst), voidptr(&args[0]))')
 			} else {
