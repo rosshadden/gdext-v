@@ -1,24 +1,23 @@
-module gdext
+module generator
 
 import json
-import godot
 import os
 import strings
 
-struct Generator {
+pub struct Generator {
 mut:
-	api godot.API @[required]
+	api API @[required]
 }
 
-fn Generator.new(api_dump string) Generator {
-	api := json.decode(godot.API, api_dump) or { panic('Failed to parse API dump JSON: ${err}') }
+pub fn Generator.new(api_dump string) Generator {
+	api := json.decode(API, api_dump) or { panic('Failed to parse API dump JSON: ${err}') }
 
 	return Generator{
 		api: api
 	}
 }
 
-fn (g &Generator) run() ! {
+pub fn (g &Generator) run() ! {
 	g.gen_classes()!
 }
 

@@ -1,6 +1,6 @@
-module godot
+module generator
 
-pub struct APIClass {
+struct APIClass {
 pub:
 	name            string @[required]
 	is_refcounted   bool   @[required]
