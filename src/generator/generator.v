@@ -32,6 +32,14 @@ fn (g &Generator) gen_builtin_classes() ! {
 		buf.writeln('pub struct ${class.name} {')
 		buf.writeln('}')
 
+		if class.has_destructor {
+			buf.writeln('')
+			buf.writeln('pub fn (s &${class.name}) deinit() {')
+			buf.writeln('\tdestructor := gdf.variant_get_ptr_destructor(GDExtensionVariantType.type_${class.name.to_lower()})')
+			buf.writeln('\tdestructor(voidptr(c))')
+			buf.writeln('}')
+		}
+
 		f.write(buf)!
 	}
 }
