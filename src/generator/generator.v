@@ -94,7 +94,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 				if a != 0 {
 					buf.write_string(', ')
 				}
-				buf.write_string('${arg.name} ${convert_type(arg.type)}')
+				buf.write_string('${convert_name(arg.name)} ${convert_type(arg.type)}')
 			}
 
 			// return signature
@@ -107,36 +107,24 @@ fn (g &Generator) gen_builtin_classes() ! {
 			// body
 			if has_return {
 				// result
-				match true {
-					return_type in numbers {
-						buf.writeln('\tmut result := ${return_type}(0)')
-					}
-					return_type == 'bool' {
-						buf.writeln('\tmut result := false')
-					}
-					return_type == 'voidptr' {
-						buf.writeln('\tmut result := unsafe{nil}')
-					}
-					else {
-						buf.writeln('\tmut result := ${return_type}{}')
-					}
-				}
+				buf.writeln('\tmut result__ := ${convert_return(return_type)}')
 				buf.writeln('\tfnname := StringName.new("${method.name}")')
 				buf.writeln('\tf := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_${class.name.to_lower()}, voidptr(&fnname), ${method.hash})')
 
 				if method.arguments.len > 0 {
 					buf.writeln('\tmut args := unsafe { [${method.arguments.len}]voidptr{} }')
-					for i, a in method.arguments {
-						mut name := convert_name(a.name)
-						buf.writeln('\targs[${i}] = voidptr(&${name})')
+
+					for a, arg in method.arguments {
+						mut name := convert_name(arg.name)
+						buf.writeln('\targs[${a}] = voidptr(&${name})')
 					}
 
-					buf.writeln('\tf(${ptr}, voidptr(&args[0]), voidptr(&result), ${method.arguments.len})')
+					buf.writeln('\tf(${ptr}, voidptr(&args[0]), voidptr(&result__), ${method.arguments.len})')
 				} else {
-					buf.writeln('\tf(${ptr}, unsafe{nil}, voidptr(&result), ${method.arguments.len})')
+					buf.writeln('\tf(${ptr}, unsafe{nil}, voidptr(&result__), ${method.arguments.len})')
 				}
 				buf.writeln('\tfnname.deinit()')
-				buf.writeln('\treturn result')
+				buf.writeln('\treturn result__')
 			} else {
 				buf.writeln('\tfnname := StringName.new("${method.name}")')
 				buf.writeln('\tf := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_${class.name.to_lower()}, voidptr(&fnname), ${method.hash})')
@@ -197,6 +185,27 @@ fn (g &Generator) gen_classes() ! {
 				buf.writeln(') ${return_type} {')
 			} else {
 				buf.writeln(') {')
+			}
+
+			// body
+			if has_return {
+				// result
+				buf.writeln('\tmut result__ := ${convert_return(return_type)}')
+				buf.writeln('\tclassname := StringName.new("${class.name}")')
+				buf.writeln('\tfnname := StringName.new("${method.name}")')
+				buf.writeln('\tmb := gdf.classdb_get_method_bind(&classname, &fnname, ${method.hash})')
+
+				if method.arguments.len > 0 {
+					buf.writeln('\tmut args := unsafe { [${method.arguments.len}]voidptr{} }')
+
+					for a, arg in method.arguments {
+						mut name := convert_name(arg.name)
+						buf.writeln('\targs[${a}] = voidptr(&${name})')
+					}
+					buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, voidptr(&args[0]), voidptr(&result__))')
+				} else {
+					buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, unsafe{nil}, voidptr(&result__))')
+				}
 			}
 
 			// end

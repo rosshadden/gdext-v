@@ -1,5 +1,7 @@
 module generator
 
+const strings = ['String', 'StringName']
+
 const numbers = ['f32', 'f64', 'i8', 'u8', 'i16', 'u16', 'i32', 'u32', 'i64', 'u64', 'int']
 
 const keywords = [
@@ -118,4 +120,22 @@ fn convert_type(_type string) string {
 	}
 
 	return type
+}
+
+// convert return type from C++ to V
+fn convert_return(type string) string {
+	return match true {
+		type in numbers {
+			'${type}(0)'
+		}
+		type == 'bool' {
+			'false'
+		}
+		type == 'voidptr' {
+			'unsafe{nil}'
+		}
+		else {
+			'${type}{}'
+		}
+	}
 }
