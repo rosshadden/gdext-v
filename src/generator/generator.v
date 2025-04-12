@@ -26,7 +26,6 @@ fn (g &Generator) gen_builtin_classes() ! {
 			continue
 		}
 
-		mut f := os.create('src/_${class.name}.v')!
 		mut buf := strings.new_builder(1024)
 
 		buf.writeln('module gd')
@@ -92,7 +91,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 				}
 				buf.write_string('${arg.name} ${convert_type(arg.type)}')
 			}
-			// return
+			// return signature
 			if has_return {
 				buf.writeln(') ${return_type} {')
 			} else {
@@ -100,6 +99,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 			}
 			// body
 			if has_return {
+				// result
 				match true {
 					return_type in numbers {
 						buf.writeln('\tmut result := ${return_type}(0)')
@@ -140,13 +140,14 @@ fn (g &Generator) gen_builtin_classes() ! {
 			buf.writeln('}')
 		}
 
+		mut f := os.create('src/_${class.name}.v')!
+		defer { f.close() }
 		f.write(buf)!
 	}
 }
 
 fn (g &Generator) gen_classes() ! {
 	for class in g.api.classes {
-		mut f := os.create('src/_${class.name}.v')!
 		mut buf := strings.new_builder(1024)
 
 		buf.writeln('module gd')
@@ -157,6 +158,8 @@ fn (g &Generator) gen_classes() ! {
 		}
 		buf.writeln('}')
 
+		mut f := os.create('src/_${class.name}.v')!
+		defer { f.close() }
 		f.write(buf)!
 	}
 }
