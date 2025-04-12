@@ -28,11 +28,13 @@ fn (g &Generator) gen_builtin_classes() ! {
 
 		mut buf := strings.new_builder(1024)
 
+		// struct
 		buf.writeln('module gd')
 		buf.writeln('')
 		buf.writeln('pub struct ${class.name} {')
 		buf.writeln('}')
 
+		// constructors
 		for constructor in class.constructors {
 			suffix := if constructor.index == 0 { '' } else { '${constructor.index}' }
 			buf.writeln('')
@@ -60,6 +62,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 			buf.writeln('}')
 		}
 
+		// destructor
 		if class.has_destructor {
 			buf.writeln('')
 			buf.writeln('pub fn (s &${class.name}) deinit() {')
@@ -68,6 +71,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 			buf.writeln('}')
 		}
 
+		// methods
 		for method in class.methods {
 			has_return := method.return_type != ''
 			return_type := convert_type(method.return_type)
@@ -77,13 +81,14 @@ fn (g &Generator) gen_builtin_classes() ! {
 				else { 'voidptr(s)' }
 			}
 
-			buf.writeln('')
 			// fn def
+			buf.writeln('')
 			if method.is_static {
 				buf.write_string('pub fn ${class.name}.${method.name}(')
 			} else {
 				buf.write_string('pub fn (s &${class.name}) ${method.name}(')
 			}
+
 			// args
 			for a, arg in method.arguments {
 				if a != 0 {
@@ -91,12 +96,14 @@ fn (g &Generator) gen_builtin_classes() ! {
 				}
 				buf.write_string('${arg.name} ${convert_type(arg.type)}')
 			}
+
 			// return signature
 			if has_return {
 				buf.writeln(') ${return_type} {')
 			} else {
 				buf.writeln(') {')
 			}
+
 			// body
 			if has_return {
 				// result
@@ -150,13 +157,51 @@ fn (g &Generator) gen_classes() ! {
 	for class in g.api.classes {
 		mut buf := strings.new_builder(1024)
 
+		// struct
 		buf.writeln('module gd')
 		buf.writeln('')
 		buf.writeln('pub struct ${class.name} {')
-		if class.inherits.len > 0 {
+		if class.inherits != '' {
 			buf.writeln('\t${class.inherits}')
 		}
 		buf.writeln('}')
+
+		// methods
+		for method in class.methods {
+			has_return := method.return_value.type != ''
+			return_type := convert_type(method.return_value.type)
+			ptr := match true {
+				method.is_static { 'unsafe{nil}' }
+				// class.name in object_names { 's.ptr' }
+				else { 'voidptr(s)' }
+			}
+
+			buf.writeln('')
+			// fn def
+			if method.is_static {
+				buf.write_string('pub fn ${class.name}.${method.name}(')
+			} else {
+				buf.write_string('pub fn (s &${class.name}) ${method.name}(')
+			}
+
+			// args
+			for a, arg in method.arguments {
+				if a != 0 {
+					buf.write_string(', ')
+				}
+				buf.write_string('${convert_name(arg.name)} ${convert_type(arg.type)}')
+			}
+
+			// return signature
+			if has_return {
+				buf.writeln(') ${return_type} {')
+			} else {
+				buf.writeln(') {')
+			}
+
+			// end
+			buf.writeln('}')
+		}
 
 		mut f := os.create('src/_${class.name}.v')!
 		defer { f.close() }

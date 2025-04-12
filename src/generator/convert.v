@@ -3,15 +3,18 @@ module generator
 const numbers = ['f32', 'f64', 'i8', 'u8', 'i16', 'u16', 'i32', 'u32', 'i64', 'u64', 'int']
 
 const keywords = [
+	'__global',
+	'__offsetof',
+	'args',
 	'as',
 	'asm',
 	'assert',
 	'atomic',
 	'bool',
 	'break',
+	'char',
 	'const',
 	'continue',
-	'char',
 	'defer',
 	'else',
 	'enum',
@@ -48,41 +51,71 @@ const keywords = [
 	'union',
 	'unsafe',
 	'volatile',
-	'__global',
-	'__offsetof',
-	'args',
 ]
 
-const type_map = {
-	'double':   'f64'
-	'float':    'f64'
-	'int16':    'i16'
-	'int16_t':  'i16'
-	'int32':    'i32'
-	'int32_t':  'i32'
-	'int64':    'i64'
-	'int64_t':  'i64'
-	'int8':     'i8'
-	'int8_t':   'i8'
-	'real_t':   'f64'
-	'uint16':   'u16'
-	'uint16_t': 'u16'
-	'uint32':   'u32'
-	'uint32_t': 'u32'
-	'uint64':   'u64'
-	'uint64_t': 'u64'
-	'uint8':    'u8'
-	'uint8_t':  'u8'
-	'void*':    'voidptr'
-}
+// convert name from C++ to V
+fn convert_name(_name string) string {
+	mut name := _name.to_lower()
 
-fn convert_name(name string) string {
 	if name in keywords {
-		return 'gd${name}'
+		name = 'gd${name}'
 	}
+
+	if name.starts_with('_') {
+		name = 'u${name[1..]}'
+	}
+
 	return name
 }
 
-fn convert_type(name string) string {
-	return type_map[name] or { name }
+// convert type from C++ to V
+fn convert_type(_type string) string {
+	mut type := _type
+
+	type = type.replace('enum::', '')
+	type = type.replace('.', '')
+	type = type.replace('bitfield::', '')
+	type = type.replace('const ', '')
+	type = type.replace('void*', 'voidptr')
+	type = type.replace('uint8_t', 'u8')
+	type = type.replace('int8_t', 'i8')
+	type = type.replace('uint16_t', 'u16')
+	type = type.replace('int16_t', 'i16')
+	type = type.replace('uint32_t', 'u32')
+	type = type.replace('int32_t', 'i32')
+	type = type.replace('uint64_t', 'u64')
+	type = type.replace('int64_t', 'i64')
+	type = type.replace('uint8', 'u8')
+	type = type.replace('int8', 'i8')
+	type = type.replace('uint16', 'u16')
+	type = type.replace('int16', 'i16')
+	type = type.replace('uint32', 'u32')
+	type = type.replace('int32', 'i32')
+	type = type.replace('uint64', 'u64')
+	type = type.replace('int64', 'i64')
+	type = type.replace('double', 'f64')
+	type = type.replace('real_t', 'f64')
+
+	// if type == 'Error' {
+	// 	type = 'GD${type}'
+	// }
+
+	if type.starts_with('typedarray::') {
+		type = 'Array'
+	}
+	type = type.replace('::', '')
+
+	for type.ends_with('*') {
+		type = '&${type[..type.len - 1]}'
+	}
+
+	if type.replace('&', '') == 'int' {
+		type = type.replace('int', 'i64')
+	}
+
+	if type.replace('&', '') == 'float' {
+		type = type.replace('float', 'f64')
+	}
+
+	return type
 }
