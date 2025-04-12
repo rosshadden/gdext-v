@@ -106,11 +106,12 @@ fn (g &Generator) gen_builtin_classes() ! {
 
 			// body
 			if has_return {
-				// result
 				buf.writeln('\tmut result__ := ${convert_return(return_type)}')
-				buf.writeln('\tfnname := StringName.new("${method.name}")')
-				buf.writeln('\tf := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_${class.name.to_lower()}, voidptr(&fnname), ${method.hash})')
+			}
+			buf.writeln('\tfnname := StringName.new("${method.name}")')
+			buf.writeln('\tf := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_${class.name.to_lower()}, voidptr(&fnname), ${method.hash})')
 
+			if has_return {
 				if method.arguments.len > 0 {
 					buf.writeln('\tmut args := unsafe { [${method.arguments.len}]voidptr{} }')
 
@@ -123,14 +124,15 @@ fn (g &Generator) gen_builtin_classes() ! {
 				} else {
 					buf.writeln('\tf(${ptr}, unsafe{nil}, voidptr(&result__), ${method.arguments.len})')
 				}
-				buf.writeln('\tfnname.deinit()')
-				buf.writeln('\treturn result__')
 			} else {
-				buf.writeln('\tfnname := StringName.new("${method.name}")')
-				buf.writeln('\tf := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_${class.name.to_lower()}, voidptr(&fnname), ${method.hash})')
 				buf.writeln('\tf(${ptr}, unsafe{nil}, unsafe{nil}, ${method.arguments.len})')
-				buf.writeln('\tfnname.deinit()')
 			}
+
+			buf.writeln('\tfnname.deinit()')
+			if has_return {
+				buf.writeln('\treturn result__')
+			}
+
 			// end
 			buf.writeln('}')
 		}

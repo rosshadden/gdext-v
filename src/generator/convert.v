@@ -134,6 +134,7 @@ fn convert_return(type string) string {
 		type == 'voidptr' {
 			'unsafe{nil}'
 		}
+		// TODO: enums
 		else {
 			'${type}{}'
 		}
