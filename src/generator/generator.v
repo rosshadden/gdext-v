@@ -202,11 +202,42 @@ fn (g &Generator) gen_classes() ! {
 
 					for a, arg in method.arguments {
 						mut name := convert_name(arg.name)
-						buf.writeln('\targs[${a}] = voidptr(&${name})')
+						match true {
+							arg.type in strings {
+								buf.writeln('\targ_sn${a} := ${arg.type}.new(${name})')
+								buf.writeln('\targsn${a} := unsafe{voidptr(&arg_sn${a})}')
+							}
+							// TODO: classdb
+							// TODO: enums
+							else {
+								buf.writeln('\targs[${a}] = voidptr(&${name})')
+							}
+						}
 					}
 					buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, voidptr(&args[0]), voidptr(&result__))')
 				} else {
 					buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, unsafe{nil}, voidptr(&result__))')
+				}
+
+				for a, arg in method.arguments {
+					if arg.type in strings {
+						buf.writeln('\targ_sn${a}.deinit()')
+					}
+				}
+
+				buf.writeln('\tclassname.deinit()')
+				buf.writeln('\tfnname.deinit()')
+
+				match true {
+					method.return_value.type in strings {
+						buf.writeln('\tresult__v := result__.to_v()')
+						buf.writeln('\tresult__.deinit()')
+						buf.writeln('\treturn result__v')
+					}
+					// TODO: enums
+					else {
+						buf.writeln('\treturn result__')
+					}
 				}
 			}
 
