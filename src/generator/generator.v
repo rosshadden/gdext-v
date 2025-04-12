@@ -128,7 +128,10 @@ fn (g &Generator) gen_builtin_classes() ! {
 				buf.writeln('\tf(${ptr}, unsafe{nil}, unsafe{nil}, ${method.arguments.len})')
 			}
 
+			// cleanup
 			buf.writeln('\tfnname.deinit()')
+
+			// return
 			if has_return {
 				buf.writeln('\treturn result__')
 			}
@@ -191,43 +194,49 @@ fn (g &Generator) gen_classes() ! {
 
 			// body
 			if has_return {
-				// result
 				buf.writeln('\tmut result__ := ${convert_return(return_type)}')
-				buf.writeln('\tclassname := StringName.new("${class.name}")')
-				buf.writeln('\tfnname := StringName.new("${method.name}")')
-				buf.writeln('\tmb := gdf.classdb_get_method_bind(&classname, &fnname, ${method.hash})')
+			}
+			buf.writeln('\tclassname := StringName.new("${class.name}")')
+			buf.writeln('\tfnname := StringName.new("${method.name}")')
+			buf.writeln('\tmb := gdf.classdb_get_method_bind(&classname, &fnname, ${method.hash})')
 
-				if method.arguments.len > 0 {
-					buf.writeln('\tmut args := unsafe { [${method.arguments.len}]voidptr{} }')
-
-					for a, arg in method.arguments {
-						mut name := convert_name(arg.name)
-						match true {
-							arg.type in strings {
-								buf.writeln('\targ_sn${a} := ${arg.type}.new(${name})')
-								buf.writeln('\targsn${a} := unsafe{voidptr(&arg_sn${a})}')
-							}
-							// TODO: classdb
-							// TODO: enums
-							else {
-								buf.writeln('\targs[${a}] = voidptr(&${name})')
-							}
-						}
-					}
-					buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, voidptr(&args[0]), voidptr(&result__))')
-				} else {
-					buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, unsafe{nil}, voidptr(&result__))')
-				}
+			if method.arguments.len > 0 {
+				buf.writeln('\tmut args := unsafe { [${method.arguments.len}]voidptr{} }')
 
 				for a, arg in method.arguments {
-					if arg.type in strings {
-						buf.writeln('\targ_sn${a}.deinit()')
+					mut name := convert_name(arg.name)
+					match true {
+						arg.type in strings {
+							buf.writeln('\targ_sn${a} := ${arg.type}.new(${name})')
+							buf.writeln('\targsn${a} := unsafe{voidptr(&arg_sn${a})}')
+						}
+						// TODO: classdb
+						// TODO: enums
+						else {
+							buf.writeln('\targs[${a}] = unsafe{voidptr(&${name})}')
+						}
 					}
 				}
+				if has_return {
+					buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, voidptr(&args[0]), voidptr(&result__))')
+				} else {
+					buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, voidptr(&args[0]), unsafe{nil})')
+				}
+			} else {
+				buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, unsafe{nil}, unsafe{nil})')
+			}
 
-				buf.writeln('\tclassname.deinit()')
-				buf.writeln('\tfnname.deinit()')
+			// cleanup
+			for a, arg in method.arguments {
+				if arg.type in strings {
+					buf.writeln('\targ_sn${a}.deinit()')
+				}
+			}
+			buf.writeln('\tclassname.deinit()')
+			buf.writeln('\tfnname.deinit()')
 
+			// return
+			if has_return {
 				match true {
 					method.return_value.type in strings {
 						buf.writeln('\tresult__v := result__.to_v()')
