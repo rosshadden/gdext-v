@@ -150,8 +150,25 @@ fn (g &Generator) gen_classes() ! {
 	for class in g.api.classes {
 		mut buf := strings.new_builder(1024)
 
-		// struct
+		// module
 		buf.writeln('module gd')
+
+		// enums
+		for enm in class.enums {
+			mut values := []i64{cap: enm.values.len}
+			buf.writeln('')
+			buf.writeln('pub enum ${class.name}${enm.name} as i64 {')
+
+			for enum_value in enm.values {
+				if enum_value.value !in values {
+					values << enum_value.value
+					buf.writeln('\t${enum_value.name.to_lower()} = ${enum_value.value}')
+				}
+			}
+			buf.writeln('}')
+		}
+
+		// struct
 		buf.writeln('')
 		buf.writeln('pub struct ${class.name} {')
 		if class.inherits != '' {
