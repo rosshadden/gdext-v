@@ -5,20 +5,42 @@ import os
 import strings
 
 pub struct Generator {
-mut:
 	api API @[required]
+mut:
+	enum_defaults map[string]string = map[string]string{}
 }
 
 pub fn Generator.new(api_dump string) Generator {
 	api := json.decode(API, api_dump) or { panic('Failed to parse API dump JSON: ${err}') }
 
-	return Generator{api}
+	return Generator{
+		api: api
+	}
 }
 
-pub fn (g &Generator) run() ! {
+pub fn (mut g Generator) run() ! {
+	g.make_enum_defaults()
 	g.gen_builtin_classes()!
 	g.gen_global_enums()!
 	g.gen_classes()!
+}
+
+// populate enum_defaults with the first value of each enum
+fn (mut g Generator) make_enum_defaults() {
+	for enm in g.api.global_enums {
+		name := convert_type(enm.name)
+		g.enum_defaults[name] = convert_name(enm.values.first().name)
+	}
+	for class in g.api.classes {
+		for class_enum in class.enums {
+			g.enum_defaults['${class.name}${class_enum.name}'] = convert_name(class_enum.values.first().name)
+		}
+	}
+	for class in g.api.builtin_classes {
+		for class_enum in class.enums {
+			g.enum_defaults['${class.name}${class_enum.name}'] = convert_name(class_enum.values.first().name)
+		}
+	}
 }
 
 fn (g &Generator) gen_builtin_classes() ! {
@@ -107,7 +129,8 @@ fn (g &Generator) gen_builtin_classes() ! {
 
 			// body
 			if has_return {
-				buf.writeln('\tmut result := ${convert_return(return_type)}')
+				buf.writeln('\tmut result := ${convert_return(return_type, method.return_type,
+					g.enum_defaults)}')
 			}
 			buf.writeln('\tfnname := StringName.new("${method.name}")')
 			buf.writeln('\tf := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_${class.name.to_lower()}, voidptr(&fnname), ${method.hash})')
@@ -237,7 +260,8 @@ fn (g &Generator) gen_classes() ! {
 
 			// body
 			if has_return {
-				buf.writeln('\tmut result := ${convert_return(return_type)}')
+				buf.writeln('\tmut result := ${convert_return(return_type, method.return_value.type,
+					g.enum_defaults)}')
 			}
 			buf.writeln('\tclassname := StringName.new("${class.name}")')
 			buf.writeln('\tfnname := StringName.new("${method.name}")')
@@ -254,7 +278,11 @@ fn (g &Generator) gen_classes() ! {
 							buf.writeln('\targsn${a} := unsafe{voidptr(&arg_sn${a})}')
 						}
 						// TODO: classdb
-						// TODO: enums
+						method.return_value.type.starts_with('enum::')
+							|| method.return_value.type.starts_with('bitfield::') {
+							buf.writeln('\ti64_${name} := i64(${name})')
+							buf.writeln('\targs[${a}] = unsafe{voidptr(&i64_${name})}')
+						}
 						else {
 							buf.writeln('\targs[${a}] = unsafe{voidptr(&${name})}')
 						}
@@ -290,7 +318,10 @@ fn (g &Generator) gen_classes() ! {
 						buf.writeln('\tresult.deinit()')
 						buf.writeln('\treturn result_v')
 					}
-					// TODO: enums
+					method.return_value.type.starts_with('enum::')
+						|| method.return_value.type.starts_with('bitfield::') {
+						buf.writeln('\treturn unsafe{${return_type}(result)}')
+					}
 					else {
 						buf.writeln('\treturn result')
 					}

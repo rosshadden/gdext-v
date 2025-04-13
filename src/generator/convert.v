@@ -128,7 +128,7 @@ fn convert_type(_type string) string {
 }
 
 // convert return type from C++ to V
-fn convert_return(type string) string {
+fn convert_return(type string, orig string, enum_defaults map[string]string) string {
 	return match true {
 		type == 'bool' {
 			'false'
@@ -139,7 +139,9 @@ fn convert_return(type string) string {
 		type in numbers {
 			'${type}(0)'
 		}
-		// TODO: enums
+		orig.starts_with('enum::') || orig.starts_with('bitfield::') {
+			'i64(${type}.${enum_defaults[type]})'
+		}
 		else {
 			'${type}{}'
 		}

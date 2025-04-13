@@ -17,7 +17,7 @@ fn main() {
 
 	api_dump := read_file(api_dump_file) or { panic('Failed to read API dump file: ${err}') }
 
-	gen := Generator.new(api_dump)
+	mut gen := Generator.new(api_dump)
 	gen.run() or { panic('Failed to generate V bindings: ${err}') }
 
 	println('V bindings generated successfully.')
