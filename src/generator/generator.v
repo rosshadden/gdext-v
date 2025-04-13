@@ -106,7 +106,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 
 			// body
 			if has_return {
-				buf.writeln('\tmut result__ := ${convert_return(return_type)}')
+				buf.writeln('\tmut result := ${convert_return(return_type)}')
 			}
 			buf.writeln('\tfnname := StringName.new("${method.name}")')
 			buf.writeln('\tf := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_${class.name.to_lower()}, voidptr(&fnname), ${method.hash})')
@@ -120,9 +120,9 @@ fn (g &Generator) gen_builtin_classes() ! {
 						buf.writeln('\targs[${a}] = voidptr(&${name})')
 					}
 
-					buf.writeln('\tf(${ptr}, voidptr(&args[0]), voidptr(&result__), ${method.arguments.len})')
+					buf.writeln('\tf(${ptr}, voidptr(&args[0]), voidptr(&result), ${method.arguments.len})')
 				} else {
-					buf.writeln('\tf(${ptr}, unsafe{nil}, voidptr(&result__), ${method.arguments.len})')
+					buf.writeln('\tf(${ptr}, unsafe{nil}, voidptr(&result), ${method.arguments.len})')
 				}
 			} else {
 				buf.writeln('\tf(${ptr}, unsafe{nil}, unsafe{nil}, ${method.arguments.len})')
@@ -133,7 +133,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 
 			// return
 			if has_return {
-				buf.writeln('\treturn result__')
+				buf.writeln('\treturn result')
 			}
 
 			// end
@@ -182,19 +182,19 @@ fn (g &Generator) gen_classes() ! {
 				if a != 0 {
 					buf.write_string(', ')
 				}
-				buf.write_string('${convert_name(arg.name)} ${convert_type(arg.type)}')
+				buf.write_string('${convert_name(arg.name)} ${convert_strings(convert_type(arg.type))}')
 			}
 
 			// return signature
 			if has_return {
-				buf.writeln(') ${return_type} {')
+				buf.writeln(') ${convert_strings(return_type)} {')
 			} else {
 				buf.writeln(') {')
 			}
 
 			// body
 			if has_return {
-				buf.writeln('\tmut result__ := ${convert_return(return_type)}')
+				buf.writeln('\tmut result := ${convert_return(return_type)}')
 			}
 			buf.writeln('\tclassname := StringName.new("${class.name}")')
 			buf.writeln('\tfnname := StringName.new("${method.name}")')
@@ -218,12 +218,16 @@ fn (g &Generator) gen_classes() ! {
 					}
 				}
 				if has_return {
-					buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, voidptr(&args[0]), voidptr(&result__))')
+					buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, voidptr(&args[0]), voidptr(&result))')
 				} else {
 					buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, voidptr(&args[0]), unsafe{nil})')
 				}
 			} else {
-				buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, unsafe{nil}, unsafe{nil})')
+				if has_return {
+					buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, unsafe{nil}, voidptr(&result))')
+				} else {
+					buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, unsafe{nil}, unsafe{nil})')
+				}
 			}
 
 			// cleanup
@@ -239,13 +243,13 @@ fn (g &Generator) gen_classes() ! {
 			if has_return {
 				match true {
 					method.return_value.type in strings {
-						buf.writeln('\tresult__v := result__.to_v()')
-						buf.writeln('\tresult__.deinit()')
-						buf.writeln('\treturn result__v')
+						buf.writeln('\tresult_v := result.to_v()')
+						buf.writeln('\tresult.deinit()')
+						buf.writeln('\treturn result_v')
 					}
 					// TODO: enums
 					else {
-						buf.writeln('\treturn result__')
+						buf.writeln('\treturn result')
 					}
 				}
 			}

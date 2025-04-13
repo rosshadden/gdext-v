@@ -55,11 +55,16 @@ const keywords = [
 	'volatile',
 ]
 
+const genwords = [
+	'classname',
+	'result',
+]
+
 // convert name from C++ to V
 fn convert_name(_name string) string {
 	mut name := _name.to_lower()
 
-	if name in keywords {
+	if name in keywords || name in genwords {
 		name = 'gd${name}'
 	}
 
@@ -125,18 +130,26 @@ fn convert_type(_type string) string {
 // convert return type from C++ to V
 fn convert_return(type string) string {
 	return match true {
-		type in numbers {
-			'${type}(0)'
-		}
 		type == 'bool' {
 			'false'
 		}
 		type == 'voidptr' {
 			'unsafe{nil}'
 		}
+		type in numbers {
+			'${type}(0)'
+		}
 		// TODO: enums
 		else {
 			'${type}{}'
 		}
 	}
+}
+
+// convert string types to `string`
+fn convert_strings(type string) string {
+	if type in strings {
+		return 'string'
+	}
+	return type
 }
