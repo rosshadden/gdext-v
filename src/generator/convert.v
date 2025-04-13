@@ -103,9 +103,9 @@ fn convert_type(_type string) string {
 	type = type.replace('double', 'f64')
 	type = type.replace('real_t', 'f64')
 
-	// if type == 'Error' {
-	// 	type = 'GD${type}'
-	// }
+	if type == 'Error' {
+		type = 'GD${type}'
+	}
 
 	if type.starts_with('typedarray::') {
 		type = 'Array'
