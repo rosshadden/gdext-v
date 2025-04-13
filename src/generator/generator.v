@@ -17,6 +17,7 @@ pub fn Generator.new(api_dump string) Generator {
 
 pub fn (g &Generator) run() ! {
 	g.gen_builtin_classes()!
+	g.gen_global_enums()!
 	g.gen_classes()!
 }
 
@@ -146,6 +147,31 @@ fn (g &Generator) gen_builtin_classes() ! {
 	}
 }
 
+fn (g &Generator) gen_global_enums() ! {
+	mut buf := strings.new_builder(1024)
+	buf.writeln('module gd')
+
+	for enm in g.api.global_enums {
+		name := convert_type(enm.name)
+		buf.writeln('')
+		buf.writeln('pub enum ${name} as i64 {')
+		mut bits := []i64{cap: enm.values.len}
+
+		for val in enm.values {
+			if val.value !in bits {
+				bits << val.value
+				buf.writeln('\t${val.name.to_lower()} = ${val.value}')
+			}
+		}
+
+		buf.writeln('}')
+	}
+
+	mut f := os.create('src/__enums.v')!
+	defer { f.close() }
+	f.write(buf)!
+}
+
 fn (g &Generator) gen_classes() ! {
 	for class in g.api.classes {
 		mut buf := strings.new_builder(1024)
@@ -155,14 +181,14 @@ fn (g &Generator) gen_classes() ! {
 
 		// enums
 		for enm in class.enums {
-			mut values := []i64{cap: enm.values.len}
+			mut bits := []i64{cap: enm.values.len}
 			buf.writeln('')
 			buf.writeln('pub enum ${class.name}${enm.name} as i64 {')
 
-			for enum_value in enm.values {
-				if enum_value.value !in values {
-					values << enum_value.value
-					buf.writeln('\t${enum_value.name.to_lower()} = ${enum_value.value}')
+			for val in enm.values {
+				if val.value !in bits {
+					bits << val.value
+					buf.writeln('\t${val.name.to_lower()} = ${val.value}')
 				}
 			}
 			buf.writeln('}')
