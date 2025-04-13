@@ -7,6 +7,7 @@ import strings
 pub struct Generator {
 	api API @[required]
 mut:
+	class_names []string
 	enum_defaults map[string]string = map[string]string{}
 }
 
@@ -19,19 +20,23 @@ pub fn Generator.new(api_dump string) Generator {
 }
 
 pub fn (mut g Generator) run() ! {
-	g.make_enum_defaults()
+	g.setup()
+
 	g.gen_builtin_classes()!
 	g.gen_global_enums()!
 	g.gen_classes()!
 }
 
-// populate enum_defaults with the first value of each enum
-fn (mut g Generator) make_enum_defaults() {
+// makes useful mappings
+// - populate class names
+// - populate enum defaults with the first value of each enum
+fn (mut g Generator) setup() {
 	for enm in g.api.global_enums {
 		name := convert_type(enm.name)
 		g.enum_defaults[name] = convert_name(enm.values.first().name)
 	}
 	for class in g.api.classes {
+		g.class_names << convert_type(class.name)
 		for class_enum in class.enums {
 			g.enum_defaults['${class.name}${class_enum.name}'] = convert_name(class_enum.values.first().name)
 		}
@@ -79,7 +84,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 				}
 				buf.writeln('\tconstructor(voidptr(&inst), voidptr(&args[0]))')
 			} else {
-				buf.writeln('\tconstructor(voidptr(&inst), unsafe {nil})')
+				buf.writeln('\tconstructor(voidptr(&inst), unsafe{nil})')
 			}
 			buf.writeln('\treturn inst')
 			buf.writeln('}')
@@ -100,7 +105,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 			return_type := convert_type(method.return_type)
 			ptr := match true {
 				method.is_static { 'unsafe{nil}' }
-				// class.name in object_names { 's.ptr' }
+				class.name in g.class_names { 's.ptr' }
 				else { 'voidptr(s)' }
 			}
 
@@ -220,10 +225,15 @@ fn (g &Generator) gen_classes() ! {
 		// struct
 		buf.writeln('')
 		buf.writeln('pub struct ${class.name} {')
-		if class.inherits != '' {
-			buf.writeln('\t${class.inherits}')
+		if class.inherits == '' {
+			buf.writeln('pub mut:')
+			buf.writeln('\tptr voidptr = unsafe{nil}')
+		} else {
+			buf.writeln('\t${convert_type(class.inherits)}')
 		}
 		buf.writeln('}')
+
+		// TODO: singletons
 
 		// methods
 		for method in class.methods {
@@ -231,7 +241,7 @@ fn (g &Generator) gen_classes() ! {
 			return_type := convert_type(method.return_value.type)
 			ptr := match true {
 				method.is_static { 'unsafe{nil}' }
-				// class.name in object_names { 's.ptr' }
+				class.name in g.class_names { 's.ptr' }
 				else { 'voidptr(s)' }
 			}
 
@@ -277,7 +287,9 @@ fn (g &Generator) gen_classes() ! {
 							buf.writeln('\targ_sn${a} := ${arg.type}.new(${name})')
 							buf.writeln('\targsn${a} := unsafe{voidptr(&arg_sn${a})}')
 						}
-						// TODO: classdb
+						convert_type(arg.type) in g.class_names {
+							buf.writeln('\targs[${a}] = voidptr(&${name}.ptr)')
+						}
 						method.return_value.type.starts_with('enum::')
 							|| method.return_value.type.starts_with('bitfield::') {
 							buf.writeln('\ti64_${name} := i64(${name})')
