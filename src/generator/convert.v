@@ -32,6 +32,7 @@ const keywords = [
 	'is',
 	'isreftype',
 	'lock',
+	'map',
 	'match',
 	'module',
 	'mut',
@@ -65,7 +66,7 @@ fn convert_name(_name string) string {
 	mut name := _name.to_lower()
 
 	if name in keywords || name in genwords {
-		name = 'gd${name}'
+		name = 'gd_${name}'
 	}
 
 	if name.starts_with('_') {

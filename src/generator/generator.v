@@ -188,7 +188,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 				if a != 0 {
 					buf.write_string(', ')
 				}
-				buf.write_string('${arg.name} &${arg.type}')
+				buf.write_string('${arg.name} &${convert_type(arg.type)}')
 			}
 			buf.writeln(') ${class.name} {')
 			buf.writeln('\tmut inst := ${class.name}{}')
@@ -310,7 +310,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 				// get
 				buf.writeln('')
 				buf.writeln('pub fn (v &${class.name}) index_get(i &Variant) ?Variant {')
-				buf.writeln('\tas_var := v.to_var()')
+				buf.writeln('\tas_var := v.to_variant()')
 				buf.writeln('\tret := Variant{}')
 				buf.writeln('\tsuc := GDExtensionBool(false)')
 				buf.writeln('\tgdf.variant_get(&as_var, i, voidptr(&ret), &suc)')
@@ -323,7 +323,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 				// get_named
 				buf.writeln('')
 				buf.writeln('pub fn (v &${class.name}) index_get_named(sn &StringName) ?Variant {')
-				buf.writeln('\tas_var := v.to_var()')
+				buf.writeln('\tas_var := v.to_variant()')
 				buf.writeln('\tret := Variant{}')
 				buf.writeln('\tsuc := GDExtensionBool(false)')
 				buf.writeln('\tgdf.variant_get_named(&as_var, sn, voidptr(&ret), &suc)')
@@ -336,7 +336,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 				// get_keyed
 				buf.writeln('')
 				buf.writeln('pub fn (v &${class.name}) index_get_keyed(i &Variant) ?Variant {')
-				buf.writeln('\tas_var := v.to_var()')
+				buf.writeln('\tas_var := v.to_variant()')
 				buf.writeln('\tret := Variant{}')
 				buf.writeln('\tsuc := GDExtensionBool(false)')
 				buf.writeln('\tgdf.variant_get_keyed(&as_var, i, voidptr(&ret), &suc)')
@@ -349,7 +349,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 				// set
 				buf.writeln('')
 				buf.writeln('pub fn (v &${class.name}) index_set(key &Variant, value &Variant) ! {')
-				buf.writeln('\tas_var := v.to_var()')
+				buf.writeln('\tas_var := v.to_variant()')
 				buf.writeln('\tsuc := GDExtensionBool(false)')
 				buf.writeln('\tgdf.variant_set(&as_var, key, value, &suc)')
 				buf.writeln('\tif suc != GDExtensionBool(true) {')
@@ -360,7 +360,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 				buf.writeln('')
 				// set_named
 				buf.writeln('pub fn (v &${class.name}) index_set_named(key &StringName, value &Variant) ! {')
-				buf.writeln('\tas_var := v.to_var()')
+				buf.writeln('\tas_var := v.to_variant()')
 				buf.writeln('\tsuc := GDExtensionBool(false)')
 				buf.writeln('\tgdf.variant_set_named(&as_var, key, value, &suc)')
 				buf.writeln('\tif suc != GDExtensionBool(true) {')
@@ -371,7 +371,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 				// set_keyed
 				buf.writeln('')
 				buf.writeln('pub fn (v &${class.name}) index_set_keyed(key &Variant, value &Variant) ! {')
-				buf.writeln('\tas_var := v.to_var()')
+				buf.writeln('\tas_var := v.to_variant()')
 				buf.writeln('\tsuc := GDExtensionBool(false)')
 				buf.writeln('\tgdf.variant_set_keyed(&as_var, key, value, &suc)')
 				buf.writeln('\tif suc != GDExtensionBool(true) {')
