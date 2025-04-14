@@ -7,7 +7,7 @@ import strings
 pub struct Generator {
 	api API @[required]
 mut:
-	class_names []string
+	class_names   []string
 	enum_defaults map[string]string = map[string]string{}
 }
 
@@ -22,8 +22,9 @@ pub fn Generator.new(api_dump string) Generator {
 pub fn (mut g Generator) run() ! {
 	g.setup()
 
-	g.gen_builtin_classes()!
+	g.gen_utility_functions()!
 	g.gen_global_enums()!
+	g.gen_builtin_classes()!
 	g.gen_classes()!
 }
 
@@ -46,6 +47,129 @@ fn (mut g Generator) setup() {
 			g.enum_defaults['${class.name}${class_enum.name}'] = convert_name(class_enum.values.first().name)
 		}
 	}
+}
+
+fn (g &Generator) gen_global_enums() ! {
+	mut buf := strings.new_builder(1024)
+	buf.writeln('module gd')
+
+	for enm in g.api.global_enums {
+		name := convert_type(enm.name)
+		buf.writeln('')
+		buf.writeln('pub enum ${name} as i64 {')
+		mut bits := []i64{cap: enm.values.len}
+
+		for val in enm.values {
+			if val.value !in bits {
+				bits << val.value
+				buf.writeln('\t${val.name.to_lower()} = ${val.value}')
+			}
+		}
+
+		buf.writeln('}')
+	}
+
+	mut f := os.create('src/__enums.v')!
+	defer { f.close() }
+	f.write(buf)!
+}
+
+fn (g &Generator) gen_utility_functions() ! {
+	mut buf := strings.new_builder(1024)
+	buf.writeln('module gd')
+
+	for method in g.api.utility_functions {
+		has_return := method.return_type != ''
+		return_type := convert_type(method.return_type)
+		method_name := convert_name(method.name)
+
+		// fn def
+		buf.writeln('')
+		buf.write_string('pub fn ${method_name}(')
+
+		// args
+		for a, arg in method.arguments {
+			if a != 0 {
+				buf.write_string(', ')
+			}
+			buf.write_string('${convert_name(arg.name)} ${convert_type(arg.type)}')
+		}
+
+		// return signature
+		if has_return {
+			buf.writeln(') ${return_type} {')
+		} else {
+			buf.writeln(') {')
+		}
+
+		// body
+		if has_return {
+			buf.writeln('\tmut result := ${convert_return(return_type, method.return_type,
+				g.enum_defaults)}')
+		}
+		buf.writeln('\tfnname := StringName.new("${method_name}")')
+		buf.writeln('\tf := gdf.variant_get_ptr_utility_function(voidptr(&fnname), ${method.hash})')
+
+		if method.arguments.len > 0 {
+			buf.writeln('\tmut args := unsafe { [${method.arguments.len}]voidptr{} }')
+			for a, arg in method.arguments {
+				mut name := convert_name(arg.name)
+				match true {
+					arg.type in strings {
+						buf.writeln('\targ_sn${a} := ${arg.type}.new(${name})')
+						buf.writeln('\targs[${a}] = unsafe{voidptr(&arg_sn${a})}')
+					}
+					convert_type(arg.type) in g.class_names {
+						buf.writeln('\targs[${a}] = voidptr(&${name}.ptr)')
+					}
+					arg.type.starts_with('enum::') || arg.type.starts_with('bitfield::') {
+						buf.writeln('\ti64_${name} := i64(${name})')
+						buf.writeln('\targs[${a}] = unsafe{voidptr(&i64_${name})}')
+					}
+					else {
+						buf.writeln('\targs[${a}] = unsafe{voidptr(&${name})}')
+					}
+				}
+			}
+			if has_return {
+				buf.writeln('\tf(voidptr(&result), voidptr(&args[0]), ${method.arguments.len})')
+			} else {
+				buf.writeln('\tf(unsafe{nil}, voidptr(&args[0]), ${method.arguments.len})')
+			}
+		} else {
+			if has_return {
+				buf.writeln('\tf(voidptr(&result), unsafe{nil}, ${method.arguments.len})')
+			} else {
+				buf.writeln('\tf(unsafe{nil}, unsafe{nil}, ${method.arguments.len})')
+			}
+		}
+		buf.writeln('\tfnname.deinit()')
+
+		// return
+		if has_return {
+			match true {
+				method.return_type in strings {
+					buf.writeln('\tresult_v := result.to_v()')
+					buf.writeln('\tresult.deinit()')
+					buf.writeln('\treturn result_v')
+				}
+				method.return_type.starts_with('enum::')
+					|| method.return_type.starts_with('bitfield::') {
+					buf.writeln('\treturn unsafe{${return_type}(result)}')
+				}
+				else {
+					buf.writeln('\treturn result')
+				}
+			}
+		}
+
+		// end
+		buf.writeln('}')
+	}
+
+	mut f := os.create('src/__functions.v')!
+	defer { f.close() }
+	f.write(buf)!
 }
 
 fn (g &Generator) gen_builtin_classes() ! {
@@ -176,31 +300,6 @@ fn (g &Generator) gen_builtin_classes() ! {
 	}
 }
 
-fn (g &Generator) gen_global_enums() ! {
-	mut buf := strings.new_builder(1024)
-	buf.writeln('module gd')
-
-	for enm in g.api.global_enums {
-		name := convert_type(enm.name)
-		buf.writeln('')
-		buf.writeln('pub enum ${name} as i64 {')
-		mut bits := []i64{cap: enm.values.len}
-
-		for val in enm.values {
-			if val.value !in bits {
-				bits << val.value
-				buf.writeln('\t${val.name.to_lower()} = ${val.value}')
-			}
-		}
-
-		buf.writeln('}')
-	}
-
-	mut f := os.create('src/__enums.v')!
-	defer { f.close() }
-	f.write(buf)!
-}
-
 fn (g &Generator) gen_classes() ! {
 	for class in g.api.classes {
 		mut buf := strings.new_builder(1024)
@@ -247,8 +346,8 @@ fn (g &Generator) gen_classes() ! {
 				else { 'voidptr(s)' }
 			}
 
-			buf.writeln('')
 			// fn def
+			buf.writeln('')
 			if method.is_static {
 				buf.write_string('pub fn ${class.name}.${method_name}(')
 			} else {
@@ -281,7 +380,6 @@ fn (g &Generator) gen_classes() ! {
 
 			if method.arguments.len > 0 {
 				buf.writeln('\tmut args := unsafe { [${method.arguments.len}]voidptr{} }')
-
 				for a, arg in method.arguments {
 					mut name := convert_name(arg.name)
 					match true {
@@ -292,8 +390,7 @@ fn (g &Generator) gen_classes() ! {
 						convert_type(arg.type) in g.class_names {
 							buf.writeln('\targs[${a}] = voidptr(&${name}.ptr)')
 						}
-						arg.type.starts_with('enum::')
-							|| arg.type.starts_with('bitfield::') {
+						arg.type.starts_with('enum::') || arg.type.starts_with('bitfield::') {
 							buf.writeln('\ti64_${name} := i64(${name})')
 							buf.writeln('\targs[${a}] = unsafe{voidptr(&i64_${name})}')
 						}
