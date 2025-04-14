@@ -22,11 +22,11 @@ pub fn Generator.new(api_dump string) Generator {
 pub fn (mut g Generator) run() ! {
 	g.setup()
 
-	g.gen_utility_functions()!
-	g.gen_global_enums()!
+	g.gen_functions()!
+	g.gen_enums()!
 	g.gen_builtin_classes()!
 	g.gen_classes()!
-	g.gen_native_structures()!
+	g.gen_structs()!
 }
 
 // makes useful mappings
@@ -50,7 +50,7 @@ fn (mut g Generator) setup() {
 	}
 }
 
-fn (g &Generator) gen_global_enums() ! {
+fn (g &Generator) gen_enums() ! {
 	mut buf := strings.new_builder(1024)
 	buf.writeln('module gd')
 
@@ -75,7 +75,7 @@ fn (g &Generator) gen_global_enums() ! {
 	f.write(buf)!
 }
 
-fn (g &Generator) gen_utility_functions() ! {
+fn (g &Generator) gen_functions() ! {
 	mut buf := strings.new_builder(1024)
 	buf.writeln('module gd')
 
@@ -560,7 +560,7 @@ fn (g &Generator) gen_classes() ! {
 	}
 }
 
-fn (g &Generator) gen_native_structures() ! {
+fn (g &Generator) gen_structs() ! {
 	mut buf := strings.new_builder(1024)
 	buf.writeln('module gd')
 
