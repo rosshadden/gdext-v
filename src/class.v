@@ -80,7 +80,7 @@ fn class_set_func[T](instance GDExtensionClassInstancePtr, name &StringName, var
 			$if field.typ is FromVariant {
 				t := unsafe { &T(instance) }
 				mut var := FromVariant(t.$(field.name))
-				var.set_from_var(variant)
+				var.from_variant(variant)
 				handled = true
 			} $else $if field.typ is f64 {
 				mut t := unsafe { &T(instance) }
@@ -105,7 +105,7 @@ fn class_get_func[T](instance GDExtensionClassInstancePtr, name &StringName, mut
 			$if field.typ is ToVariant {
 				t := unsafe { &T(instance) }
 				var := ToVariant(t.$(field.name))
-				variant = var.to_var()
+				variant = var.to_variant()
 				handled = true
 			} $else $if field.typ is f64 {
 				t := unsafe { &T(instance) }

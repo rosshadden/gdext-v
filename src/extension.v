@@ -66,7 +66,7 @@ pub fn (l GodotLogger) get_level() log.Level {
 pub fn (mut l GodotLogger) fatal(s string) {
 	str := String.new(s)
 	defer { str.deinit() }
-	v := str.to_var()
+	v := str.to_variant()
 	defer { v.deinit() }
 	printerr(v)
 }
@@ -74,7 +74,7 @@ pub fn (mut l GodotLogger) fatal(s string) {
 pub fn (mut l GodotLogger) error(s string) {
 	str := String.new(s)
 	defer { str.deinit() }
-	v := str.to_var()
+	v := str.to_variant()
 	defer { v.deinit() }
 	printerr(v)
 }
@@ -82,7 +82,7 @@ pub fn (mut l GodotLogger) error(s string) {
 pub fn (mut l GodotLogger) warn(s string) {
 	str := String.new(s)
 	defer { str.deinit() }
-	v := str.to_var()
+	v := str.to_variant()
 	defer { v.deinit() }
 	print(v)
 }
@@ -90,7 +90,7 @@ pub fn (mut l GodotLogger) warn(s string) {
 pub fn (mut l GodotLogger) info(s string) {
 	str := String.new(s)
 	defer { str.deinit() }
-	v := str.to_var()
+	v := str.to_variant()
 	defer { v.deinit() }
 	print(v)
 }
@@ -98,7 +98,7 @@ pub fn (mut l GodotLogger) info(s string) {
 pub fn (mut l GodotLogger) debug(s string) {
 	str := String.new(s)
 	defer { str.deinit() }
-	v := str.to_var()
+	v := str.to_variant()
 	defer { v.deinit() }
 	print(v)
 }

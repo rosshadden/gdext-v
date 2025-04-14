@@ -6,12 +6,12 @@ pub struct Variant {
 }
 
 pub interface ToVariant {
-	to_var() Variant
+	to_variant() Variant
 }
 
 pub interface FromVariant {
 mut:
-	set_from_var(var &Variant)
+	from_variant(var &Variant)
 }
 
 pub fn (v &Variant) deinit() {
