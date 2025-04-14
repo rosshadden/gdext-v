@@ -1,5 +1,7 @@
 module gd
 
+// TODO: use the enums generated from api dump
+
 pub enum GDExtensionVariantType {
 	type_nil
 	type_bool
@@ -39,6 +41,7 @@ pub enum GDExtensionVariantType {
 	type_packedvector2array
 	type_packedvector3array
 	type_packedcolorarray
+	type_packedvector4array
 	type_variantmax
 }
 
