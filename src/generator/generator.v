@@ -103,6 +103,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 		for method in class.methods {
 			has_return := method.return_type != ''
 			return_type := convert_type(method.return_type)
+			method_name := convert_name(method.name)
 			ptr := match true {
 				method.is_static { 'unsafe{nil}' }
 				class.name in g.class_names { 's.ptr' }
@@ -112,9 +113,9 @@ fn (g &Generator) gen_builtin_classes() ! {
 			// fn def
 			buf.writeln('')
 			if method.is_static {
-				buf.write_string('pub fn ${class.name}.${method.name}(')
+				buf.write_string('pub fn ${class.name}.${method_name}(')
 			} else {
-				buf.write_string('pub fn (s &${class.name}) ${method.name}(')
+				buf.write_string('pub fn (s &${class.name}) ${method_name}(')
 			}
 
 			// args
@@ -239,6 +240,7 @@ fn (g &Generator) gen_classes() ! {
 		for method in class.methods {
 			has_return := method.return_value.type != ''
 			return_type := convert_type(method.return_value.type)
+			method_name := convert_name(method.name)
 			ptr := match true {
 				method.is_static { 'unsafe{nil}' }
 				class.name in g.class_names { 's.ptr' }
@@ -248,9 +250,9 @@ fn (g &Generator) gen_classes() ! {
 			buf.writeln('')
 			// fn def
 			if method.is_static {
-				buf.write_string('pub fn ${class.name}.${method.name}(')
+				buf.write_string('pub fn ${class.name}.${method_name}(')
 			} else {
-				buf.write_string('pub fn (s &${class.name}) ${method.name}(')
+				buf.write_string('pub fn (s &${class.name}) ${method_name}(')
 			}
 
 			// args
