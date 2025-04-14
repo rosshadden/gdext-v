@@ -114,23 +114,7 @@ fn (g &Generator) gen_functions() ! {
 		if method.arguments.len > 0 {
 			buf.writeln('\tmut args := unsafe { [${method.arguments.len}]voidptr{} }')
 			for a, arg in method.arguments {
-				mut name := convert_name(arg.name)
-				match true {
-					arg.type in strings {
-						buf.writeln('\targ_sn${a} := ${arg.type}.new(${name})')
-						buf.writeln('\targs[${a}] = unsafe{voidptr(&arg_sn${a})}')
-					}
-					convert_type(arg.type) in g.class_names {
-						buf.writeln('\targs[${a}] = voidptr(&${name}.ptr)')
-					}
-					arg.type.starts_with('enum::') || arg.type.starts_with('bitfield::') {
-						buf.writeln('\ti64_${name} := i64(${name})')
-						buf.writeln('\targs[${a}] = unsafe{voidptr(&i64_${name})}')
-					}
-					else {
-						buf.writeln('\targs[${a}] = unsafe{voidptr(&${name})}')
-					}
-				}
+				buf.writeln('\targs[${a}] = voidptr(&${convert_name(arg.name)})')
 			}
 			if has_return {
 				buf.writeln('\tf(voidptr(&result), voidptr(&args[0]), ${method.arguments.len})')
@@ -144,24 +128,13 @@ fn (g &Generator) gen_functions() ! {
 				buf.writeln('\tf(unsafe{nil}, unsafe{nil}, ${method.arguments.len})')
 			}
 		}
+
+		// cleanup
 		buf.writeln('\tfnname.deinit()')
 
 		// return
 		if has_return {
-			match true {
-				method.return_type in strings {
-					buf.writeln('\tresult_v := result.to_v()')
-					buf.writeln('\tresult.deinit()')
-					buf.writeln('\treturn result_v')
-				}
-				method.return_type.starts_with('enum::')
-					|| method.return_type.starts_with('bitfield::') {
-					buf.writeln('\treturn unsafe{${return_type}(result)}')
-				}
-				else {
-					buf.writeln('\treturn result')
-				}
-			}
+			buf.writeln('\treturn result')
 		}
 
 		// end
