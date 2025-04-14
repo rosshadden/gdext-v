@@ -285,13 +285,13 @@ fn (g &Generator) gen_classes() ! {
 					match true {
 						arg.type in strings {
 							buf.writeln('\targ_sn${a} := ${arg.type}.new(${name})')
-							buf.writeln('\targsn${a} := unsafe{voidptr(&arg_sn${a})}')
+							buf.writeln('\targs[${a}] = unsafe{voidptr(&arg_sn${a})}')
 						}
 						convert_type(arg.type) in g.class_names {
 							buf.writeln('\targs[${a}] = voidptr(&${name}.ptr)')
 						}
-						method.return_value.type.starts_with('enum::')
-							|| method.return_value.type.starts_with('bitfield::') {
+						arg.type.starts_with('enum::')
+							|| arg.type.starts_with('bitfield::') {
 							buf.writeln('\ti64_${name} := i64(${name})')
 							buf.writeln('\targs[${a}] = unsafe{voidptr(&i64_${name})}')
 						}
