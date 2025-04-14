@@ -181,10 +181,28 @@ fn (g &Generator) gen_builtin_classes() ! {
 
 		mut buf := strings.new_builder(1024)
 
-		// struct
+		// module
 		buf.writeln('module gd')
 		buf.writeln('')
+
+		// enums
+		for enm in class.enums {
+			mut bits := []i64{cap: enm.values.len}
+			buf.writeln('')
+			buf.writeln('pub enum ${class.name}${enm.name} as i64 {')
+
+			for val in enm.values {
+				if val.value !in bits {
+					bits << val.value
+					buf.writeln('\t${val.name.to_lower()} = ${val.value}')
+				}
+			}
+			buf.writeln('}')
+		}
+
+		// struct
 		buf.writeln('pub struct ${class.name} {')
+		// TODO: fields
 		buf.writeln('}')
 
 		// constructors
@@ -436,6 +454,7 @@ fn (g &Generator) gen_classes() ! {
 		// struct
 		buf.writeln('')
 		buf.writeln('pub struct ${class.name} {')
+		// TODO: fields
 		if class.inherits == '' {
 			buf.writeln('pub mut:')
 			buf.writeln('\tptr voidptr = unsafe{nil}')
