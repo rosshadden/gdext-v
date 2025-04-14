@@ -180,10 +180,8 @@ fn (g &Generator) gen_builtin_classes() ! {
 
 		// constructors
 		for constructor in class.constructors {
-			suffix := if constructor.index == 0 { '' } else { '${constructor.index}' }
 			buf.writeln('')
-
-			buf.write_string('pub fn ${class.name}.new${suffix}(')
+			buf.write_string('pub fn ${class.name}.new${constructor.index}(')
 			for a, arg in constructor.arguments {
 				if a != 0 {
 					buf.write_string(', ')
