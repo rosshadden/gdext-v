@@ -26,6 +26,7 @@ pub fn (mut g Generator) run() ! {
 	g.gen_global_enums()!
 	g.gen_builtin_classes()!
 	g.gen_classes()!
+	g.gen_native_structures()!
 }
 
 // makes useful mappings
@@ -402,6 +403,8 @@ fn (g &Generator) gen_builtin_classes() ! {
 			}
 		}
 
+		// TODO: operators
+
 		mut f := os.create('src/_${class.name}.v')!
 		defer { f.close() }
 		f.write(buf)!
@@ -555,4 +558,49 @@ fn (g &Generator) gen_classes() ! {
 		defer { f.close() }
 		f.write(buf)!
 	}
+}
+
+fn (g &Generator) gen_native_structures() ! {
+	mut buf := strings.new_builder(1024)
+	buf.writeln('module gd')
+
+	for structure in g.api.native_structures {
+		structure_name := convert_type(structure.name)
+
+		buf.writeln('')
+		buf.writeln('pub struct ${structure_name} {')
+
+		members := structure.format.split(';')
+		buf.writeln('pub mut:')
+		for member in members {
+			segments := member.split(' = ')
+			parts := segments[0].split(' ')
+
+			mut mtype := convert_type(parts[..parts.len - 1].join(' '))
+			mut mname := convert_name(parts.last())
+			for mname.starts_with('*') {
+				mtype = '&${mtype}'
+				mname = mname[1..]
+			}
+
+			mut mvalue := (segments[1] or { '' }).trim_space()
+			if mvalue.ends_with('f') {
+				mvalue = mvalue[..mvalue.len - 1]
+			}
+			if mvalue.ends_with('.') {
+				mvalue = mvalue[..mvalue.len - 1]
+			}
+			if segments.len > 1 && mvalue != '0' {
+				buf.writeln('\t${mname} ${mtype} = ${mvalue}')
+			} else {
+				buf.writeln('\t${mname} ${mtype}')
+			}
+		}
+
+		buf.writeln('}')
+	}
+
+	mut f := os.create('src/__structs.v')!
+	defer { f.close() }
+	f.write(buf)!
 }
