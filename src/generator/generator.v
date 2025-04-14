@@ -317,7 +317,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 		buf.writeln('')
 		buf.writeln('pub fn (v &${class.name}) to_variant() Variant {')
 		buf.writeln('\tto_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_${class.name.to_lower()})')
-		buf.writeln('\toutput := Variant{}')
+		buf.writeln('\tresult := Variant{}')
 		buf.writeln('\tto_variant(GDExtensionUninitializedVariantPtr(&result), GDExtensionTypePtr(v))')
 		buf.writeln('\treturn result')
 		buf.writeln('}')
