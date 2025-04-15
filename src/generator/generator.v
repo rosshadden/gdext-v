@@ -439,7 +439,19 @@ fn (g &Generator) gen_classes() ! {
 		}
 		buf.writeln('}')
 
-		// TODO: singletons
+		// singleton
+		singletons := g.api.singletons.filter(it.type == class.name)
+		if singletons.len > 0 {
+			buf.writeln('')
+			buf.writeln('pub fn ${class.name}.get_singleton() ${class.name} {')
+			buf.writeln('\tsn := StringName.new("${class.name}")')
+			buf.writeln('\tresult := ${class.name}{')
+			buf.writeln('\t\tptr: gdf.global_get_singleton(sn)')
+			buf.writeln('\t}')
+			buf.writeln('\tsn.deinit()')
+			buf.writeln('\treturn result')
+			buf.writeln('}')
+		}
 
 		// methods
 		for method in class.methods {
