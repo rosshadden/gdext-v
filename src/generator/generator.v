@@ -686,9 +686,9 @@ fn (g &Generator) gen_signals() ! {
 	// interface
 	for class in g.api.classes {
 		for signal in class.signals {
-			iname := interface_name(.signal, class.name, signal.name)
+			i_name := interface_name(.signal, class.name, signal.name)
 			buf.writeln('')
-			buf.writeln('pub interface ${iname} {')
+			buf.writeln('pub interface ${i_name} {')
 			buf.writeln('mut:')
 			buf.write_string('\tsignal_${convert_name(signal.name)}(')
 			for a, arg in signal.arguments {
@@ -698,6 +698,62 @@ fn (g &Generator) gen_signals() ! {
 				buf.write_string('${convert_name(arg.name)} ${convert_type(arg.type)}')
 			}
 			buf.writeln(')')
+			buf.writeln('}')
+		}
+	}
+
+	// ptr call
+	for class in g.api.classes {
+		for signal in class.signals {
+			i_name := interface_name(.signal, class.name, signal.name)
+			buf.writeln('fn ${i_name.to_lower()}_ptrcall[T](method_userdata voidptr, inst GDExtensionClassInstancePtr, args &GDExtensionConstTypePtr, ret GDExtensionTypePtr) {')
+			buf.writeln('\tt := unsafe{&T(voidptr(inst))}')
+			buf.writeln('\tmut i := ${i_name}(*t)')
+
+			for a, arg in signal.arguments {
+				arg_type := convert_type(arg.type)
+				if arg_type in g.class_names {
+					buf.writeln('\targ_${a}_ptr := unsafe{&voidptr(args[${a}])}')
+					buf.writeln('\targ_${a} := ${arg_type}{')
+					buf.writeln('\t\tptr: *arg_${a}_ptr')
+					buf.writeln('\t}')
+				} else {
+					buf.writeln('\targ_${a}_ptr := unsafe{&${arg_type}(voidptr(args[${a}]))}')
+					buf.writeln('\targ_${a} := *arg_${a}_ptr')
+				}
+			}
+			buf.write_string('\ti.signal_${convert_name(signal.name)}(')
+			for a, _ in signal.arguments {
+				if a != 0 {
+					buf.write_string(', ')
+				}
+				buf.write_string('arg_${a}')
+			}
+			buf.writeln(')')
+			buf.writeln('}')
+		}
+	}
+
+	// call
+	for class in g.api.classes {
+		for signal in class.signals {
+			i_name := interface_name(.signal, class.name, signal.name)
+			buf.writeln('fn ${i_name.to_lower()}_call[T](method_userdata voidptr, inst GDExtensionClassInstancePtr, args &&Variant, arg_count GDExtensionInt, ret &Variant, err &GDExtensionCallError) {')
+			buf.writeln('\tmut raw_args := []GDExtensionConstTypePtr{}')
+			buf.writeln('\tfor i in 0 .. int(arg_count) {')
+			buf.writeln('\t\to := gdf.mem_alloc(sizeof[voidptr]())')
+			buf.writeln('\t\tf := gdf.get_variant_to_type_constructor(gdf.variant_get_type(unsafe { args[i] }))')
+			buf.writeln('\t\tf(o, unsafe { args[i] })')
+			buf.writeln('\t\traw_args << GDExtensionConstTypePtr(o)')
+			buf.writeln('\t}')
+			buf.writeln('\tif int(arg_count) > 0 {')
+			buf.writeln('\t\t${i_name.to_lower()}_ptrcall[T](method_userdata, inst, unsafe { &raw_args[0] }, unsafe { nil })')
+			buf.writeln('\t}else{')
+			buf.writeln('\t\t${i_name.to_lower()}_ptrcall[T](method_userdata, inst, unsafe { nil }, unsafe { nil })')
+			buf.writeln('\t}')
+			buf.writeln('\tfor i in 0 .. int(arg_count) {')
+			buf.writeln('\t\tgdf.mem_free(raw_args[i])')
+			buf.writeln('\t}')
 			buf.writeln('}')
 		}
 	}
@@ -714,7 +770,9 @@ fn (g &Generator) gen_virtual_methods() ! {
 	// methods
 	for class in g.api.classes {
 		for method in class.methods {
-			if !method.is_virtual { continue }
+			if !method.is_virtual {
+				continue
+			}
 
 			name := interface_name(.virtual, class.name, method.name)
 			method_name := 'virtual_${convert_name(method.name)}'
