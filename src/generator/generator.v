@@ -458,7 +458,6 @@ fn (g &Generator) gen_classes() ! {
 		buf.writeln('')
 		// buf.writeln('@[noinit]')
 		buf.writeln('pub struct ${class.name} {')
-		// TODO: fields
 		if class.inherits == '' {
 			buf.writeln('pub mut:')
 			buf.writeln('\tptr voidptr = unsafe{nil}')
@@ -506,6 +505,29 @@ fn (g &Generator) gen_classes() ! {
 				method.is_static { 'unsafe{nil}' }
 				class.name in g.class_names { 's.ptr' }
 				else { 'voidptr(s)' }
+			}
+
+			if method.is_virtual {
+				buf.writeln('')
+				buf.writeln('pub interface ${convert_virtual_method_name(class.name, method.name)} {')
+				buf.writeln('mut:')
+				mut methodname := 'virt_${convert_name(method.name)}'
+
+				buf.write_string('\t${methodname}(')
+				for i, arg in method.arguments {
+					if i != 0 {
+						buf.write_string(', ')
+					}
+
+					mut name := convert_name(arg.name)
+					buf.write_string('${name} ${convert_type(arg.type)}')
+				}
+				if has_return {
+					buf.writeln(') ${return_type}')
+				} else {
+					buf.writeln(')')
+				}
+				buf.writeln('}')
 			}
 
 			// fn def
@@ -666,7 +688,7 @@ fn (g &Generator) gen_virtual_methods() ! {
 			if !method.is_virtual { continue }
 
 			name := convert_virtual_method_name(class.name, method.name)
-			method_name := 'virtual_${convert_name(method.name)[1..]}'
+			method_name := 'virtual_${convert_name(method.name)}'
 
 			buf.writeln('')
 			buf.writeln('fn ${convert_type(class.name).to_lower()}_${convert_name(method.name)}[T] (inst GDExtensionClassInstancePtr, args &GDExtensionConstTypePtr, ret GDExtensionTypePtr) {')
