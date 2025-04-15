@@ -300,8 +300,8 @@ fn (g &Generator) gen_builtin_classes() ! {
 		// from variant
 		buf.writeln('')
 		buf.writeln('pub fn (mut t ${class.name}) from_variant(var &Variant) {')
-		buf.writeln('\tvar_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_${class.name.to_lower()})')
-		buf.writeln('\tvar_to_type(voidptr(&t), var)')
+		buf.writeln('\tvariant_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_${class.name.to_lower()})')
+		buf.writeln('\tvariant_to_type(voidptr(&t), var)')
 		buf.writeln('}')
 
 		if class.indexing_return_type != '' {
@@ -452,6 +452,22 @@ fn (g &Generator) gen_classes() ! {
 			buf.writeln('\treturn result')
 			buf.writeln('}')
 		}
+
+		// to variant
+		buf.writeln('')
+		buf.writeln('pub fn (s &${class.name}) to_variant() Variant {')
+		buf.writeln('\tto_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_object)')
+		buf.writeln('\tresult := Variant{}')
+		buf.writeln('\tto_variant(GDExtensionUninitializedVariantPtr(&result), s.ptr)')
+		buf.writeln('\treturn result')
+		buf.writeln('}')
+
+		// from variant
+		buf.writeln('')
+		buf.writeln('pub fn (mut s ${class.name}) from_variant(var &Variant) {')
+		buf.writeln('\tvariant_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_object)')
+		buf.writeln('\tvariant_to_type(voidptr(&s.ptr), var)')
+		buf.writeln('}')
 
 		// methods
 		for method in class.methods {
