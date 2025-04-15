@@ -4,6 +4,9 @@ import json
 import os
 import strings
 
+// 64bit
+const platform_index = 1
+
 pub struct Generator {
 	api API @[required]
 mut:
@@ -177,9 +180,34 @@ fn (g &Generator) gen_builtin_classes() ! {
 		// TODO: constants
 
 		// struct
-		// buf.writeln('@[packed]')
+		buf.writeln('')
+		buf.writeln('@[packed]')
 		buf.writeln('pub struct ${class.name} {')
-		// TODO: fields
+		mut defined_size := 0
+		if members := g.api.builtin_class_member_offsets[platform_index].classes.filter(it.name == class.name)[0] {
+			sorted_mem := members.members.sorted(a.offset < b.offset)
+			buf.writeln('pub mut:')
+			for mem in sorted_mem {
+				if mem.meta in ['int32', 'float'] {
+					defined_size += 4
+				} else {
+					defined_size += g.api.builtin_class_sizes[platform_index].sizes.filter(it.name == mem.meta).first().size
+				}
+				if mem.meta == 'float' {
+					buf.writeln('\t${mem.member} f32 // offset ${mem.offset}')
+				} else {
+					buf.writeln('\t${mem.member} ${convert_type(mem.meta)} // offset ${mem.offset}')
+				}
+			}
+		}
+		class_size := g.api.builtin_class_sizes[platform_index].sizes.filter(it.name == class.name).first().size
+		if defined_size < class_size {
+			buf.writeln('\tgodot_data [${class_size - defined_size}]u8 // filler')
+		}
+
+		if defined_size > class_size {
+			println('${class.name} defined size ${defined_size} does not match class size ${class_size}')
+		}
 		buf.writeln('}')
 
 		// constructors
