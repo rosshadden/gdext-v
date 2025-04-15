@@ -367,8 +367,7 @@ fn class_get_virtual_func[T](user_data voidptr, method_name &StringName) GDExten
 		if virt == 0 {
 			return GDExtensionClassCallVirtual(unsafe { nil })
 		}
-
-		return GDExtensionClassCallVirtual(virt)
+		return GDExtensionClassCallVirtual(unsafe { voidptr(virt) })
 	}
 	return GDExtensionClassCallVirtual(unsafe { nil })
 }
