@@ -1,13 +1,15 @@
 module generator
 
+struct APIOperator {
+	name        string @[required]
+	right_type  string
+	return_type string @[required]
+}
+
 struct APIBuiltinClass {
 	name                 string          @[required]
 	is_keyed             bool            @[required]
-	operators            []struct {
-		name        string @[required]
-		right_type  string
-		return_type string @[required]
-	} @[required]
+	operators            []APIOperator   @[required]
 	constructors         []struct {
 		index     int @[required]
 		arguments []struct {

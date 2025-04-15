@@ -159,11 +159,11 @@ fn (g &Generator) gen_builtin_classes() ! {
 			continue
 		}
 
+		class_name := convert_type(class.name)
 		mut buf := strings.new_builder(1024)
 
 		// module
 		buf.writeln('module gd')
-		buf.writeln('')
 
 		// enums
 		for enm in class.enums {
@@ -427,12 +427,135 @@ fn (g &Generator) gen_builtin_classes() ! {
 			}
 		}
 
-		// TODO: operators
+		// operators
+		for op in class.operators {
+			if op.right_type == class_name {
+				match op.name {
+					'+' {
+						gen_class_op(mut buf, class_name, '+', '.op_add')
+					}
+					'-' {
+						gen_class_op(mut buf, class_name, '-', '.op_subtract')
+					}
+					'*' {
+						gen_class_op(mut buf, class_name, '*', '.op_multiply')
+					}
+					'/' {
+						gen_class_op(mut buf, class_name, '/', '.op_divide')
+					}
+					'%' {
+						gen_class_op(mut buf, class_name, '%', '.op_module')
+					}
+					'<' {
+						gen_class_bin_op(mut buf, class_name, '<', '.op_less')
+					}
+					'==' {
+						gen_class_bin_op(mut buf, class_name, '==', '.op_equal')
+					}
+					else {}
+				}
+			}
+			if op.right_type != 'Variant' {
+				match op.name {
+					'+' {
+						gen_class_op_fn(mut buf, class_name, 'add_', '.op_add', op)
+					}
+					'-' {
+						gen_class_op_fn(mut buf, class_name, 'sub_', '.op_subtract', op)
+					}
+					'*' {
+						gen_class_op_fn(mut buf, class_name, 'mul_', '.op_multiply', op)
+					}
+					'/' {
+						gen_class_op_fn(mut buf, class_name, 'div_', '.op_divide', op)
+					}
+					'%' {
+						gen_class_op_fn(mut buf, class_name, 'mod_', '.op_module', op)
+					}
+					'<' {
+						gen_class_bin_op_fn(mut buf, class_name, 'lt_', '.op_less', op)
+					}
+					'>' {
+						gen_class_bin_op_fn(mut buf, class_name, 'gt_', '.op_greater',
+							op)
+					}
+					'==' {
+						gen_class_bin_op_fn(mut buf, class_name, 'eq_', '.op_equal', op)
+					}
+					'!=' {
+						gen_class_bin_op_fn(mut buf, class_name, 'ne_', '.op_not_equal',
+							op)
+					}
+					'<=' {
+						gen_class_bin_op_fn(mut buf, class_name, 'le_', '.op_less_equal',
+							op)
+					}
+					'>=' {
+						gen_class_bin_op_fn(mut buf, class_name, 'ge_', '.op_greater_equal',
+							op)
+					}
+					'in' {
+						gen_class_bin_op_fn(mut buf, class_name, 'in_', '.op_in', op)
+					}
+					else {}
+				}
+			}
+		}
 
 		mut f := os.create('src/_${class.name}.v')!
 		defer { f.close() }
 		f.write(buf)!
 	}
+}
+
+fn gen_class_op(mut buf strings.Builder, class_name string, op string, op_type string) {
+	buf.writeln('')
+	buf.writeln('pub fn (a ${class_name}) ${op} (b ${class_name}) ${class_name} {')
+	buf.writeln('\te := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator${op_type}, GDExtensionVariantType.type_${class_name.to_lower()}, GDExtensionVariantType.type_${class_name.to_lower()})')
+	buf.writeln('\tres := ${class_name}{}')
+	buf.writeln('\te(voidptr(&a), voidptr(&b), voidptr(&res))')
+	buf.writeln('\treturn res')
+	buf.writeln('}')
+}
+
+fn gen_class_bin_op(mut buf strings.Builder, class_name string, op string, op_type string) {
+	buf.writeln('')
+	buf.writeln('pub fn (a ${class_name}) ${op} (b ${class_name}) bool {')
+	buf.writeln('\te := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator${op_type}, GDExtensionVariantType.type_${class_name.to_lower()}, GDExtensionVariantType.type_${class_name.to_lower()})')
+	buf.writeln('\tres := false')
+	buf.writeln('\te(voidptr(&a), voidptr(&b), voidptr(&res))')
+	buf.writeln('\treturn res')
+	buf.writeln('}')
+}
+
+fn gen_class_op_fn(mut buf strings.Builder, class_name string, op_fn_name string, op_type string, op APIOperator) {
+	buf.writeln('')
+	right_type := convert_type(op.right_type)
+	buf.writeln('pub fn (a ${class_name}) ${op_fn_name}${right_type.to_lower()}(b ${right_type}) ${op.return_type} {')
+	buf.writeln('\te := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator${op_type}, GDExtensionVariantType.type_${class_name.to_lower()}, GDExtensionVariantType.type_${right_type.to_lower()})')
+
+	ret_type := convert_type(op.return_type)
+	if ret_type in ['f32', 'f64', 'i8', 'u8', 'i16', 'u16', 'i32', 'u32', 'i64', 'u64'] {
+		buf.writeln('\tres := ${ret_type}(0)')
+	} else if ret_type == 'voidptr' {
+		buf.writeln('\tres := unsafe{nil}')
+	} else {
+		buf.writeln('\tres := ${ret_type}{}')
+	}
+	buf.writeln('\te(voidptr(&a), voidptr(&b), voidptr(&res))')
+	buf.writeln('\treturn res')
+	buf.writeln('}')
+}
+
+fn gen_class_bin_op_fn(mut buf strings.Builder, class_name string, op_fn_name string, op_type string, op APIOperator) {
+	buf.writeln('')
+	right_type := convert_type(op.right_type)
+	buf.writeln('pub fn (a ${class_name}) ${op_fn_name}${right_type.to_lower()}(b ${right_type}) bool {')
+	buf.writeln('\te := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator${op_type}, GDExtensionVariantType.type_${class_name.to_lower()}, GDExtensionVariantType.type_${right_type.to_lower()})')
+	buf.writeln('\tres := false')
+	buf.writeln('\te(voidptr(&a), voidptr(&b), voidptr(&res))')
+	buf.writeln('\treturn res')
+	buf.writeln('}')
 }
 
 fn (g &Generator) gen_classes() ! {
@@ -769,7 +892,7 @@ fn (g &Generator) gen_signals() ! {
 			if signal.arguments.len > 0 {
 				buf.writeln('\t\tmut argument_props := [${signal.arguments.len}]GDExtensionPropertyInfo{}')
 				buf.writeln('\t\tmut argument_metadata := [${signal.arguments.len}]GDExtensionClassMethodArgumentMetadata{}')
-				for i,a in signal.arguments {
+				for i, a in signal.arguments {
 					vartype := g.class_to_variant_type(a.type)
 					buf.writeln('\t\tmut arg_name_${i} := StringName.new("${a.name}")')
 					buf.writeln('\t\tmut arg_hint_${i} := String.new("")')
@@ -783,10 +906,10 @@ fn (g &Generator) gen_signals() ! {
 					buf.writeln('\t\t}')
 
 					match vartype {
-						".type_f64" {
+						'.type_f64' {
 							buf.writeln('\t\targument_metadata[${i}] = .gdextension_method_argument_metadata_real_is_double')
 						}
-						".type_i64" {
+						'.type_i64' {
 							buf.writeln('\t\targument_metadata[${i}] = .gdextension_method_argument_metadata_int_is_int64')
 						}
 						else {
@@ -811,7 +934,7 @@ fn (g &Generator) gen_signals() ! {
 			if signal.arguments.len > 0 {
 				buf.writeln('\t\t\targuments_info: unsafe{&argument_props[0]}')
 				buf.writeln('\t\t\targuments_metadata: unsafe{&argument_metadata[0]}')
-			}else{
+			} else {
 				buf.writeln('\t\t\targuments_info: unsafe{nil}')
 				buf.writeln('\t\t\targuments_metadata: unsafe{nil}')
 			}
@@ -832,8 +955,8 @@ fn (g &Generator) gen_signals() ! {
 fn (g &Generator) class_to_variant_type(class_name string) string {
 	name := convert_type(class_name)
 	return match true {
-		name in g.builtin_names { ".type_${name.to_lower()}" }
-		name in g.class_names { ".type_object" }
+		name in g.builtin_names { '.type_${name.to_lower()}' }
+		name in g.class_names { '.type_object' }
 		else { '.type_nil' }
 	}
 }
