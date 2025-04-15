@@ -11,6 +11,7 @@ pub struct Generator {
 	api API @[required]
 mut:
 	class_names   []string
+	builtin_names []string
 	enum_defaults map[string]string = map[string]string{}
 }
 
@@ -49,6 +50,7 @@ fn (mut g Generator) setup() {
 		}
 	}
 	for class in g.api.builtin_classes {
+		g.builtin_names << convert_type(class.name)
 		for class_enum in class.enums {
 			g.enum_defaults['${class.name}${class_enum.name}'] = convert_name(class_enum.values.first().name)
 		}
@@ -758,9 +760,82 @@ fn (g &Generator) gen_signals() ! {
 		}
 	}
 
+	buf.writeln('pub fn register_signal_methods[T](mut ci ClassInfo) {')
+	for class in g.api.classes {
+		for signal in class.signals {
+			i_name := interface_name(.signal, class.name, signal.name)
+			buf.writeln('\t\$if T is ${i_name} {{')
+
+			if signal.arguments.len > 0 {
+				buf.writeln('\t\tmut argument_props := [${signal.arguments.len}]GDExtensionPropertyInfo{}')
+				buf.writeln('\t\tmut argument_metadata := [${signal.arguments.len}]GDExtensionClassMethodArgumentMetadata{}')
+				for i,a in signal.arguments {
+					vartype := g.class_to_variant_type(a.type)
+					buf.writeln('\t\tmut arg_name_${i} := StringName.new("${a.name}")')
+					buf.writeln('\t\tmut arg_hint_${i} := String.new("")')
+					buf.writeln('\t\targument_props[${i}] = GDExtensionPropertyInfo {')
+					buf.writeln('\t\t\ttype_: ${vartype}')
+					buf.writeln('\t\t\tname: &arg_name_${i}')
+					buf.writeln('\t\t\tclass_name: &ci.class_name')
+					buf.writeln('\t\t\thint: u32(PropertyHint.property_hint_none)')
+					buf.writeln('\t\t\thint_string: &arg_hint_${i}')
+					buf.writeln('\t\t\tusage: u32(PropertyUsageFlags.property_usage_default)')
+					buf.writeln('\t\t}')
+
+					match vartype {
+						".type_f64" {
+							buf.writeln('\t\targument_metadata[${i}] = .gdextension_method_argument_metadata_real_is_double')
+						}
+						".type_i64" {
+							buf.writeln('\t\targument_metadata[${i}] = .gdextension_method_argument_metadata_int_is_int64')
+						}
+						else {
+							buf.writeln('\t\targument_metadata[${i}] = .gdextension_method_argument_metadata_none')
+						}
+					}
+				}
+			}
+
+			buf.writeln('\t\tmethod_name := StringName.new("signal_${convert_name(signal.name)}")')
+			buf.writeln('\t\tmethod_info := GDExtensionClassMethodInfo {')
+			buf.writeln('\t\t\tname: &method_name')
+			buf.writeln('\t\t\tmethod_userdata: unsafe{nil}')
+			buf.writeln('\t\t\tcall_func: ${i_name.to_lower()}_call[T]')
+			buf.writeln('\t\t\tptrcall_func: ${i_name.to_lower()}_ptrcall[T]')
+			buf.writeln('\t\t\tmethod_flags: 1')
+			buf.writeln('\t\t\thas_return_value: GDExtensionBool(false)')
+			buf.writeln('\t\t\treturn_value_info: unsafe{nil}')
+			buf.writeln('\t\t\treturn_value_metadata: GDExtensionClassMethodArgumentMetadata{}')
+
+			buf.writeln('\t\t\targument_count: ${signal.arguments.len}')
+			if signal.arguments.len > 0 {
+				buf.writeln('\t\t\targuments_info: unsafe{&argument_props[0]}')
+				buf.writeln('\t\t\targuments_metadata: unsafe{&argument_metadata[0]}')
+			}else{
+				buf.writeln('\t\t\targuments_info: unsafe{nil}')
+				buf.writeln('\t\t\targuments_metadata: unsafe{nil}')
+			}
+			buf.writeln('\t\t\tdefault_argument_count: 0')
+			buf.writeln('\t\t\tdefault_arguments: unsafe{nil}')
+			buf.writeln('\t\t}')
+			buf.writeln('\t\tgdf.classdb_register_extension_class_method(gdf.clp, ci.class_name, method_info)')
+			buf.writeln('\t}}')
+		}
+	}
+	buf.writeln('}')
+
 	mut f := os.create('src/__signals.v')!
 	defer { f.close() }
 	f.write(buf)!
+}
+
+fn (g &Generator) class_to_variant_type(class_name string) string {
+	name := convert_type(class_name)
+	return match true {
+		name in g.builtin_names { ".type_${name.to_lower()}" }
+		name in g.class_names { ".type_object" }
+		else { '.type_nil' }
+	}
 }
 
 fn (g &Generator) gen_virtual_methods() ! {
