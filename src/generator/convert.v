@@ -157,11 +157,20 @@ fn convert_strings(type string) string {
 	return type
 }
 
-fn convert_virtual_method_name(class_name string, method_name string) string {
+enum InterfaceType {
+	virtual
+	signal
+}
+
+fn interface_name(type InterfaceType, class_name string, method_name string) string {
+	prefix := match type {
+		.virtual { '' }
+		.signal { 'Signal' }
+	}
 	mut mname := method_name.capitalize()
 	for mname.contains('_') {
 		i := mname.index('_') or { panic(err) }
 		mname = '${mname[0..i]}${mname[i + 1..].capitalize()}'
 	}
-	return 'I${class_name}${mname}'
+	return 'I${prefix}${class_name}${mname}'
 }

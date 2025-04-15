@@ -30,6 +30,7 @@ pub fn (mut g Generator) run() ! {
 	g.gen_builtin_classes()!
 	g.gen_classes()!
 	g.gen_structs()!
+	g.gen_signals()!
 	g.gen_virtual_methods()!
 }
 
@@ -509,7 +510,7 @@ fn (g &Generator) gen_classes() ! {
 
 			if method.is_virtual {
 				buf.writeln('')
-				buf.writeln('pub interface ${convert_virtual_method_name(class.name, method.name)} {')
+				buf.writeln('pub interface ${interface_name(.virtual, class.name, method.name)} {')
 				buf.writeln('mut:')
 				mut methodname := 'virt_${convert_name(method.name)}'
 
@@ -678,6 +679,34 @@ fn (g &Generator) gen_structs() ! {
 	f.write(buf)!
 }
 
+fn (g &Generator) gen_signals() ! {
+	mut buf := strings.new_builder(1024)
+	buf.writeln('module gd')
+
+	// interface
+	for class in g.api.classes {
+		for signal in class.signals {
+			iname := interface_name(.signal, class.name, signal.name)
+			buf.writeln('')
+			buf.writeln('pub interface ${iname} {')
+			buf.writeln('mut:')
+			buf.write_string('\tsignal_${convert_name(signal.name)}(')
+			for a, arg in signal.arguments {
+				if a != 0 {
+					buf.write_string(', ')
+				}
+				buf.write_string('${convert_name(arg.name)} ${convert_type(arg.type)}')
+			}
+			buf.writeln(')')
+			buf.writeln('}')
+		}
+	}
+
+	mut f := os.create('src/__signals.v')!
+	defer { f.close() }
+	f.write(buf)!
+}
+
 fn (g &Generator) gen_virtual_methods() ! {
 	mut buf := strings.new_builder(1024)
 	buf.writeln('module gd')
@@ -687,7 +716,7 @@ fn (g &Generator) gen_virtual_methods() ! {
 		for method in class.methods {
 			if !method.is_virtual { continue }
 
-			name := convert_virtual_method_name(class.name, method.name)
+			name := interface_name(.virtual, class.name, method.name)
 			method_name := 'virtual_${convert_name(method.name)}'
 
 			buf.writeln('')
@@ -722,7 +751,7 @@ fn (g &Generator) gen_virtual_methods() ! {
 			if !method.is_virtual {
 				continue
 			}
-			name := convert_virtual_method_name(class.name, method.name)
+			name := interface_name(.virtual, class.name, method.name)
 			buf.writeln('\t\$if T is ${name} {{')
 			buf.writeln('\t\tfunc := ${convert_type(class.name).to_lower()}_${convert_name(method.name)}[T]')
 			buf.writeln('\t\tivar := i64(func)')
