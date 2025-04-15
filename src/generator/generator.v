@@ -27,6 +27,7 @@ pub fn (mut g Generator) run() ! {
 	g.gen_builtin_classes()!
 	g.gen_classes()!
 	g.gen_structs()!
+	g.gen_virtual_methods()!
 }
 
 // makes useful mappings
@@ -595,6 +596,68 @@ fn (g &Generator) gen_structs() ! {
 	}
 
 	mut f := os.create('src/__structs.v')!
+	defer { f.close() }
+	f.write(buf)!
+}
+
+fn (g &Generator) gen_virtual_methods() ! {
+	mut buf := strings.new_builder(1024)
+	buf.writeln('module gd')
+
+	// methods
+	for class in g.api.classes {
+		for method in class.methods {
+			if !method.is_virtual { continue }
+
+			name := convert_virtual_method_name(class.name, method.name)
+			method_name := 'virtual_${convert_name(method.name)[1..]}'
+
+			buf.writeln('')
+			buf.writeln('fn ${convert_type(class.name).to_lower()}_${convert_name(method.name)}[T] (inst GDExtensionClassInstancePtr, args &GDExtensionConstTypePtr, ret GDExtensionTypePtr) {')
+			buf.writeln('\tmut v_inst := &${name}(unsafe{&T(voidptr(inst))})')
+
+			for i, arg in method.arguments {
+				buf.writeln('\t${convert_name(arg.name)} := unsafe{&${convert_type(arg.type)}(args[${i}])}')
+			}
+
+			buf.write_string('\t')
+			if method.return_value.type != '' {
+				buf.write_string('*(&${convert_type(method.return_value.type)}(ret)) := ')
+			}
+			buf.write_string('v_inst.${method_name}(')
+			for i, arg in method.arguments {
+				if i != 0 {
+					buf.write_string(', ')
+				}
+				buf.write_string('${convert_name(arg.name)}')
+			}
+			buf.writeln(')')
+
+			buf.writeln('}')
+		}
+	}
+
+	// registrar
+	buf.writeln('fn register_virtual_methods[T](mut ci ClassInfo) {')
+	for class in g.api.classes {
+		for method in class.methods {
+			if !method.is_virtual {
+				continue
+			}
+			name := convert_virtual_method_name(class.name, method.name)
+			buf.writeln('\t\$if T is ${name} {{')
+			buf.writeln('\t\tfunc := ${convert_type(class.name).to_lower()}_${convert_name(method.name)}[T]')
+			buf.writeln('\t\tivar := i64(func)')
+			buf.writeln('\t\tvar := i64_to_var(ivar)')
+			buf.writeln('\t\tsn := StringName.new("${method.name}")')
+			buf.writeln('\t\tci.virtual_methods.index_set_named(sn, var) or {panic(err)}')
+			buf.writeln('\t\tsn.deinit()')
+			buf.writeln('\t}}')
+		}
+	}
+	buf.writeln('}')
+
+	mut f := os.create('src/__virtual.v')!
 	defer { f.close() }
 	f.write(buf)!
 }

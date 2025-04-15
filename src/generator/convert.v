@@ -156,3 +156,12 @@ fn convert_strings(type string) string {
 	}
 	return type
 }
+
+fn convert_virtual_method_name(class_name string, method_name string) string {
+	mut mname := method_name.capitalize()
+	for mname.contains('_') {
+		i := mname.index('_') or { panic(err) }
+		mname = '${mname[0..i]}${mname[i + 1..].capitalize()}'
+	}
+	return 'I${class_name}${mname}'
+}
