@@ -173,7 +173,10 @@ fn (g &Generator) gen_builtin_classes() ! {
 			buf.writeln('}')
 		}
 
+		// TODO: constants
+
 		// struct
+		// buf.writeln('@[packed]')
 		buf.writeln('pub struct ${class.name} {')
 		// TODO: fields
 		buf.writeln('}')
@@ -424,6 +427,7 @@ fn (g &Generator) gen_classes() ! {
 
 		// struct
 		buf.writeln('')
+		// buf.writeln('@[noinit]')
 		buf.writeln('pub struct ${class.name} {')
 		// TODO: fields
 		if class.inherits == '' {

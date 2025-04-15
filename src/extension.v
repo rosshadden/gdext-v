@@ -256,7 +256,6 @@ pub:
 fn C._vinit(int, voidptr)
 
 pub fn setup_lib(gpaddr fn (&i8) GDExtensionInterfaceFunctionPtr, clp GDExtensionClassLibraryPtr) {
-	// Call vinit to setup V for windows
 	$if windows {
 		C._vinit(0, unsafe { nil })
 	}

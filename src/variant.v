@@ -32,14 +32,14 @@ pub fn f64_to_var(f &f64) Variant {
 	return output
 }
 
-pub fn i64_from_var(var &Variant) i64 {
+pub fn i64_from_variant(var &Variant) i64 {
 	var_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_i64)
 	t := i64(0)
 	var_to_type(voidptr(&t), var)
 	return t
 }
 
-pub fn f64_from_var(var &Variant) f64 {
+pub fn f64_from_variant(var &Variant) f64 {
 	var_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_f64)
 	t := f64(0)
 	var_to_type(voidptr(&t), var)

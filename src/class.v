@@ -84,11 +84,11 @@ fn class_set_func[T](instance GDExtensionClassInstancePtr, name &StringName, var
 				handled = true
 			} $else $if field.typ is f64 {
 				mut t := unsafe { &T(instance) }
-				t.$(field.name) = f64_from_var(variant)
+				t.$(field.name) = f64_from_variant(variant)
 				handled = true
 			} $else $if field.typ is i64 {
 				mut t := unsafe { &T(instance) }
-				t.$(field.name) = i64_from_var(variant)
+				t.$(field.name) = i64_from_variant(variant)
 				handled = true
 			}
 		}
@@ -363,7 +363,7 @@ fn class_get_virtual_func[T](user_data voidptr, method_name &StringName) GDExten
 		r := ud.virtual_methods.index_get_named(method_name) or {
 			return GDExtensionClassCallVirtual(unsafe { nil })
 		}
-		virt := i64_from_var(r)
+		virt := i64_from_variant(r)
 		if virt == 0 {
 			return GDExtensionClassCallVirtual(unsafe { nil })
 		}
