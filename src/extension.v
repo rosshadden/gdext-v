@@ -8,7 +8,7 @@ __global (
 
 pub fn String.new(str string) String {
 	output := String{}
-	gdf.string_new_with_utf8_chars_and_len(voidptr(&output), str.str, str.len)
+	gdf.string_new_with_utf8_chars_and_len2(voidptr(&output), str.str, str.len)
 	return output
 }
 
@@ -119,6 +119,7 @@ pub:
 	gpaddr                                             fn (&i8) GDExtensionInterfaceFunctionPtr                 @[required]
 	clp                                                GDExtensionClassLibraryPtr                               @[required]
 	get_godot_version                                  GDExtensionInterfaceGetGodotVersion                      @[required]
+	get_godot_version2                                 GDExtensionInterfaceGetGodotVersion2                     @[required]
 	mem_alloc                                          GDExtensionInterfaceMemAlloc                             @[required]
 	mem_realloc                                        GDExtensionInterfaceMemRealloc                           @[required]
 	mem_free                                           GDExtensionInterfaceMemFree                              @[required]
@@ -182,7 +183,9 @@ pub:
 	string_new_with_wide_chars                         GDExtensionInterfaceStringNewWithWideChars               @[required]
 	string_new_with_latin1_chars_and_len               GDExtensionInterfaceStringNewWithLatin1CharsAndLen       @[required]
 	string_new_with_utf8_chars_and_len                 GDExtensionInterfaceStringNewWithUtf8CharsAndLen         @[required]
+	string_new_with_utf8_chars_and_len2                GDExtensionInterfaceStringNewWithUtf8CharsAndLen2        @[required]
 	string_new_with_utf16_chars_and_len                GDExtensionInterfaceStringNewWithUtf16CharsAndLen        @[required]
+	string_new_with_utf16_chars_and_len2               GDExtensionInterfaceStringNewWithUtf16CharsAndLen2       @[required]
 	string_new_with_utf32_chars_and_len                GDExtensionInterfaceStringNewWithUtf32CharsAndLen        @[required]
 	string_new_with_wide_chars_and_len                 GDExtensionInterfaceStringNewWithWideCharsAndLen         @[required]
 	string_to_latin1_chars                             GDExtensionInterfaceStringToLatin1Chars                  @[required]
@@ -237,10 +240,13 @@ pub:
 	ref_get_object                                     GDExtensionInterfaceRefGetObject                                  @[required]
 	ref_set_object                                     GDExtensionInterfaceRefSetObject                                  @[required]
 	script_instance_create                             GDExtensionInterfaceScriptInstanceCreate                          @[required]
+	script_instance_create3                            GDExtensionInterfaceScriptInstanceCreate3                         @[required]
 	classdb_construct_object                           GDExtensionInterfaceClassdbConstructObject                        @[required]
+	classdb_construct_object2                          GDExtensionInterfaceClassdbConstructObject2                       @[required]
 	classdb_get_method_bind                            GDExtensionInterfaceClassdbGetMethodBind                          @[required]
 	classdb_get_class_tag                              GDExtensionInterfaceClassdbGetClassTag                            @[required]
 	classdb_register_extension_class                   GDExtensionInterfaceClassdbRegisterExtensionClass                 @[required]
+	classdb_register_extension_class4                  GDExtensionInterfaceClassdbRegisterExtensionClass4                @[required]
 	classdb_register_extension_class_method            GDExtensionInterfaceClassdbRegisterExtensionClassMethod           @[required]
 	classdb_register_extension_class_integer_constant  GDExtensionInterfaceClassdbRegisterExtensionClassIntegerConstant  @[required]
 	classdb_register_extension_class_property          GDExtensionInterfaceClassdbRegisterExtensionClassProperty         @[required]
@@ -264,6 +270,7 @@ pub fn setup_lib(gpaddr fn (&i8) GDExtensionInterfaceFunctionPtr, clp GDExtensio
 		gpaddr:                                             gpaddr
 		clp:                                                clp
 		get_godot_version:                                  unsafe { GDExtensionInterfaceGetGodotVersion(gpaddr(c'get_godot_version')) }
+		get_godot_version2:                                 unsafe { GDExtensionInterfaceGetGodotVersion2(gpaddr(c'get_godot_version2')) }
 		mem_alloc:                                          unsafe { GDExtensionInterfaceMemAlloc(gpaddr(c'mem_alloc')) }
 		mem_realloc:                                        unsafe { GDExtensionInterfaceMemRealloc(gpaddr(c'mem_realloc')) }
 		mem_free:                                           unsafe { GDExtensionInterfaceMemFree(gpaddr(c'mem_free')) }
@@ -327,7 +334,9 @@ pub fn setup_lib(gpaddr fn (&i8) GDExtensionInterfaceFunctionPtr, clp GDExtensio
 		string_new_with_wide_chars:                         unsafe { GDExtensionInterfaceStringNewWithWideChars(gpaddr(c'string_new_with_wide_chars')) }
 		string_new_with_latin1_chars_and_len:               unsafe { GDExtensionInterfaceStringNewWithLatin1CharsAndLen(gpaddr(c'string_new_with_latin1_chars_and_len')) }
 		string_new_with_utf8_chars_and_len:                 unsafe { GDExtensionInterfaceStringNewWithUtf8CharsAndLen(gpaddr(c'string_new_with_utf8_chars_and_len')) }
+		string_new_with_utf8_chars_and_len2:                unsafe { GDExtensionInterfaceStringNewWithUtf8CharsAndLen2(gpaddr(c'string_new_with_utf8_chars_and_len2')) }
 		string_new_with_utf16_chars_and_len:                unsafe { GDExtensionInterfaceStringNewWithUtf16CharsAndLen(gpaddr(c'string_new_with_utf16_chars_and_len')) }
+		string_new_with_utf16_chars_and_len2:               unsafe { GDExtensionInterfaceStringNewWithUtf16CharsAndLen2(gpaddr(c'string_new_with_utf16_chars_and_len2')) }
 		string_new_with_utf32_chars_and_len:                unsafe { GDExtensionInterfaceStringNewWithUtf32CharsAndLen(gpaddr(c'string_new_with_utf32_chars_and_len')) }
 		string_new_with_wide_chars_and_len:                 unsafe { GDExtensionInterfaceStringNewWithWideCharsAndLen(gpaddr(c'string_new_with_wide_chars_and_len')) }
 		string_to_latin1_chars:                             unsafe { GDExtensionInterfaceStringToLatin1Chars(gpaddr(c'string_to_latin1_chars')) }
@@ -382,10 +391,13 @@ pub fn setup_lib(gpaddr fn (&i8) GDExtensionInterfaceFunctionPtr, clp GDExtensio
 		ref_get_object:                                     unsafe { GDExtensionInterfaceRefGetObject(gpaddr(c'ref_get_object')) }
 		ref_set_object:                                     unsafe { GDExtensionInterfaceRefSetObject(gpaddr(c'ref_set_object')) }
 		script_instance_create:                             unsafe { GDExtensionInterfaceScriptInstanceCreate(gpaddr(c'script_instance_create')) }
+		script_instance_create3:                            unsafe { GDExtensionInterfaceScriptInstanceCreate3(gpaddr(c'script_instance_create3')) }
 		classdb_construct_object:                           unsafe { GDExtensionInterfaceClassdbConstructObject(gpaddr(c'classdb_construct_object')) }
+		classdb_construct_object2:                          unsafe { GDExtensionInterfaceClassdbConstructObject2(gpaddr(c'classdb_construct_object2')) }
 		classdb_get_method_bind:                            unsafe { GDExtensionInterfaceClassdbGetMethodBind(gpaddr(c'classdb_get_method_bind')) }
 		classdb_get_class_tag:                              unsafe { GDExtensionInterfaceClassdbGetClassTag(gpaddr(c'classdb_get_class_tag')) }
 		classdb_register_extension_class:                   unsafe { GDExtensionInterfaceClassdbRegisterExtensionClass(gpaddr(c'classdb_register_extension_class')) }
+		classdb_register_extension_class4:                  unsafe { GDExtensionInterfaceClassdbRegisterExtensionClass4(gpaddr(c'classdb_register_extension_class4')) }
 		classdb_register_extension_class_method:            unsafe { GDExtensionInterfaceClassdbRegisterExtensionClassMethod(gpaddr(c'classdb_register_extension_class_method')) }
 		classdb_register_extension_class_integer_constant:  unsafe { GDExtensionInterfaceClassdbRegisterExtensionClassIntegerConstant(gpaddr(c'classdb_register_extension_class_integer_constant')) }
 		classdb_register_extension_class_property:          unsafe { GDExtensionInterfaceClassdbRegisterExtensionClassProperty(gpaddr(c'classdb_register_extension_class_property')) }

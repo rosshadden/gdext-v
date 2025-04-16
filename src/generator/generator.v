@@ -1011,7 +1011,7 @@ fn (g &Generator) gen_virtual_methods() ! {
 			buf.writeln('\t\$if T is ${name} {{')
 			buf.writeln('\t\tfunc := ${convert_type(class.name).to_lower()}_${convert_name(method.name)}[T]')
 			buf.writeln('\t\tivar := i64(func)')
-			buf.writeln('\t\tvar := i64_to_var(ivar)')
+			buf.writeln('\t\tvar := i64_to_variant(ivar)')
 			buf.writeln('\t\tsn := StringName.new("${method.name}")')
 			buf.writeln('\t\tci.virtual_methods.index_set_named(sn, var) or {panic(err)}')
 			buf.writeln('\t\tsn.deinit()')

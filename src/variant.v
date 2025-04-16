@@ -18,14 +18,14 @@ pub fn (v &Variant) deinit() {
 	gdf.variant_destroy(v)
 }
 
-pub fn i64_to_var(i &i64) Variant {
+pub fn i64_to_variant(i &i64) Variant {
 	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_i64)
 	output := Variant{}
 	to_variant(GDExtensionUninitializedVariantPtr(&output), GDExtensionTypePtr(i))
 	return output
 }
 
-pub fn f64_to_var(f &f64) Variant {
+pub fn f64_to_variant(f &f64) Variant {
 	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_f64)
 	output := Variant{}
 	to_variant(GDExtensionUninitializedVariantPtr(&output), GDExtensionTypePtr(f))
