@@ -124,13 +124,6 @@ pub fn register_class_with_name[T](parent_class string, class_name string) {
 		class_userdata: ci
 	}
 
-	// HACK: force function generation
-	if false {
-		$if T is INodeReady {
-			unsafe { node_uready[T](nil, nil, nil) }
-		}
-	}
-
 	register_virtual_methods[T](mut ci)
 	// gdf.classdb_register_extension_class(gdf.clp, &sn, &pn, &info1)
 	// gdf.classdb_register_extension_class2(gdf.clp, &sn, &pn, &info2)

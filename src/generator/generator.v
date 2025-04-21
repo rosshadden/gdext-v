@@ -1007,14 +1007,25 @@ fn (g &Generator) gen_virtual_methods() ! {
 			if !method.is_virtual {
 				continue
 			}
+
 			name := interface_name(.virtual, class.name, method.name)
+			full_name := '${convert_type(class.name).to_lower()}_${convert_name(method.name)}'
+
 			buf.writeln('\t\$if T is ${name} {{')
-			buf.writeln('\t\tfunc := ${convert_type(class.name).to_lower()}_${convert_name(method.name)}[T]')
+
+			// HACK: force function generation
+			buf.writeln('\t\t// HACK: force function generation')
+			buf.writeln('\t\tif false { unsafe { ${full_name}[T](nil, nil, nil) } }')
+			buf.writeln('')
+
+			buf.writeln('\t\tfunc := ${full_name}[T]')
 			buf.writeln('\t\tivar := i64(func)')
+
 			buf.writeln('\t\tvar := i64_to_variant(ivar)')
 			buf.writeln('\t\tsn := StringName.new("${method.name}")')
 			buf.writeln('\t\tci.virtual_methods.index_set_named(sn, var) or {panic(err)}')
 			buf.writeln('\t\tsn.deinit()')
+
 			buf.writeln('\t}}')
 		}
 	}
