@@ -637,9 +637,9 @@ fn (g &Generator) gen_classes() ! {
 				buf.writeln('')
 				buf.writeln('pub interface ${interface_name(.virtual, class.name, method.name)} {')
 				buf.writeln('mut:')
-				mut methodname := 'virt_${convert_name(method.name)}'
+				mut virt_name := 'virt_${convert_name(method.name)[1..]}'
 
-				buf.write_string('\t${methodname}(')
+				buf.write_string('\t${virt_name}(')
 				for i, arg in method.arguments {
 					if i != 0 {
 						buf.write_string(', ')
@@ -973,7 +973,7 @@ fn (g &Generator) gen_virtual_methods() ! {
 			}
 
 			name := interface_name(.virtual, class.name, method.name)
-			method_name := 'virtual_${convert_name(method.name)}'
+			virt_name := 'virt_${convert_name(method.name)[1..]}'
 
 			buf.writeln('')
 			buf.writeln('fn ${convert_type(class.name).to_lower()}_${convert_name(method.name)}[T] (inst GDExtensionClassInstancePtr, args &GDExtensionConstTypePtr, ret GDExtensionTypePtr) {')
@@ -987,7 +987,7 @@ fn (g &Generator) gen_virtual_methods() ! {
 			if method.return_value.type != '' {
 				buf.write_string('*(&${convert_type(method.return_value.type)}(ret)) := ')
 			}
-			buf.write_string('v_inst.${method_name}(')
+			buf.write_string('v_inst.${virt_name}(')
 			for i, arg in method.arguments {
 				if i != 0 {
 					buf.write_string(', ')

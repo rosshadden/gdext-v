@@ -70,7 +70,7 @@ fn convert_name(_name string) string {
 	}
 
 	if name.starts_with('_') {
-		name = '${name[1..]}_'
+		name = 'u${name[1..]}'
 	}
 
 	return name
