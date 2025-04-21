@@ -7,9 +7,9 @@ __global (
 )
 
 pub fn String.new(str string) String {
-	output := String{}
-	gdf.string_new_with_utf8_chars_and_len2(voidptr(&output), str.str, str.len)
-	return output
+	result := String{}
+	gdf.string_new_with_utf8_chars_and_len2(voidptr(&result), str.str, str.len)
+	return result
 }
 
 pub fn StringName.new(str string) StringName {
@@ -246,6 +246,8 @@ pub:
 	classdb_get_method_bind                            GDExtensionInterfaceClassdbGetMethodBind                          @[required]
 	classdb_get_class_tag                              GDExtensionInterfaceClassdbGetClassTag                            @[required]
 	classdb_register_extension_class                   GDExtensionInterfaceClassdbRegisterExtensionClass                 @[required]
+	classdb_register_extension_class2                  GDExtensionInterfaceClassdbRegisterExtensionClass2                @[required]
+	classdb_register_extension_class3                  GDExtensionInterfaceClassdbRegisterExtensionClass3                @[required]
 	classdb_register_extension_class4                  GDExtensionInterfaceClassdbRegisterExtensionClass4                @[required]
 	classdb_register_extension_class_method            GDExtensionInterfaceClassdbRegisterExtensionClassMethod           @[required]
 	classdb_register_extension_class_integer_constant  GDExtensionInterfaceClassdbRegisterExtensionClassIntegerConstant  @[required]
@@ -397,6 +399,8 @@ pub fn setup_lib(gpaddr fn (&i8) GDExtensionInterfaceFunctionPtr, clp GDExtensio
 		classdb_get_method_bind:                            unsafe { GDExtensionInterfaceClassdbGetMethodBind(gpaddr(c'classdb_get_method_bind')) }
 		classdb_get_class_tag:                              unsafe { GDExtensionInterfaceClassdbGetClassTag(gpaddr(c'classdb_get_class_tag')) }
 		classdb_register_extension_class:                   unsafe { GDExtensionInterfaceClassdbRegisterExtensionClass(gpaddr(c'classdb_register_extension_class')) }
+		classdb_register_extension_class2:                  unsafe { GDExtensionInterfaceClassdbRegisterExtensionClass2(gpaddr(c'classdb_register_extension_class2')) }
+		classdb_register_extension_class3:                  unsafe { GDExtensionInterfaceClassdbRegisterExtensionClass3(gpaddr(c'classdb_register_extension_class3')) }
 		classdb_register_extension_class4:                  unsafe { GDExtensionInterfaceClassdbRegisterExtensionClass4(gpaddr(c'classdb_register_extension_class4')) }
 		classdb_register_extension_class_method:            unsafe { GDExtensionInterfaceClassdbRegisterExtensionClassMethod(gpaddr(c'classdb_register_extension_class_method')) }
 		classdb_register_extension_class_integer_constant:  unsafe { GDExtensionInterfaceClassdbRegisterExtensionClassIntegerConstant(gpaddr(c'classdb_register_extension_class_integer_constant')) }

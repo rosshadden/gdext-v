@@ -18,7 +18,7 @@ mut:
 }
 
 pub fn register_class_with_name[T](parent_class string, class_name string) {
-	println('registering: ${T.name} as ${class_name}')
+	println('registering: ${T.name} as ${class_name} [${parent_class}]')
 	sn := StringName.new(class_name)
 	pn := StringName.new(parent_class)
 
@@ -29,6 +29,74 @@ pub fn register_class_with_name[T](parent_class string, class_name string) {
 	ci.class_name = sn
 	ci.parent_name = pn
 	ci.virtual_methods = Dictionary.new0()
+
+	info1 := GDExtensionClassCreationInfo{
+		is_virtual:              GDExtensionBool(false)
+		is_abstract:             GDExtensionBool(false)
+		set_func:                class_set_func[T]
+		get_func:                class_get_func[T]
+		get_property_list_func:  class_get_property_list[T]
+		free_property_list_func: class_free_property_list[T]
+		// property_can_revert_func: class_property_can_revert[T]
+		// property_get_revert_func GDExtensionClassPropertyGetRevert = unsafe { nil }
+		// notification_func GDExtensionClassNotification = unsafe { nil }
+		// to_string_func: to_string_func
+		// reference_func: reference_func
+		// unreference_func: unreference_func
+		create_instance_func: class_create_instance1[T]
+		free_instance_func:   class_free_instance[T]
+		get_virtual_func:     class_get_virtual_func1[T]
+		// get_rid_func:         unsafe { nil }
+		class_userdata: ci
+	}
+
+	info2 := GDExtensionClassCreationInfo2{
+		is_virtual:               GDExtensionBool(false)
+		is_abstract:              GDExtensionBool(false)
+		is_exposed:               GDExtensionBool(true)
+		set_func:                 class_set_func[T]
+		get_func:                 class_get_func[T]
+		get_property_list_func:   class_get_property_list[T]
+		free_property_list_func:  class_free_property_list[T]
+		property_can_revert_func: class_property_can_revert[T]
+		property_get_revert_func: class_property_get_revert[T]
+		// validate_property_func
+		notification_func:    class_notification[T]
+		to_string_func:       class_to_string[T]
+		reference_func:       class_reference[T]
+		unreference_func:     class_unreference[T]
+		create_instance_func: class_create_instance1[T]
+		free_instance_func:   class_free_instance[T]
+		// recreate_instance_func
+		get_virtual_func:           class_get_virtual_func1[T]
+		get_virtual_call_data_func: fn (user_data voidptr, method_name &StringName) {}
+		// call_virtual_with_data_func
+		class_userdata: ci
+	}
+
+	info3 := GDExtensionClassCreationInfo3{
+		is_virtual:               GDExtensionBool(false)
+		is_abstract:              GDExtensionBool(false)
+		is_exposed:               GDExtensionBool(true)
+		set_func:                 class_set_func[T]
+		get_func:                 class_get_func[T]
+		get_property_list_func:   class_get_property_list[T]
+		free_property_list_func:  class_free_property_list[T]
+		property_can_revert_func: class_property_can_revert[T]
+		property_get_revert_func: class_property_get_revert[T]
+		// validate_property_func
+		notification_func:    class_notification[T]
+		to_string_func:       class_to_string[T]
+		reference_func:       class_reference[T]
+		unreference_func:     class_unreference[T]
+		create_instance_func: class_create_instance1[T]
+		free_instance_func:   class_free_instance[T]
+		// recreate_instance_func
+		get_virtual_func:           class_get_virtual_func1[T]
+		get_virtual_call_data_func: fn (user_data voidptr, method_name &StringName) {}
+		// call_virtual_with_data_func
+		class_userdata: ci
+	}
 
 	info := GDExtensionClassCreationInfo4{
 		is_virtual:               GDExtensionBool(false)
@@ -56,7 +124,16 @@ pub fn register_class_with_name[T](parent_class string, class_name string) {
 		class_userdata: ci
 	}
 
+	// if false {
+	// 	$if T is INodeReady {
+	// 		node_uready[T](unsafe{nil}, unsafe{nil}, unsafe{nil})
+	// 	}
+	// }
+
 	register_virtual_methods[T](mut ci)
+	// gdf.classdb_register_extension_class(gdf.clp, &sn, &pn, &info1)
+	// gdf.classdb_register_extension_class2(gdf.clp, &sn, &pn, &info2)
+	// gdf.classdb_register_extension_class3(gdf.clp, &sn, &pn, &info3)
 	gdf.classdb_register_extension_class4(gdf.clp, &sn, &pn, &info)
 	register_signal_methods[T](mut ci)
 }
@@ -306,7 +383,7 @@ fn class_property_get_revert[T](instance GDExtensionClassInstancePtr, prop_name 
 }
 
 fn class_notification[T](instance GDExtensionClassInstancePtr, what int, reversed &GDExtensionBool) {
-	println('TODO: notification')
+	// println('TODO: notification')
 }
 
 fn class_to_string[T](instance GDExtensionClassInstancePtr, valid &GDExtensionBool, out &String) {
@@ -323,6 +400,10 @@ fn class_reference[T](instance GDExtensionClassInstancePtr) {
 
 fn class_unreference[T](instance GDExtensionClassInstancePtr) {
 	println('TODO: unref')
+}
+
+fn class_create_instance1[T](user_data voidptr) &Object {
+	return class_create_instance[T](user_data, GDExtensionBool(false))
 }
 
 fn class_create_instance[T](user_data voidptr, notify_postinitialize &GDExtensionBool) &Object {
@@ -357,9 +438,15 @@ fn class_free_instance[T](user_data voidptr, instance GDExtensionClassInstancePt
 	}
 }
 
+fn class_get_virtual_func1[T](user_data voidptr, method_name &StringName) GDExtensionClassCallVirtual {
+	return class_get_virtual_func[T](user_data, method_name, 0)
+}
+
 fn class_get_virtual_func[T](user_data voidptr, method_name &StringName, hash int) GDExtensionClassCallVirtual {
 	ud := unsafe { &ClassInfo(user_data) }
+	println('get virtual func: ${method_name.to_v()}')
 	if method_name.in_dictionary(ud.virtual_methods) {
+		println('found virtual method: ${method_name.to_v()}')
 		r := ud.virtual_methods.index_get_named(method_name) or {
 			return GDExtensionClassCallVirtual(unsafe { nil })
 		}

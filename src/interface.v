@@ -234,6 +234,58 @@ pub struct GDExtensionClassCreationInfo {
 	class_userdata           voidptr
 }
 
+pub struct GDExtensionClassCreationInfo2 {
+	is_virtual                  GDExtensionBool
+	is_abstract                 GDExtensionBool
+	is_exposed                  GDExtensionBool
+	set_func                    GDExtensionClassSet                 = unsafe { nil }
+	get_func                    GDExtensionClassGet                 = unsafe { nil }
+	get_property_list_func      GDExtensionClassGetPropertyList     = unsafe { nil }
+	free_property_list_func     GDExtensionClassFreePropertyList    = unsafe { nil }
+	property_can_revert_func    GDExtensionClassPropertyCanRevert   = unsafe { nil }
+	property_get_revert_func    GDExtensionClassPropertyGetRevert   = unsafe { nil }
+	validate_property_func      GDExtensionClassValidateProperty    = unsafe { nil }
+	notification_func           GDExtensionClassNotification2       = unsafe { nil }
+	to_string_func              GDExtensionClassToString            = unsafe { nil }
+	reference_func              GDExtensionClassReference           = unsafe { nil }
+	unreference_func            GDExtensionClassUnreference         = unsafe { nil }
+	create_instance_func        GDExtensionClassCreateInstance      = unsafe { nil }
+	free_instance_func          GDExtensionClassFreeInstance        = unsafe { nil }
+	recreate_instance_func      GDExtensionClassRecreateInstance    = unsafe { nil }
+	get_virtual_func            GDExtensionClassGetVirtual          = unsafe { nil }
+	get_virtual_call_data_func  GDExtensionClassGetVirtualCallData  = unsafe { nil }
+	call_virtual_with_data_func GDExtensionClassCallVirtualWithData = unsafe { nil }
+	get_rid_func                GDExtensionClassGetRID              = unsafe { nil }
+	class_userdata              voidptr
+}
+
+pub struct GDExtensionClassCreationInfo3 {
+	is_virtual                  GDExtensionBool
+	is_abstract                 GDExtensionBool
+	is_exposed                  GDExtensionBool
+	is_runtime                  GDExtensionBool
+	icon_path                   GDExtensionConstStringPtr
+	set_func                    GDExtensionClassSet                 = unsafe { nil }
+	get_func                    GDExtensionClassGet                 = unsafe { nil }
+	get_property_list_func      GDExtensionClassGetPropertyList     = unsafe { nil }
+	free_property_list_func     GDExtensionClassFreePropertyList    = unsafe { nil }
+	property_can_revert_func    GDExtensionClassPropertyCanRevert   = unsafe { nil }
+	property_get_revert_func    GDExtensionClassPropertyGetRevert   = unsafe { nil }
+	validate_property_func      GDExtensionClassValidateProperty    = unsafe { nil }
+	notification_func           GDExtensionClassNotification2       = unsafe { nil }
+	to_string_func              GDExtensionClassToString            = unsafe { nil }
+	reference_func              GDExtensionClassReference           = unsafe { nil }
+	unreference_func            GDExtensionClassUnreference         = unsafe { nil }
+	create_instance_func        GDExtensionClassCreateInstance      = unsafe { nil }
+	free_instance_func          GDExtensionClassFreeInstance        = unsafe { nil }
+	recreate_instance_func      GDExtensionClassRecreateInstance    = unsafe { nil }
+	get_virtual_func            GDExtensionClassGetVirtual          = unsafe { nil }
+	get_virtual_call_data_func  GDExtensionClassGetVirtualCallData  = unsafe { nil }
+	call_virtual_with_data_func GDExtensionClassCallVirtualWithData = unsafe { nil }
+	get_rid_func                GDExtensionClassGetRID              = unsafe { nil }
+	class_userdata              voidptr
+}
+
 pub struct GDExtensionClassCreationInfo4 {
 	is_virtual                  GDExtensionBool
 	is_abstract                 GDExtensionBool
@@ -712,6 +764,10 @@ pub type GDExtensionInterfaceClassdbGetMethodBind = fn (&StringName, &StringName
 pub type GDExtensionInterfaceClassdbGetClassTag = fn (&StringName) voidptr
 
 pub type GDExtensionInterfaceClassdbRegisterExtensionClass = fn (GDExtensionClassLibraryPtr, &StringName, &StringName, &GDExtensionClassCreationInfo)
+
+pub type GDExtensionInterfaceClassdbRegisterExtensionClass2 = fn (GDExtensionClassLibraryPtr, &StringName, &StringName, &GDExtensionClassCreationInfo2)
+
+pub type GDExtensionInterfaceClassdbRegisterExtensionClass3 = fn (GDExtensionClassLibraryPtr, &StringName, &StringName, &GDExtensionClassCreationInfo3)
 
 pub type GDExtensionInterfaceClassdbRegisterExtensionClass4 = fn (GDExtensionClassLibraryPtr, &StringName, &StringName, &GDExtensionClassCreationInfo4)
 
