@@ -637,7 +637,7 @@ fn (g &Generator) gen_classes() ! {
 				buf.writeln('')
 				buf.writeln('pub interface ${interface_name(.virtual, class.name, method.name)} {')
 				buf.writeln('mut:')
-				mut virt_name := '${convert_name(method.name)[1..]}_'
+				mut virt_name := '${convert_name(method.name[1..])}_'
 
 				buf.write_string('\t${virt_name}(')
 				for i, arg in method.arguments {
@@ -973,7 +973,7 @@ fn (g &Generator) gen_virtual_methods() ! {
 			}
 
 			name := interface_name(.virtual, class.name, method.name)
-			virt_name := '${convert_name(method.name)[1..]}_'
+			virt_name := '${convert_name(method.name[1..])}_'
 
 			buf.writeln('')
 			buf.writeln('fn ${convert_type(class.name).to_lower()}_${convert_name(method.name)}[T] (inst GDExtensionClassInstancePtr, args &GDExtensionConstTypePtr, ret GDExtensionTypePtr) {')
