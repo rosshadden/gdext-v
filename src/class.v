@@ -367,9 +367,7 @@ fn class_get_virtual_func1[T](user_data voidptr, method_name &StringName) GDExte
 
 fn class_get_virtual_func[T](user_data voidptr, method_name &StringName, hash int) GDExtensionClassCallVirtual {
 	ud := unsafe { &ClassInfo(user_data) }
-	println('get virtual func: ${method_name.to_v()}')
 	if method_name.in_dictionary(ud.virtual_methods) {
-		println('found virtual method: ${method_name.to_v()}')
 		r := ud.virtual_methods.index_get_named(method_name) or {
 			return GDExtensionClassCallVirtual(unsafe { nil })
 		}
