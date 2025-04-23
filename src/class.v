@@ -62,7 +62,8 @@ pub fn register_class_with_name[T](parent_class string, class_name string) {
 }
 
 pub fn register_class[T](parent_class string) {
-	register_class_with_name[T](parent_class, T.name.replace('.', '_'))
+	parts := T.name.split('.')
+	register_class_with_name[T](parent_class, parts.last())
 }
 
 fn class_set_func[T](instance GDExtensionClassInstancePtr, name &StringName, variant &Variant) GDExtensionBool {
