@@ -627,6 +627,7 @@ fn (g &Generator) gen_classes() ! {
 			has_return := method.return_value.type != ''
 			return_type := convert_type(method.return_value.type)
 			method_name := convert_name(method.name)
+			has_optionals := method.arguments.any(it.default_value != '')
 			ptr := match true {
 				method.is_static { 'unsafe{nil}' }
 				class.name in g.class_names { 's.ptr' }
@@ -656,6 +657,21 @@ fn (g &Generator) gen_classes() ! {
 				buf.writeln('}')
 			}
 
+			// create trailing struct for optional arguments
+			if has_optionals {
+				buf.writeln('')
+				buf.writeln('@[params]')
+				buf.writeln('pub struct ${class.name}_${method_name}_Cfg {')
+				buf.writeln('pub:')
+				for arg in method.arguments {
+					if arg.default_value == '' {
+						continue
+					}
+					buf.writeln('\t${convert_name(arg.name)} ${convert_strings(convert_type(arg.type))}')
+				}
+				buf.writeln('}')
+			}
+
 			// fn def
 			buf.writeln('')
 			if method.is_static {
@@ -665,11 +681,25 @@ fn (g &Generator) gen_classes() ! {
 			}
 
 			// args
-			for a, arg in method.arguments {
-				if a != 0 {
+			mut first_arg := true
+			for arg in method.arguments {
+				if arg.default_value != '' {
+					continue
+				}
+				if first_arg {
+					first_arg = false
+				} else {
 					buf.write_string(', ')
 				}
 				buf.write_string('${convert_name(arg.name)} ${convert_strings(convert_type(arg.type))}')
+			}
+
+			// trailing struct
+			if has_optionals {
+				if !first_arg {
+					buf.write_string(', ')
+				}
+				buf.write_string('cfg ${class.name}_${method_name}_Cfg')
 			}
 
 			// return signature
@@ -692,20 +722,25 @@ fn (g &Generator) gen_classes() ! {
 				buf.writeln('\tmut args := unsafe { [${method.arguments.len}]voidptr{} }')
 				for a, arg in method.arguments {
 					mut name := convert_name(arg.name)
+					name_prefix := if has_optionals && arg.default_value != '' {
+						'cfg.'
+					} else {
+						''
+					}
 					match true {
 						arg.type in strings {
-							buf.writeln('\targ_sn${a} := ${arg.type}.new(${name})')
+							buf.writeln('\targ_sn${a} := ${arg.type}.new(${name_prefix}${name})')
 							buf.writeln('\targs[${a}] = unsafe{voidptr(&arg_sn${a})}')
 						}
 						convert_type(arg.type) in g.class_names {
-							buf.writeln('\targs[${a}] = voidptr(&${name}.ptr)')
+							buf.writeln('\targs[${a}] = voidptr(&${name_prefix}${name}.ptr)')
 						}
 						arg.type.starts_with('enum::') || arg.type.starts_with('bitfield::') {
-							buf.writeln('\ti64_${name} := i64(${name})')
+							buf.writeln('\ti64_${name} := i64(${name_prefix}${name})')
 							buf.writeln('\targs[${a}] = unsafe{voidptr(&i64_${name})}')
 						}
 						else {
-							buf.writeln('\targs[${a}] = unsafe{voidptr(&${name})}')
+							buf.writeln('\targs[${a}] = unsafe{voidptr(&${name_prefix}${name})}')
 						}
 					}
 				}
