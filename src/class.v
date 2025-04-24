@@ -43,13 +43,13 @@ pub fn register_class_with_name[T](parent_class string, class_name string) {
 		property_can_revert_func: class_property_can_revert[T]
 		property_get_revert_func: class_property_get_revert[T]
 		// validate_property_func
-		notification_func:    class_notification[T]
-		to_string_func:       class_to_string[T]
-		reference_func:       class_reference[T]
-		unreference_func:     class_unreference[T]
-		create_instance_func: class_create_instance[T]
-		free_instance_func:   class_free_instance[T]
-		// recreate_instance_func
+		notification_func:          class_notification[T]
+		to_string_func:             class_to_string[T]
+		reference_func:             class_reference[T]
+		unreference_func:           class_unreference[T]
+		create_instance_func:       class_create_instance[T]
+		free_instance_func:         class_free_instance[T]
+		recreate_instance_func:     class_recreate_instance[T]
 		get_virtual_func:           class_get_virtual_func[T]
 		get_virtual_call_data_func: fn (user_data voidptr, method_name &StringName, hash int) {}
 		// call_virtual_with_data_func
@@ -360,6 +360,29 @@ fn class_free_instance[T](user_data voidptr, instance GDExtensionClassInstancePt
 		}
 		gdf.mem_free(t)
 	}
+}
+
+fn class_recreate_instance[T](user_data voidptr, object &Object) GDExtensionClassInstancePtr {
+	// Allocate a new instance of T
+	t := unsafe { &T(gdf.mem_alloc(sizeof[T]())) }
+	// Copy default values
+	t_v := T{}
+	unsafe { C.memcpy(t, &t_v, sizeof[T]()) }
+
+	// Set the instance binding to the existing Godot object
+	gdf.object_set_instance(object, StringName.new(T.name), t)
+
+	// Set up instance binding callbacks if necessary
+	cb := GDExtensionInstanceBindingCallbacks{}
+	gdf.object_set_instance_binding(object, gdf.clp, t, cb)
+
+	// Call init if T implements ClassInitable
+	$if T is ClassInitable {
+		mut ci := ClassInitable(t)
+		ci.init()
+	}
+
+	return unsafe { GDExtensionClassInstancePtr(t) }
 }
 
 fn class_get_virtual_func1[T](user_data voidptr, method_name &StringName) GDExtensionClassCallVirtual {

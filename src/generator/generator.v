@@ -90,7 +90,6 @@ fn (g &Generator) gen_functions() ! {
 		has_return := method.return_type != ''
 		return_type := convert_type(method.return_type)
 		method_name := convert_name(method.name)
-		is_vararg := method.is_vararg
 
 		// fn def
 		buf.writeln('')
@@ -103,7 +102,7 @@ fn (g &Generator) gen_functions() ! {
 			}
 
 			// For the last argument in a vararg function, make it vararg
-			if is_vararg && a == method.arguments.len - 1 {
+			if method.is_vararg && a == method.arguments.len - 1 {
 				buf.write_string('varargs ...${convert_type(arg.type)}')
 			} else {
 				buf.write_string('${convert_name(arg.name)} ${convert_type(arg.type)}')
@@ -127,7 +126,7 @@ fn (g &Generator) gen_functions() ! {
 
 		// Handle args
 		if method.arguments.len > 0 {
-			if is_vararg {
+			if method.is_vararg {
 				// Calculate total args: regular args + varargs
 				fixed_args_count := method.arguments.len - 1
 				buf.writeln('\ttotal_args := ${fixed_args_count} + varargs.len')
