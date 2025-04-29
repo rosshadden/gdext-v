@@ -633,7 +633,7 @@ fn (g &Generator) gen_classes() ! {
 		singletons := g.api.singletons.filter(it.type == class.name)
 		if singletons.len > 0 {
 			buf.writeln('')
-			buf.writeln('pub fn ${class.name}.get_singleton() ${class.name} {')
+			buf.writeln('pub fn ${class.name}.singleton() ${class.name} {')
 			buf.writeln('\tsn := StringName.new("${class.name}")')
 			buf.writeln('\tresult := ${class.name}{')
 			buf.writeln('\t\tptr: gdf.global_get_singleton(sn)')
