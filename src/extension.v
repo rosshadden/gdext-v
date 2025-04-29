@@ -264,9 +264,7 @@ pub:
 fn C._vinit(int, voidptr)
 
 pub fn setup_lib(gpaddr fn (&i8) GDExtensionInterfaceFunctionPtr, clp GDExtensionClassLibraryPtr) {
-	$if windows {
-		C._vinit(0, unsafe { nil })
-	}
+	C._vinit(0, unsafe { nil })
 
 	gdf = &GdExtensionInterfaceFunctions{
 		gpaddr:                                             gpaddr
