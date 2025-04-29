@@ -23,4 +23,4 @@ main
 data/
 
 # generated
-src/_*.v
+# src/_*.v

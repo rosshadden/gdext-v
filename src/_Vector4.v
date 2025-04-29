@@ -1,0 +1,577 @@
+module gd
+
+pub enum Vector4Axis as i64 {
+	axis_x = 0
+	axis_y = 1
+	axis_z = 2
+	axis_w = 3
+}
+
+@[packed]
+pub struct Vector4 {
+pub mut:
+	x f32 // offset 0
+	y f32 // offset 4
+	z f32 // offset 8
+	w f32 // offset 12
+}
+
+pub fn Vector4.new0() Vector4 {
+	mut inst := Vector4{}
+	constructor := gdf.variant_get_ptr_constructor(GDExtensionVariantType.type_vector4, 0)
+	constructor(voidptr(&inst), unsafe{nil})
+	return inst
+}
+
+pub fn Vector4.new1(from &Vector4) Vector4 {
+	mut inst := Vector4{}
+	constructor := gdf.variant_get_ptr_constructor(GDExtensionVariantType.type_vector4, 1)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = from
+	constructor(voidptr(&inst), voidptr(&args[0]))
+	return inst
+}
+
+pub fn Vector4.new2(from &Vector4i) Vector4 {
+	mut inst := Vector4{}
+	constructor := gdf.variant_get_ptr_constructor(GDExtensionVariantType.type_vector4, 2)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = from
+	constructor(voidptr(&inst), voidptr(&args[0]))
+	return inst
+}
+
+pub fn Vector4.new3(x &f64, y &f64, z &f64, w &f64) Vector4 {
+	mut inst := Vector4{}
+	constructor := gdf.variant_get_ptr_constructor(GDExtensionVariantType.type_vector4, 3)
+	mut args := unsafe { [4]voidptr{} }
+	args[0] = x
+	args[1] = y
+	args[2] = z
+	args[3] = w
+	constructor(voidptr(&inst), voidptr(&args[0]))
+	return inst
+}
+
+pub fn (s &Vector4) min_axis_index() i64 {
+	mut result := i64(0)
+	fnname := StringName.new("min_axis_index")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 3173160232)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) max_axis_index() i64 {
+	mut result := i64(0)
+	fnname := StringName.new("max_axis_index")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 3173160232)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) length() f64 {
+	mut result := f64(0)
+	fnname := StringName.new("length")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 466405837)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) length_squared() f64 {
+	mut result := f64(0)
+	fnname := StringName.new("length_squared")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 466405837)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) abs() Vector4 {
+	mut result := Vector4{}
+	fnname := StringName.new("abs")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 80860099)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) sign() Vector4 {
+	mut result := Vector4{}
+	fnname := StringName.new("sign")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 80860099)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) floor() Vector4 {
+	mut result := Vector4{}
+	fnname := StringName.new("floor")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 80860099)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) ceil() Vector4 {
+	mut result := Vector4{}
+	fnname := StringName.new("ceil")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 80860099)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) round() Vector4 {
+	mut result := Vector4{}
+	fnname := StringName.new("round")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 80860099)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) lerp(to Vector4, weight f64) Vector4 {
+	mut result := Vector4{}
+	fnname := StringName.new("lerp")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 2329757942)
+	mut args := unsafe { [2]voidptr{} }
+	args[0] = voidptr(&to)
+	args[1] = voidptr(&weight)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 2)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) cubic_interpolate(b Vector4, pre_a Vector4, post_b Vector4, weight f64) Vector4 {
+	mut result := Vector4{}
+	fnname := StringName.new("cubic_interpolate")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 726768410)
+	mut args := unsafe { [4]voidptr{} }
+	args[0] = voidptr(&b)
+	args[1] = voidptr(&pre_a)
+	args[2] = voidptr(&post_b)
+	args[3] = voidptr(&weight)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 4)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) cubic_interpolate_in_time(b Vector4, pre_a Vector4, post_b Vector4, weight f64, b_t f64, pre_a_t f64, post_b_t f64) Vector4 {
+	mut result := Vector4{}
+	fnname := StringName.new("cubic_interpolate_in_time")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 681631873)
+	mut args := unsafe { [7]voidptr{} }
+	args[0] = voidptr(&b)
+	args[1] = voidptr(&pre_a)
+	args[2] = voidptr(&post_b)
+	args[3] = voidptr(&weight)
+	args[4] = voidptr(&b_t)
+	args[5] = voidptr(&pre_a_t)
+	args[6] = voidptr(&post_b_t)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 7)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) posmod(mod f64) Vector4 {
+	mut result := Vector4{}
+	fnname := StringName.new("posmod")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 3129671720)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&mod)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) posmodv(modv Vector4) Vector4 {
+	mut result := Vector4{}
+	fnname := StringName.new("posmodv")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 2031281584)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&modv)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) snapped(step Vector4) Vector4 {
+	mut result := Vector4{}
+	fnname := StringName.new("snapped")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 2031281584)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&step)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) snappedf(step f64) Vector4 {
+	mut result := Vector4{}
+	fnname := StringName.new("snappedf")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 3129671720)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&step)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) clamp(min Vector4, max Vector4) Vector4 {
+	mut result := Vector4{}
+	fnname := StringName.new("clamp")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 823915692)
+	mut args := unsafe { [2]voidptr{} }
+	args[0] = voidptr(&min)
+	args[1] = voidptr(&max)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 2)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) clampf(min f64, max f64) Vector4 {
+	mut result := Vector4{}
+	fnname := StringName.new("clampf")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 4072091586)
+	mut args := unsafe { [2]voidptr{} }
+	args[0] = voidptr(&min)
+	args[1] = voidptr(&max)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 2)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) normalized() Vector4 {
+	mut result := Vector4{}
+	fnname := StringName.new("normalized")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 80860099)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) is_normalized() bool {
+	mut result := false
+	fnname := StringName.new("is_normalized")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 3918633141)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) direction_to(to Vector4) Vector4 {
+	mut result := Vector4{}
+	fnname := StringName.new("direction_to")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 2031281584)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&to)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) distance_to(to Vector4) f64 {
+	mut result := f64(0)
+	fnname := StringName.new("distance_to")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 3770801042)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&to)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) distance_squared_to(to Vector4) f64 {
+	mut result := f64(0)
+	fnname := StringName.new("distance_squared_to")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 3770801042)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&to)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) dot(with Vector4) f64 {
+	mut result := f64(0)
+	fnname := StringName.new("dot")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 3770801042)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&with)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) inverse() Vector4 {
+	mut result := Vector4{}
+	fnname := StringName.new("inverse")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 80860099)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) is_equal_approx(to Vector4) bool {
+	mut result := false
+	fnname := StringName.new("is_equal_approx")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 88913544)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&to)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) is_zero_approx() bool {
+	mut result := false
+	fnname := StringName.new("is_zero_approx")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 3918633141)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) is_finite() bool {
+	mut result := false
+	fnname := StringName.new("is_finite")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 3918633141)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) min(with Vector4) Vector4 {
+	mut result := Vector4{}
+	fnname := StringName.new("min")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 2031281584)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&with)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) minf(with f64) Vector4 {
+	mut result := Vector4{}
+	fnname := StringName.new("minf")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 3129671720)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&with)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) max(with Vector4) Vector4 {
+	mut result := Vector4{}
+	fnname := StringName.new("max")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 2031281584)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&with)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector4) maxf(with f64) Vector4 {
+	mut result := Vector4{}
+	fnname := StringName.new("maxf")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector4, voidptr(&fnname), 3129671720)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&with)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (v &Vector4) to_variant() Variant {
+	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_vector4)
+	result := Variant{}
+	to_variant(GDExtensionUninitializedVariantPtr(&result), GDExtensionTypePtr(v))
+	return result
+}
+
+pub fn (mut t Vector4) from_variant(var &Variant) {
+	variant_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_vector4)
+	variant_to_type(voidptr(&t), var)
+}
+
+pub fn (v &Vector4) index(i i64) f64 {
+	index_fn := gdf.variant_get_ptr_indexed_getter(GDExtensionVariantType.type_vector4)
+	mut result := f64(0)
+	index_fn(GDExtensionConstTypePtr(v), GDExtensionInt(i), GDExtensionTypePtr(&result))
+	return result
+}
+
+pub fn (a Vector4) mul_i64(b i64) Vector4 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_multiply, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_i64)
+	res := Vector4{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) div_i64(b i64) Vector4 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_divide, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_i64)
+	res := Vector4{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) mul_f64(b f64) Vector4 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_multiply, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_f64)
+	res := Vector4{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) div_f64(b f64) Vector4 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_divide, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_f64)
+	res := Vector4{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) == (b Vector4) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_equal, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_vector4)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) eq_vector4(b Vector4) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_equal, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_vector4)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) ne_vector4(b Vector4) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_not_equal, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_vector4)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) < (b Vector4) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_less, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_vector4)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) lt_vector4(b Vector4) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_less, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_vector4)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) le_vector4(b Vector4) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_less_equal, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_vector4)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) gt_vector4(b Vector4) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_greater, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_vector4)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) ge_vector4(b Vector4) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_greater_equal, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_vector4)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) + (b Vector4) Vector4 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_add, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_vector4)
+	res := Vector4{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) add_vector4(b Vector4) Vector4 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_add, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_vector4)
+	res := Vector4{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) - (b Vector4) Vector4 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_subtract, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_vector4)
+	res := Vector4{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) sub_vector4(b Vector4) Vector4 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_subtract, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_vector4)
+	res := Vector4{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) * (b Vector4) Vector4 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_multiply, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_vector4)
+	res := Vector4{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) mul_vector4(b Vector4) Vector4 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_multiply, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_vector4)
+	res := Vector4{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) / (b Vector4) Vector4 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_divide, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_vector4)
+	res := Vector4{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) div_vector4(b Vector4) Vector4 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_divide, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_vector4)
+	res := Vector4{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) mul_projection(b Projection) Vector4 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_multiply, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_projection)
+	res := Vector4{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) in_dictionary(b Dictionary) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_in, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_dictionary)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) in_array(b Array) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_in, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_array)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector4) in_packedvector4array(b PackedVector4Array) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_in, GDExtensionVariantType.type_vector4, GDExtensionVariantType.type_packedvector4array)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}

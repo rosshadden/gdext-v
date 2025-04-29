@@ -1,0 +1,772 @@
+module gd
+
+pub enum Vector3Axis as i64 {
+	axis_x = 0
+	axis_y = 1
+	axis_z = 2
+}
+
+@[packed]
+pub struct Vector3 {
+pub mut:
+	x f32 // offset 0
+	y f32 // offset 4
+	z f32 // offset 8
+}
+
+pub fn Vector3.new0() Vector3 {
+	mut inst := Vector3{}
+	constructor := gdf.variant_get_ptr_constructor(GDExtensionVariantType.type_vector3, 0)
+	constructor(voidptr(&inst), unsafe{nil})
+	return inst
+}
+
+pub fn Vector3.new1(from &Vector3) Vector3 {
+	mut inst := Vector3{}
+	constructor := gdf.variant_get_ptr_constructor(GDExtensionVariantType.type_vector3, 1)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = from
+	constructor(voidptr(&inst), voidptr(&args[0]))
+	return inst
+}
+
+pub fn Vector3.new2(from &Vector3i) Vector3 {
+	mut inst := Vector3{}
+	constructor := gdf.variant_get_ptr_constructor(GDExtensionVariantType.type_vector3, 2)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = from
+	constructor(voidptr(&inst), voidptr(&args[0]))
+	return inst
+}
+
+pub fn Vector3.new3(x &f64, y &f64, z &f64) Vector3 {
+	mut inst := Vector3{}
+	constructor := gdf.variant_get_ptr_constructor(GDExtensionVariantType.type_vector3, 3)
+	mut args := unsafe { [3]voidptr{} }
+	args[0] = x
+	args[1] = y
+	args[2] = z
+	constructor(voidptr(&inst), voidptr(&args[0]))
+	return inst
+}
+
+pub fn (s &Vector3) min_axis_index() i64 {
+	mut result := i64(0)
+	fnname := StringName.new("min_axis_index")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 3173160232)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) max_axis_index() i64 {
+	mut result := i64(0)
+	fnname := StringName.new("max_axis_index")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 3173160232)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) angle_to(to Vector3) f64 {
+	mut result := f64(0)
+	fnname := StringName.new("angle_to")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 1047977935)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&to)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) signed_angle_to(to Vector3, axis Vector3) f64 {
+	mut result := f64(0)
+	fnname := StringName.new("signed_angle_to")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 2781412522)
+	mut args := unsafe { [2]voidptr{} }
+	args[0] = voidptr(&to)
+	args[1] = voidptr(&axis)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 2)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) direction_to(to Vector3) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("direction_to")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 2923479887)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&to)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) distance_to(to Vector3) f64 {
+	mut result := f64(0)
+	fnname := StringName.new("distance_to")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 1047977935)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&to)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) distance_squared_to(to Vector3) f64 {
+	mut result := f64(0)
+	fnname := StringName.new("distance_squared_to")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 1047977935)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&to)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) length() f64 {
+	mut result := f64(0)
+	fnname := StringName.new("length")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 466405837)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) length_squared() f64 {
+	mut result := f64(0)
+	fnname := StringName.new("length_squared")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 466405837)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) limit_length(length f64) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("limit_length")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 514930144)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&length)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) normalized() Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("normalized")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 1776574132)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) is_normalized() bool {
+	mut result := false
+	fnname := StringName.new("is_normalized")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 3918633141)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) is_equal_approx(to Vector3) bool {
+	mut result := false
+	fnname := StringName.new("is_equal_approx")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 1749054343)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&to)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) is_zero_approx() bool {
+	mut result := false
+	fnname := StringName.new("is_zero_approx")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 3918633141)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) is_finite() bool {
+	mut result := false
+	fnname := StringName.new("is_finite")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 3918633141)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) inverse() Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("inverse")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 1776574132)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) clamp(min Vector3, max Vector3) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("clamp")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 4145107892)
+	mut args := unsafe { [2]voidptr{} }
+	args[0] = voidptr(&min)
+	args[1] = voidptr(&max)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 2)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) clampf(min f64, max f64) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("clampf")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 2329594628)
+	mut args := unsafe { [2]voidptr{} }
+	args[0] = voidptr(&min)
+	args[1] = voidptr(&max)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 2)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) snapped(step Vector3) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("snapped")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 2923479887)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&step)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) snappedf(step f64) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("snappedf")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 514930144)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&step)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) rotated(axis Vector3, angle f64) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("rotated")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 1682608829)
+	mut args := unsafe { [2]voidptr{} }
+	args[0] = voidptr(&axis)
+	args[1] = voidptr(&angle)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 2)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) lerp(to Vector3, weight f64) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("lerp")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 1682608829)
+	mut args := unsafe { [2]voidptr{} }
+	args[0] = voidptr(&to)
+	args[1] = voidptr(&weight)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 2)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) slerp(to Vector3, weight f64) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("slerp")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 1682608829)
+	mut args := unsafe { [2]voidptr{} }
+	args[0] = voidptr(&to)
+	args[1] = voidptr(&weight)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 2)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) cubic_interpolate(b Vector3, pre_a Vector3, post_b Vector3, weight f64) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("cubic_interpolate")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 2597922253)
+	mut args := unsafe { [4]voidptr{} }
+	args[0] = voidptr(&b)
+	args[1] = voidptr(&pre_a)
+	args[2] = voidptr(&post_b)
+	args[3] = voidptr(&weight)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 4)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) cubic_interpolate_in_time(b Vector3, pre_a Vector3, post_b Vector3, weight f64, b_t f64, pre_a_t f64, post_b_t f64) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("cubic_interpolate_in_time")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 3256682901)
+	mut args := unsafe { [7]voidptr{} }
+	args[0] = voidptr(&b)
+	args[1] = voidptr(&pre_a)
+	args[2] = voidptr(&post_b)
+	args[3] = voidptr(&weight)
+	args[4] = voidptr(&b_t)
+	args[5] = voidptr(&pre_a_t)
+	args[6] = voidptr(&post_b_t)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 7)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) bezier_interpolate(control_1 Vector3, control_2 Vector3, end Vector3, t f64) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("bezier_interpolate")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 2597922253)
+	mut args := unsafe { [4]voidptr{} }
+	args[0] = voidptr(&control_1)
+	args[1] = voidptr(&control_2)
+	args[2] = voidptr(&end)
+	args[3] = voidptr(&t)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 4)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) bezier_derivative(control_1 Vector3, control_2 Vector3, end Vector3, t f64) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("bezier_derivative")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 2597922253)
+	mut args := unsafe { [4]voidptr{} }
+	args[0] = voidptr(&control_1)
+	args[1] = voidptr(&control_2)
+	args[2] = voidptr(&end)
+	args[3] = voidptr(&t)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 4)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) move_toward(to Vector3, delta f64) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("move_toward")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 1682608829)
+	mut args := unsafe { [2]voidptr{} }
+	args[0] = voidptr(&to)
+	args[1] = voidptr(&delta)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 2)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) dot(with Vector3) f64 {
+	mut result := f64(0)
+	fnname := StringName.new("dot")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 1047977935)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&with)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) cross(with Vector3) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("cross")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 2923479887)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&with)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) outer(with Vector3) Basis {
+	mut result := Basis{}
+	fnname := StringName.new("outer")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 3934786792)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&with)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) abs() Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("abs")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 1776574132)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) floor() Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("floor")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 1776574132)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) ceil() Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("ceil")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 1776574132)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) round() Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("round")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 1776574132)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) posmod(mod f64) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("posmod")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 514930144)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&mod)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) posmodv(modv Vector3) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("posmodv")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 2923479887)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&modv)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) project(b Vector3) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("project")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 2923479887)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&b)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) slide(n Vector3) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("slide")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 2923479887)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&n)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) bounce(n Vector3) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("bounce")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 2923479887)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&n)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) reflect(n Vector3) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("reflect")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 2923479887)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&n)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) sign() Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("sign")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 1776574132)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) octahedron_encode() Vector2 {
+	mut result := Vector2{}
+	fnname := StringName.new("octahedron_encode")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 2428350749)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) min(with Vector3) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("min")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 2923479887)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&with)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) minf(with f64) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("minf")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 514930144)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&with)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) max(with Vector3) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("max")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 2923479887)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&with)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Vector3) maxf(with f64) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("maxf")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 514930144)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&with)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn Vector3.octahedron_decode(uv Vector2) Vector3 {
+	mut result := Vector3{}
+	fnname := StringName.new("octahedron_decode")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_vector3, voidptr(&fnname), 3991820552)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&uv)
+	f(unsafe{nil}, voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (v &Vector3) to_variant() Variant {
+	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_vector3)
+	result := Variant{}
+	to_variant(GDExtensionUninitializedVariantPtr(&result), GDExtensionTypePtr(v))
+	return result
+}
+
+pub fn (mut t Vector3) from_variant(var &Variant) {
+	variant_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_vector3)
+	variant_to_type(voidptr(&t), var)
+}
+
+pub fn (v &Vector3) index(i i64) f64 {
+	index_fn := gdf.variant_get_ptr_indexed_getter(GDExtensionVariantType.type_vector3)
+	mut result := f64(0)
+	index_fn(GDExtensionConstTypePtr(v), GDExtensionInt(i), GDExtensionTypePtr(&result))
+	return result
+}
+
+pub fn (a Vector3) mul_i64(b i64) Vector3 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_multiply, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_i64)
+	res := Vector3{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) div_i64(b i64) Vector3 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_divide, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_i64)
+	res := Vector3{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) mul_f64(b f64) Vector3 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_multiply, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_f64)
+	res := Vector3{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) div_f64(b f64) Vector3 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_divide, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_f64)
+	res := Vector3{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) == (b Vector3) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_equal, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_vector3)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) eq_vector3(b Vector3) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_equal, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_vector3)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) ne_vector3(b Vector3) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_not_equal, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_vector3)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) < (b Vector3) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_less, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_vector3)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) lt_vector3(b Vector3) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_less, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_vector3)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) le_vector3(b Vector3) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_less_equal, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_vector3)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) gt_vector3(b Vector3) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_greater, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_vector3)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) ge_vector3(b Vector3) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_greater_equal, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_vector3)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) + (b Vector3) Vector3 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_add, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_vector3)
+	res := Vector3{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) add_vector3(b Vector3) Vector3 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_add, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_vector3)
+	res := Vector3{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) - (b Vector3) Vector3 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_subtract, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_vector3)
+	res := Vector3{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) sub_vector3(b Vector3) Vector3 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_subtract, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_vector3)
+	res := Vector3{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) * (b Vector3) Vector3 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_multiply, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_vector3)
+	res := Vector3{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) mul_vector3(b Vector3) Vector3 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_multiply, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_vector3)
+	res := Vector3{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) / (b Vector3) Vector3 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_divide, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_vector3)
+	res := Vector3{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) div_vector3(b Vector3) Vector3 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_divide, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_vector3)
+	res := Vector3{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) mul_quaternion(b Quaternion) Vector3 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_multiply, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_quaternion)
+	res := Vector3{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) mul_basis(b Basis) Vector3 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_multiply, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_basis)
+	res := Vector3{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) mul_transform3d(b Transform3D) Vector3 {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_multiply, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_transform3d)
+	res := Vector3{}
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) in_dictionary(b Dictionary) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_in, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_dictionary)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) in_array(b Array) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_in, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_array)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Vector3) in_packedvector3array(b PackedVector3Array) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_in, GDExtensionVariantType.type_vector3, GDExtensionVariantType.type_packedvector3array)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}

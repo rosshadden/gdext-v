@@ -1,0 +1,324 @@
+module gd
+
+pub struct RayCast2D {
+	Node2D
+}
+
+pub fn (s &RayCast2D) to_variant() Variant {
+	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_object)
+	result := Variant{}
+	to_variant(GDExtensionUninitializedVariantPtr(&result), s.ptr)
+	return result
+}
+
+pub fn (mut s RayCast2D) from_variant(var &Variant) {
+	variant_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_object)
+	variant_to_type(voidptr(&s.ptr), var)
+}
+
+pub fn (s &RayCast2D) set_enabled(enabled bool) {
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("set_enabled")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 2586408642)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&enabled)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &RayCast2D) is_enabled() bool {
+	mut result := false
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("is_enabled")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 36873697)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &RayCast2D) set_target_position(local_point Vector2) {
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("set_target_position")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 743155724)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&local_point)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &RayCast2D) get_target_position() Vector2 {
+	mut result := Vector2{}
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("get_target_position")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3341600327)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &RayCast2D) is_colliding() bool {
+	mut result := false
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("is_colliding")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 36873697)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &RayCast2D) force_raycast_update() {
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("force_raycast_update")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3218959716)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &RayCast2D) get_collider() Object {
+	mut result := Object{}
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("get_collider")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 1981248198)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &RayCast2D) get_collider_rid() RID {
+	mut result := RID{}
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("get_collider_rid")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 2944877500)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &RayCast2D) get_collider_shape() i64 {
+	mut result := i64(0)
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("get_collider_shape")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3905245786)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &RayCast2D) get_collision_point() Vector2 {
+	mut result := Vector2{}
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("get_collision_point")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3341600327)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &RayCast2D) get_collision_normal() Vector2 {
+	mut result := Vector2{}
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("get_collision_normal")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3341600327)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &RayCast2D) add_exception_rid(rid RID) {
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("add_exception_rid")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 2722037293)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&rid)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &RayCast2D) add_exception(node CollisionObject2D) {
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("add_exception")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3090941106)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&node.ptr)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &RayCast2D) remove_exception_rid(rid RID) {
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("remove_exception_rid")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 2722037293)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&rid)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &RayCast2D) remove_exception(node CollisionObject2D) {
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("remove_exception")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3090941106)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&node.ptr)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &RayCast2D) clear_exceptions() {
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("clear_exceptions")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3218959716)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &RayCast2D) set_collision_mask(mask i64) {
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("set_collision_mask")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 1286410249)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&mask)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &RayCast2D) get_collision_mask() i64 {
+	mut result := i64(0)
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("get_collision_mask")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3905245786)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &RayCast2D) set_collision_mask_value(layer_number i64, value bool) {
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("set_collision_mask_value")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 300928843)
+	mut args := unsafe { [2]voidptr{} }
+	args[0] = unsafe{voidptr(&layer_number)}
+	args[1] = unsafe{voidptr(&value)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &RayCast2D) get_collision_mask_value(layer_number i64) bool {
+	mut result := false
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("get_collision_mask_value")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 1116898809)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&layer_number)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &RayCast2D) set_exclude_parent_body(mask bool) {
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("set_exclude_parent_body")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 2586408642)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&mask)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &RayCast2D) get_exclude_parent_body() bool {
+	mut result := false
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("get_exclude_parent_body")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 36873697)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &RayCast2D) set_collide_with_areas(enable bool) {
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("set_collide_with_areas")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 2586408642)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&enable)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &RayCast2D) is_collide_with_areas_enabled() bool {
+	mut result := false
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("is_collide_with_areas_enabled")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 36873697)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &RayCast2D) set_collide_with_bodies(enable bool) {
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("set_collide_with_bodies")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 2586408642)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&enable)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &RayCast2D) is_collide_with_bodies_enabled() bool {
+	mut result := false
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("is_collide_with_bodies_enabled")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 36873697)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &RayCast2D) set_hit_from_inside(enable bool) {
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("set_hit_from_inside")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 2586408642)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&enable)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &RayCast2D) is_hit_from_inside_enabled() bool {
+	mut result := false
+	classname := StringName.new("RayCast2D")
+	fnname := StringName.new("is_hit_from_inside_enabled")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 36873697)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}

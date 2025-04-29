@@ -1,0 +1,103 @@
+module gd
+
+pub enum SkyRadianceSize as i64 {
+	radiance_size_32 = 0
+	radiance_size_64 = 1
+	radiance_size_128 = 2
+	radiance_size_256 = 3
+	radiance_size_512 = 4
+	radiance_size_1024 = 5
+	radiance_size_2048 = 6
+	radiance_size_max = 7
+}
+
+pub enum SkyProcessMode as i64 {
+	process_mode_automatic = 0
+	process_mode_quality = 1
+	process_mode_incremental = 2
+	process_mode_realtime = 3
+}
+
+pub struct Sky {
+	Resource
+}
+
+pub fn (s &Sky) to_variant() Variant {
+	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_object)
+	result := Variant{}
+	to_variant(GDExtensionUninitializedVariantPtr(&result), s.ptr)
+	return result
+}
+
+pub fn (mut s Sky) from_variant(var &Variant) {
+	variant_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_object)
+	variant_to_type(voidptr(&s.ptr), var)
+}
+
+pub fn (s &Sky) set_radiance_size(size SkyRadianceSize) {
+	classname := StringName.new("Sky")
+	fnname := StringName.new("set_radiance_size")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 1512957179)
+	mut args := unsafe { [1]voidptr{} }
+	i64_size := i64(size)
+	args[0] = unsafe{voidptr(&i64_size)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &Sky) get_radiance_size() SkyRadianceSize {
+	mut result := i64(SkyRadianceSize.radiance_size_32)
+	classname := StringName.new("Sky")
+	fnname := StringName.new("get_radiance_size")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 2708733976)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return unsafe{SkyRadianceSize(result)}
+}
+
+pub fn (s &Sky) set_process_mode(mode SkyProcessMode) {
+	classname := StringName.new("Sky")
+	fnname := StringName.new("set_process_mode")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 875986769)
+	mut args := unsafe { [1]voidptr{} }
+	i64_mode := i64(mode)
+	args[0] = unsafe{voidptr(&i64_mode)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &Sky) get_process_mode() SkyProcessMode {
+	mut result := i64(SkyProcessMode.process_mode_automatic)
+	classname := StringName.new("Sky")
+	fnname := StringName.new("get_process_mode")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 731245043)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return unsafe{SkyProcessMode(result)}
+}
+
+pub fn (s &Sky) set_material(material Material) {
+	classname := StringName.new("Sky")
+	fnname := StringName.new("set_material")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 2757459619)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&material.ptr)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &Sky) get_material() Material {
+	mut result := Material{}
+	classname := StringName.new("Sky")
+	fnname := StringName.new("get_material")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 5934680)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}

@@ -1,0 +1,241 @@
+module gd
+
+@[packed]
+pub struct Rect2i {
+pub mut:
+	position Vector2i // offset 0
+	size Vector2i // offset 8
+}
+
+pub fn Rect2i.new0() Rect2i {
+	mut inst := Rect2i{}
+	constructor := gdf.variant_get_ptr_constructor(GDExtensionVariantType.type_rect2i, 0)
+	constructor(voidptr(&inst), unsafe{nil})
+	return inst
+}
+
+pub fn Rect2i.new1(from &Rect2i) Rect2i {
+	mut inst := Rect2i{}
+	constructor := gdf.variant_get_ptr_constructor(GDExtensionVariantType.type_rect2i, 1)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = from
+	constructor(voidptr(&inst), voidptr(&args[0]))
+	return inst
+}
+
+pub fn Rect2i.new2(from &Rect2) Rect2i {
+	mut inst := Rect2i{}
+	constructor := gdf.variant_get_ptr_constructor(GDExtensionVariantType.type_rect2i, 2)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = from
+	constructor(voidptr(&inst), voidptr(&args[0]))
+	return inst
+}
+
+pub fn Rect2i.new3(position &Vector2i, size &Vector2i) Rect2i {
+	mut inst := Rect2i{}
+	constructor := gdf.variant_get_ptr_constructor(GDExtensionVariantType.type_rect2i, 3)
+	mut args := unsafe { [2]voidptr{} }
+	args[0] = position
+	args[1] = size
+	constructor(voidptr(&inst), voidptr(&args[0]))
+	return inst
+}
+
+pub fn Rect2i.new4(x &i64, y &i64, width &i64, height &i64) Rect2i {
+	mut inst := Rect2i{}
+	constructor := gdf.variant_get_ptr_constructor(GDExtensionVariantType.type_rect2i, 4)
+	mut args := unsafe { [4]voidptr{} }
+	args[0] = x
+	args[1] = y
+	args[2] = width
+	args[3] = height
+	constructor(voidptr(&inst), voidptr(&args[0]))
+	return inst
+}
+
+pub fn (s &Rect2i) get_center() Vector2i {
+	mut result := Vector2i{}
+	fnname := StringName.new("get_center")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_rect2i, voidptr(&fnname), 3444277866)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Rect2i) get_area() i64 {
+	mut result := i64(0)
+	fnname := StringName.new("get_area")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_rect2i, voidptr(&fnname), 3173160232)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Rect2i) has_area() bool {
+	mut result := false
+	fnname := StringName.new("has_area")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_rect2i, voidptr(&fnname), 3918633141)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Rect2i) has_point(point Vector2i) bool {
+	mut result := false
+	fnname := StringName.new("has_point")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_rect2i, voidptr(&fnname), 328189994)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&point)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Rect2i) intersects(b Rect2i) bool {
+	mut result := false
+	fnname := StringName.new("intersects")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_rect2i, voidptr(&fnname), 3434691493)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&b)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Rect2i) encloses(b Rect2i) bool {
+	mut result := false
+	fnname := StringName.new("encloses")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_rect2i, voidptr(&fnname), 3434691493)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&b)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Rect2i) intersection(b Rect2i) Rect2i {
+	mut result := Rect2i{}
+	fnname := StringName.new("intersection")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_rect2i, voidptr(&fnname), 717431873)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&b)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Rect2i) merge(b Rect2i) Rect2i {
+	mut result := Rect2i{}
+	fnname := StringName.new("merge")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_rect2i, voidptr(&fnname), 717431873)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&b)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Rect2i) expand(to Vector2i) Rect2i {
+	mut result := Rect2i{}
+	fnname := StringName.new("expand")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_rect2i, voidptr(&fnname), 1355196872)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&to)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Rect2i) grow(amount i64) Rect2i {
+	mut result := Rect2i{}
+	fnname := StringName.new("grow")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_rect2i, voidptr(&fnname), 1578070074)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&amount)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Rect2i) grow_side(side i64, amount i64) Rect2i {
+	mut result := Rect2i{}
+	fnname := StringName.new("grow_side")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_rect2i, voidptr(&fnname), 3191154199)
+	mut args := unsafe { [2]voidptr{} }
+	args[0] = voidptr(&side)
+	args[1] = voidptr(&amount)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 2)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Rect2i) grow_individual(left i64, top i64, right i64, bottom i64) Rect2i {
+	mut result := Rect2i{}
+	fnname := StringName.new("grow_individual")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_rect2i, voidptr(&fnname), 1893743416)
+	mut args := unsafe { [4]voidptr{} }
+	args[0] = voidptr(&left)
+	args[1] = voidptr(&top)
+	args[2] = voidptr(&right)
+	args[3] = voidptr(&bottom)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 4)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Rect2i) abs() Rect2i {
+	mut result := Rect2i{}
+	fnname := StringName.new("abs")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_rect2i, voidptr(&fnname), 1469025700)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (v &Rect2i) to_variant() Variant {
+	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_rect2i)
+	result := Variant{}
+	to_variant(GDExtensionUninitializedVariantPtr(&result), GDExtensionTypePtr(v))
+	return result
+}
+
+pub fn (mut t Rect2i) from_variant(var &Variant) {
+	variant_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_rect2i)
+	variant_to_type(voidptr(&t), var)
+}
+
+pub fn (a Rect2i) == (b Rect2i) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_equal, GDExtensionVariantType.type_rect2i, GDExtensionVariantType.type_rect2i)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Rect2i) eq_rect2i(b Rect2i) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_equal, GDExtensionVariantType.type_rect2i, GDExtensionVariantType.type_rect2i)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Rect2i) ne_rect2i(b Rect2i) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_not_equal, GDExtensionVariantType.type_rect2i, GDExtensionVariantType.type_rect2i)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Rect2i) in_dictionary(b Dictionary) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_in, GDExtensionVariantType.type_rect2i, GDExtensionVariantType.type_dictionary)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Rect2i) in_array(b Array) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_in, GDExtensionVariantType.type_rect2i, GDExtensionVariantType.type_array)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}

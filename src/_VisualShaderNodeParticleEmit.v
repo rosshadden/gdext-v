@@ -1,0 +1,48 @@
+module gd
+
+pub enum VisualShaderNodeParticleEmitEmitFlags as i64 {
+	emit_flag_position = 1
+	emit_flag_rot_scale = 2
+	emit_flag_velocity = 4
+	emit_flag_color = 8
+	emit_flag_custom = 16
+}
+
+pub struct VisualShaderNodeParticleEmit {
+	VisualShaderNode
+}
+
+pub fn (s &VisualShaderNodeParticleEmit) to_variant() Variant {
+	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_object)
+	result := Variant{}
+	to_variant(GDExtensionUninitializedVariantPtr(&result), s.ptr)
+	return result
+}
+
+pub fn (mut s VisualShaderNodeParticleEmit) from_variant(var &Variant) {
+	variant_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_object)
+	variant_to_type(voidptr(&s.ptr), var)
+}
+
+pub fn (s &VisualShaderNodeParticleEmit) set_flags(flags VisualShaderNodeParticleEmitEmitFlags) {
+	classname := StringName.new("VisualShaderNodeParticleEmit")
+	fnname := StringName.new("set_flags")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3960756792)
+	mut args := unsafe { [1]voidptr{} }
+	i64_flags := i64(flags)
+	args[0] = unsafe{voidptr(&i64_flags)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &VisualShaderNodeParticleEmit) get_flags() VisualShaderNodeParticleEmitEmitFlags {
+	mut result := i64(VisualShaderNodeParticleEmitEmitFlags.emit_flag_position)
+	classname := StringName.new("VisualShaderNodeParticleEmit")
+	fnname := StringName.new("get_flags")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 171277835)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return unsafe{VisualShaderNodeParticleEmitEmitFlags(result)}
+}

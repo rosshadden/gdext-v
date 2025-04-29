@@ -1,0 +1,175 @@
+module gd
+
+@[packed]
+pub struct Signal {
+	godot_data [16]u8 // filler
+}
+
+pub fn Signal.new0() Signal {
+	mut inst := Signal{}
+	constructor := gdf.variant_get_ptr_constructor(GDExtensionVariantType.type_signal, 0)
+	constructor(voidptr(&inst), unsafe{nil})
+	return inst
+}
+
+pub fn Signal.new1(from &Signal) Signal {
+	mut inst := Signal{}
+	constructor := gdf.variant_get_ptr_constructor(GDExtensionVariantType.type_signal, 1)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = from
+	constructor(voidptr(&inst), voidptr(&args[0]))
+	return inst
+}
+
+pub fn Signal.new2(object &Object, signal &StringName) Signal {
+	mut inst := Signal{}
+	constructor := gdf.variant_get_ptr_constructor(GDExtensionVariantType.type_signal, 2)
+	mut args := unsafe { [2]voidptr{} }
+	args[0] = object
+	args[1] = signal
+	constructor(voidptr(&inst), voidptr(&args[0]))
+	return inst
+}
+
+pub fn (s &Signal) deinit() {
+	destructor := gdf.variant_get_ptr_destructor(GDExtensionVariantType.type_signal)
+	destructor(voidptr(s))
+}
+
+pub fn (s &Signal) is_null() bool {
+	mut result := false
+	fnname := StringName.new("is_null")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_signal, voidptr(&fnname), 3918633141)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Signal) get_object() Object {
+	mut result := Object{}
+	fnname := StringName.new("get_object")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_signal, voidptr(&fnname), 4008621732)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Signal) get_object_id() i64 {
+	mut result := i64(0)
+	fnname := StringName.new("get_object_id")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_signal, voidptr(&fnname), 3173160232)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Signal) get_name() StringName {
+	mut result := StringName{}
+	fnname := StringName.new("get_name")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_signal, voidptr(&fnname), 1825232092)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Signal) connect(callable Callable, flags i64) i64 {
+	mut result := i64(0)
+	fnname := StringName.new("connect")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_signal, voidptr(&fnname), 979702392)
+	mut args := unsafe { [2]voidptr{} }
+	args[0] = voidptr(&callable)
+	args[1] = voidptr(&flags)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 2)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Signal) disconnect(callable Callable) {
+	fnname := StringName.new("disconnect")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_signal, voidptr(&fnname), 3470848906)
+	f(voidptr(s), unsafe{nil}, unsafe{nil}, 1)
+	fnname.deinit()
+}
+
+pub fn (s &Signal) is_connected(callable Callable) bool {
+	mut result := false
+	fnname := StringName.new("is_connected")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_signal, voidptr(&fnname), 4129521963)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = voidptr(&callable)
+	f(voidptr(s), voidptr(&args[0]), voidptr(&result), 1)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Signal) get_connections() Array {
+	mut result := Array{}
+	fnname := StringName.new("get_connections")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_signal, voidptr(&fnname), 4144163970)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Signal) has_connections() bool {
+	mut result := false
+	fnname := StringName.new("has_connections")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_signal, voidptr(&fnname), 3918633141)
+	f(voidptr(s), unsafe{nil}, voidptr(&result), 0)
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &Signal) emit() {
+	fnname := StringName.new("emit")
+	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_signal, voidptr(&fnname), 3286317445)
+	f(voidptr(s), unsafe{nil}, unsafe{nil}, 0)
+	fnname.deinit()
+}
+
+pub fn (v &Signal) to_variant() Variant {
+	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_signal)
+	result := Variant{}
+	to_variant(GDExtensionUninitializedVariantPtr(&result), GDExtensionTypePtr(v))
+	return result
+}
+
+pub fn (mut t Signal) from_variant(var &Variant) {
+	variant_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_signal)
+	variant_to_type(voidptr(&t), var)
+}
+
+pub fn (a Signal) == (b Signal) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_equal, GDExtensionVariantType.type_signal, GDExtensionVariantType.type_signal)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Signal) eq_signal(b Signal) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_equal, GDExtensionVariantType.type_signal, GDExtensionVariantType.type_signal)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Signal) ne_signal(b Signal) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_not_equal, GDExtensionVariantType.type_signal, GDExtensionVariantType.type_signal)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Signal) in_dictionary(b Dictionary) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_in, GDExtensionVariantType.type_signal, GDExtensionVariantType.type_dictionary)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}
+
+pub fn (a Signal) in_array(b Array) bool {
+	e := gdf.variant_get_ptr_operator_evaluator(GDExtensionVariantOperator.op_in, GDExtensionVariantType.type_signal, GDExtensionVariantType.type_array)
+	res := false
+	e(voidptr(&a), voidptr(&b), voidptr(&res))
+	return res
+}

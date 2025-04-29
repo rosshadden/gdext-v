@@ -1,0 +1,584 @@
+module gd
+
+pub struct PhysicsDirectBodyState3D {
+	Object
+}
+
+pub fn (s &PhysicsDirectBodyState3D) to_variant() Variant {
+	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_object)
+	result := Variant{}
+	to_variant(GDExtensionUninitializedVariantPtr(&result), s.ptr)
+	return result
+}
+
+pub fn (mut s PhysicsDirectBodyState3D) from_variant(var &Variant) {
+	variant_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_object)
+	variant_to_type(voidptr(&s.ptr), var)
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_total_gravity() Vector3 {
+	mut result := Vector3{}
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_total_gravity")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3360562783)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_total_linear_damp() f64 {
+	mut result := f64(0)
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_total_linear_damp")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 1740695150)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_total_angular_damp() f64 {
+	mut result := f64(0)
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_total_angular_damp")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 1740695150)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_center_of_mass() Vector3 {
+	mut result := Vector3{}
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_center_of_mass")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3360562783)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_center_of_mass_local() Vector3 {
+	mut result := Vector3{}
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_center_of_mass_local")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3360562783)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_principal_inertia_axes() Basis {
+	mut result := Basis{}
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_principal_inertia_axes")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 2716978435)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_inverse_mass() f64 {
+	mut result := f64(0)
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_inverse_mass")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 1740695150)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_inverse_inertia() Vector3 {
+	mut result := Vector3{}
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_inverse_inertia")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3360562783)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_inverse_inertia_tensor() Basis {
+	mut result := Basis{}
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_inverse_inertia_tensor")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 2716978435)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) set_linear_velocity(velocity Vector3) {
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("set_linear_velocity")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3460891852)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&velocity)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_linear_velocity() Vector3 {
+	mut result := Vector3{}
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_linear_velocity")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3360562783)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) set_angular_velocity(velocity Vector3) {
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("set_angular_velocity")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3460891852)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&velocity)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_angular_velocity() Vector3 {
+	mut result := Vector3{}
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_angular_velocity")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3360562783)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) set_transform(transform Transform3D) {
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("set_transform")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 2952846383)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&transform)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_transform() Transform3D {
+	mut result := Transform3D{}
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_transform")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3229777777)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_velocity_at_local_position(local_position Vector3) Vector3 {
+	mut result := Vector3{}
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_velocity_at_local_position")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 192990374)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&local_position)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+@[params]
+pub struct PhysicsDirectBodyState3D_apply_central_impulse_Cfg {
+pub:
+	impulse Vector3
+}
+
+pub fn (s &PhysicsDirectBodyState3D) apply_central_impulse(cfg PhysicsDirectBodyState3D_apply_central_impulse_Cfg) {
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("apply_central_impulse")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 2007698547)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&cfg.impulse)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+@[params]
+pub struct PhysicsDirectBodyState3D_apply_impulse_Cfg {
+pub:
+	position Vector3
+}
+
+pub fn (s &PhysicsDirectBodyState3D) apply_impulse(impulse Vector3, cfg PhysicsDirectBodyState3D_apply_impulse_Cfg) {
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("apply_impulse")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 2754756483)
+	mut args := unsafe { [2]voidptr{} }
+	args[0] = unsafe{voidptr(&impulse)}
+	args[1] = unsafe{voidptr(&cfg.position)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &PhysicsDirectBodyState3D) apply_torque_impulse(impulse Vector3) {
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("apply_torque_impulse")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3460891852)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&impulse)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+@[params]
+pub struct PhysicsDirectBodyState3D_apply_central_force_Cfg {
+pub:
+	force Vector3
+}
+
+pub fn (s &PhysicsDirectBodyState3D) apply_central_force(cfg PhysicsDirectBodyState3D_apply_central_force_Cfg) {
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("apply_central_force")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 2007698547)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&cfg.force)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+@[params]
+pub struct PhysicsDirectBodyState3D_apply_force_Cfg {
+pub:
+	position Vector3
+}
+
+pub fn (s &PhysicsDirectBodyState3D) apply_force(force Vector3, cfg PhysicsDirectBodyState3D_apply_force_Cfg) {
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("apply_force")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 2754756483)
+	mut args := unsafe { [2]voidptr{} }
+	args[0] = unsafe{voidptr(&force)}
+	args[1] = unsafe{voidptr(&cfg.position)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &PhysicsDirectBodyState3D) apply_torque(torque Vector3) {
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("apply_torque")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3460891852)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&torque)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+@[params]
+pub struct PhysicsDirectBodyState3D_add_constant_central_force_Cfg {
+pub:
+	force Vector3
+}
+
+pub fn (s &PhysicsDirectBodyState3D) add_constant_central_force(cfg PhysicsDirectBodyState3D_add_constant_central_force_Cfg) {
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("add_constant_central_force")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 2007698547)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&cfg.force)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+@[params]
+pub struct PhysicsDirectBodyState3D_add_constant_force_Cfg {
+pub:
+	position Vector3
+}
+
+pub fn (s &PhysicsDirectBodyState3D) add_constant_force(force Vector3, cfg PhysicsDirectBodyState3D_add_constant_force_Cfg) {
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("add_constant_force")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 2754756483)
+	mut args := unsafe { [2]voidptr{} }
+	args[0] = unsafe{voidptr(&force)}
+	args[1] = unsafe{voidptr(&cfg.position)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &PhysicsDirectBodyState3D) add_constant_torque(torque Vector3) {
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("add_constant_torque")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3460891852)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&torque)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &PhysicsDirectBodyState3D) set_constant_force(force Vector3) {
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("set_constant_force")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3460891852)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&force)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_constant_force() Vector3 {
+	mut result := Vector3{}
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_constant_force")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3360562783)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) set_constant_torque(torque Vector3) {
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("set_constant_torque")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3460891852)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&torque)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_constant_torque() Vector3 {
+	mut result := Vector3{}
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_constant_torque")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3360562783)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) set_sleep_state(enabled bool) {
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("set_sleep_state")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 2586408642)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&enabled)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &PhysicsDirectBodyState3D) is_sleeping() bool {
+	mut result := false
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("is_sleeping")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 36873697)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_contact_count() i64 {
+	mut result := i64(0)
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_contact_count")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3905245786)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_contact_local_position(contact_idx i64) Vector3 {
+	mut result := Vector3{}
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_contact_local_position")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 711720468)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&contact_idx)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_contact_local_normal(contact_idx i64) Vector3 {
+	mut result := Vector3{}
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_contact_local_normal")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 711720468)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&contact_idx)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_contact_impulse(contact_idx i64) Vector3 {
+	mut result := Vector3{}
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_contact_impulse")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 711720468)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&contact_idx)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_contact_local_shape(contact_idx i64) i64 {
+	mut result := i64(0)
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_contact_local_shape")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 923996154)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&contact_idx)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_contact_local_velocity_at_position(contact_idx i64) Vector3 {
+	mut result := Vector3{}
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_contact_local_velocity_at_position")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 711720468)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&contact_idx)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_contact_collider(contact_idx i64) RID {
+	mut result := RID{}
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_contact_collider")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 495598643)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&contact_idx)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_contact_collider_position(contact_idx i64) Vector3 {
+	mut result := Vector3{}
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_contact_collider_position")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 711720468)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&contact_idx)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_contact_collider_id(contact_idx i64) i64 {
+	mut result := i64(0)
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_contact_collider_id")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 923996154)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&contact_idx)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_contact_collider_object(contact_idx i64) Object {
+	mut result := Object{}
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_contact_collider_object")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3332903315)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&contact_idx)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_contact_collider_shape(contact_idx i64) i64 {
+	mut result := i64(0)
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_contact_collider_shape")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 923996154)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&contact_idx)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_contact_collider_velocity_at_position(contact_idx i64) Vector3 {
+	mut result := Vector3{}
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_contact_collider_velocity_at_position")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 711720468)
+	mut args := unsafe { [1]voidptr{} }
+	args[0] = unsafe{voidptr(&contact_idx)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_step() f64 {
+	mut result := f64(0)
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_step")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 1740695150)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &PhysicsDirectBodyState3D) integrate_forces() {
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("integrate_forces")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3218959716)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &PhysicsDirectBodyState3D) get_space_state() PhysicsDirectSpaceState3D {
+	mut result := PhysicsDirectSpaceState3D{}
+	classname := StringName.new("PhysicsDirectBodyState3D")
+	fnname := StringName.new("get_space_state")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 2069328350)
+	gdf.object_method_bind_ptrcall(mb, s.ptr, unsafe{nil}, voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}

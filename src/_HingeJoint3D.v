@@ -1,0 +1,89 @@
+module gd
+
+pub enum HingeJoint3DParam as i64 {
+	param_bias = 0
+	param_limit_upper = 1
+	param_limit_lower = 2
+	param_limit_bias = 3
+	param_limit_softness = 4
+	param_limit_relaxation = 5
+	param_motor_target_velocity = 6
+	param_motor_max_impulse = 7
+	param_max = 8
+}
+
+pub enum HingeJoint3DFlag as i64 {
+	flag_use_limit = 0
+	flag_enable_motor = 1
+	flag_max = 2
+}
+
+pub struct HingeJoint3D {
+	Joint3D
+}
+
+pub fn (s &HingeJoint3D) to_variant() Variant {
+	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_object)
+	result := Variant{}
+	to_variant(GDExtensionUninitializedVariantPtr(&result), s.ptr)
+	return result
+}
+
+pub fn (mut s HingeJoint3D) from_variant(var &Variant) {
+	variant_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_object)
+	variant_to_type(voidptr(&s.ptr), var)
+}
+
+pub fn (s &HingeJoint3D) set_param(param HingeJoint3DParam, value f64) {
+	classname := StringName.new("HingeJoint3D")
+	fnname := StringName.new("set_param")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 3082977519)
+	mut args := unsafe { [2]voidptr{} }
+	i64_param := i64(param)
+	args[0] = unsafe{voidptr(&i64_param)}
+	args[1] = unsafe{voidptr(&value)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &HingeJoint3D) get_param(param HingeJoint3DParam) f64 {
+	mut result := f64(0)
+	classname := StringName.new("HingeJoint3D")
+	fnname := StringName.new("get_param")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 4066002676)
+	mut args := unsafe { [1]voidptr{} }
+	i64_param := i64(param)
+	args[0] = unsafe{voidptr(&i64_param)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
+
+pub fn (s &HingeJoint3D) set_flag(flag HingeJoint3DFlag, enabled bool) {
+	classname := StringName.new("HingeJoint3D")
+	fnname := StringName.new("set_flag")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 1083494620)
+	mut args := unsafe { [2]voidptr{} }
+	i64_flag := i64(flag)
+	args[0] = unsafe{voidptr(&i64_flag)}
+	args[1] = unsafe{voidptr(&enabled)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), unsafe{nil})
+	classname.deinit()
+	fnname.deinit()
+}
+
+pub fn (s &HingeJoint3D) get_flag(flag HingeJoint3DFlag) bool {
+	mut result := false
+	classname := StringName.new("HingeJoint3D")
+	fnname := StringName.new("get_flag")
+	mb := gdf.classdb_get_method_bind(&classname, &fnname, 2841369610)
+	mut args := unsafe { [1]voidptr{} }
+	i64_flag := i64(flag)
+	args[0] = unsafe{voidptr(&i64_flag)}
+	gdf.object_method_bind_ptrcall(mb, s.ptr, voidptr(&args[0]), voidptr(&result))
+	classname.deinit()
+	fnname.deinit()
+	return result
+}
