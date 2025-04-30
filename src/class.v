@@ -56,9 +56,10 @@ pub fn register_class_with_name[T](parent_class string, class_name string) {
 		class_userdata: ci
 	}
 
-	register_virtual_methods[T](mut ci)
 	gdf.classdb_register_extension_class4(gdf.clp, &sn, &pn, &info)
+	register_virtual_methods[T](mut ci)
 	register_signal_methods[T](mut ci)
+	register_class_methods[T](mut ci)
 }
 
 pub fn register_class[T](parent_class string) {
@@ -402,4 +403,47 @@ fn class_get_virtual_func[T](user_data voidptr, method_name &StringName, hash in
 		return GDExtensionClassCallVirtual(unsafe { voidptr(virt) })
 	}
 	return GDExtensionClassCallVirtual(unsafe { nil })
+}
+
+// TODO: handle arbitrary params
+// TODO: handle arbitrary returns
+// TODO: see if we can leverage the passed-in FunctionData
+fn call_func[T](user_data voidptr, instance GDExtensionClassInstancePtr, args &&Variant, arg_count GDExtensionInt, ret &Variant, errr &GDExtensionCallError) {
+	mut inst := unsafe { &T(instance) }
+	method_data := unsafe { &FunctionData(user_data) }
+	// HACK: there is no way this nested `$for` is actually necessary...
+	$for method in T.methods {
+		if method == method_data {
+			inst.$method()
+		}
+	}
+}
+
+pub fn register_class_methods[T](mut ci ClassInfo) {
+	$for method in T.methods {
+		if 'gd.expose' in method.attrs {
+			method_data := method
+			method_sn := StringName.new(method.name)
+
+			method_info := GDExtensionClassMethodInfo{
+				name:                   &method_sn
+				method_userdata:        &method_data
+				call_func:              call_func[T]
+				ptrcall_func:           fn (user_data voidptr, instance GDExtensionClassInstancePtr, args &GDExtensionConstTypePtr, ret GDExtensionTypePtr) {
+					println('ptrcall_func')
+				}
+				method_flags:           1
+				has_return_value:       GDExtensionBool(false)
+				return_value_info:      unsafe { nil }
+				return_value_metadata:  unsafe { nil }
+				argument_count:         0
+				arguments_info:         unsafe { nil }
+				arguments_metadata:     unsafe { nil }
+				default_argument_count: 0
+				default_arguments:      unsafe { nil }
+			}
+
+			gdf.classdb_register_extension_class_method(gdf.clp, &ci.class_name, &method_info)
+		}
+	}
 }
