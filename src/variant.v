@@ -34,7 +34,7 @@ pub fn (v &Variant) to_int() int {
 
 pub fn (v &Variant) to_string() string {
 	var_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_string)
-	t := gd.String{}
+	t := String{}
 	var_to_type(voidptr(&t), v)
 	return t.to_v()
 }

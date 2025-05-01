@@ -437,10 +437,12 @@ fn call_func[T](user_data voidptr, instance GDExtensionClassInstancePtr, args &&
 						value.from_variant(unsafe { args[p] })
 						params << &value
 					}
-					else {
-					}
+					else {}
 				}
 				p += 1
+			}
+			if p != arg_count {
+				panic('call_func: argument count mismatch')
 			}
 
 			inst.$method(...params)
