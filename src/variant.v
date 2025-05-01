@@ -18,6 +18,28 @@ pub fn (v &Variant) deinit() {
 	gdf.variant_destroy(v)
 }
 
+pub fn (v &Variant) to_bool() bool {
+	var_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_bool)
+	t := false
+	var_to_type(voidptr(&t), v)
+	return t
+}
+
+pub fn (v &Variant) to_int() int {
+	var_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_i64)
+	t := 0
+	var_to_type(voidptr(&t), v)
+	return t
+}
+
+pub fn (v &Variant) to_string() string {
+	var_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_string)
+	t := gd.String{}
+	var_to_type(voidptr(&t), v)
+	return t.to_v()
+}
+
+// TODO: move to variant
 pub fn i64_to_variant(i &i64) Variant {
 	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_i64)
 	result := Variant{}
@@ -25,6 +47,7 @@ pub fn i64_to_variant(i &i64) Variant {
 	return result
 }
 
+// TODO: move to variant
 pub fn f64_to_variant(f &f64) Variant {
 	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_f64)
 	result := Variant{}
@@ -32,6 +55,7 @@ pub fn f64_to_variant(f &f64) Variant {
 	return result
 }
 
+// TODO: move to variant
 pub fn i64_from_variant(var &Variant) i64 {
 	var_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_i64)
 	t := i64(0)
@@ -39,6 +63,7 @@ pub fn i64_from_variant(var &Variant) i64 {
 	return t
 }
 
+// TODO: move to variant
 pub fn f64_from_variant(var &Variant) f64 {
 	var_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_f64)
 	t := f64(0)

@@ -405,7 +405,6 @@ fn class_get_virtual_func[T](user_data voidptr, method_name &StringName, hash in
 	return GDExtensionClassCallVirtual(unsafe { nil })
 }
 
-// TODO: handle arbitrary params
 // TODO: handle arbitrary returns
 // TODO: see if we can leverage the passed-in FunctionData
 fn call_func[T](user_data voidptr, instance GDExtensionClassInstancePtr, args &&Variant, arg_count GDExtensionInt, ret &Variant, errr &GDExtensionCallError) {
@@ -414,7 +413,37 @@ fn call_func[T](user_data voidptr, instance GDExtensionClassInstancePtr, args &&
 	// HACK: there is no way this nested `$for` is actually necessary...
 	$for method in T.methods {
 		if method == method_data {
-			inst.$method()
+			mut params := []voidptr{}
+
+			// TODO: expand arg type coverage
+			// TODO: leverage `ToVariant` and `FromVariant` interfaces
+			mut p := 0
+			$for param in method.params {
+				match typeof(param.typ).name {
+					'&bool' {
+						value := unsafe { args[p].to_bool() }
+						params << &value
+					}
+					'&int' {
+						value := unsafe { args[p].to_int() }
+						params << &value
+					}
+					'&string' {
+						value := unsafe { args[p].to_string() }
+						params << &value
+					}
+					'&gd.String' {
+						mut value := String{}
+						value.from_variant(unsafe { args[p] })
+						params << &value
+					}
+					else {
+					}
+				}
+				p += 1
+			}
+
+			inst.$method(...params)
 		}
 	}
 }
