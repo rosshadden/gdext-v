@@ -364,20 +364,20 @@ fn class_free_instance[T](user_data voidptr, instance GDExtensionClassInstancePt
 }
 
 fn class_recreate_instance[T](user_data voidptr, object &Object) GDExtensionClassInstancePtr {
-	// Allocate a new instance of T
+	// allocate a new instance of T
 	t := unsafe { &T(gdf.mem_alloc(sizeof[T]())) }
-	// Copy default values
+	// copy default values
 	t_v := T{}
 	unsafe { C.memcpy(t, &t_v, sizeof[T]()) }
 
-	// Set the instance binding to the existing Godot object
+	// set the instance binding to the existing Godot object
 	gdf.object_set_instance(object, StringName.new(T.name), t)
 
-	// Set up instance binding callbacks if necessary
+	// set up instance binding callbacks if necessary
 	cb := GDExtensionInstanceBindingCallbacks{}
 	gdf.object_set_instance_binding(object, gdf.clp, t, cb)
 
-	// Call init if T implements ClassInitable
+	// call init if T implements ClassInitable
 	$if T is ClassInitable {
 		mut ci := ClassInitable(t)
 		ci.init()
@@ -407,7 +407,7 @@ fn class_get_virtual_func[T](user_data voidptr, method_name &StringName, hash in
 
 // TODO: handle arbitrary returns
 // TODO: see if we can leverage the passed-in FunctionData
-fn call_func[T](user_data voidptr, instance GDExtensionClassInstancePtr, args &&Variant, arg_count GDExtensionInt, ret &Variant, errr &GDExtensionCallError) {
+fn call_func[T](user_data voidptr, instance GDExtensionClassInstancePtr, args &&Variant, arg_count GDExtensionInt, ret &Variant, err &GDExtensionCallError) {
 	mut inst := unsafe { &T(instance) }
 	method_data := unsafe { &FunctionData(user_data) }
 	// HACK: there is no way this nested `$for` is actually necessary...
@@ -415,6 +415,7 @@ fn call_func[T](user_data voidptr, instance GDExtensionClassInstancePtr, args &&
 		if method == method_data {
 			mut params := []voidptr{}
 
+			// handle params
 			// TODO: expand arg type coverage
 			// TODO: leverage `ToVariant` and `FromVariant` interfaces
 			mut p := 0
@@ -437,7 +438,10 @@ fn call_func[T](user_data voidptr, instance GDExtensionClassInstancePtr, args &&
 						value.from_variant(unsafe { args[p] })
 						params << &value
 					}
-					else {}
+					else {
+						value := unsafe { args[p] }
+						params << &value
+					}
 				}
 				p += 1
 			}
