@@ -449,7 +449,17 @@ fn call_func[T](user_data voidptr, instance GDExtensionClassInstancePtr, args &&
 				panic('call_func: argument count mismatch')
 			}
 
-			inst.$method(...params)
+			// handle return value
+			$if method.return_type is bool {
+				result := inst.$method(...params)
+				ret.from_bool(&result)
+			} $else $if method.return_type is f64 {
+			} $else $if method.return_type is i64 {
+			} $else $if method.return_type is ToVariant {
+			} $else {
+				// void
+				inst.$method(...params)
+			}
 		}
 	}
 }

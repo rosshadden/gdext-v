@@ -25,6 +25,11 @@ pub fn (v &Variant) to_bool() bool {
 	return t
 }
 
+pub fn (v &Variant) from_bool(value &bool) {
+	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_bool)
+	to_variant(GDExtensionUninitializedVariantPtr(v), GDExtensionTypePtr(value))
+}
+
 pub fn (v &Variant) to_int() int {
 	var_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_i64)
 	t := 0
