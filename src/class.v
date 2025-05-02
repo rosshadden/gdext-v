@@ -452,13 +452,22 @@ fn call_func[T](user_data voidptr, instance GDExtensionClassInstancePtr, args &&
 			// handle return value
 			$if method.return_type is bool {
 				result := inst.$method(...params)
-				ret.from_bool(&result)
-			} $else $if method.return_type is f64 {
+				ret.from_bool(result)
+			} $else $if method.return_type is string {
+				result := inst.$method(...params)
+				str := String.new(result)
+				variant := str.to_variant()
+				ret.from_variant(variant)
 			} $else $if method.return_type is i64 {
+				result := inst.$method(...params)
+				ret.from_variant(i64_to_variant(result))
+			} $else $if method.return_type is f64 {
+				result := inst.$method(...params)
+				ret.from_variant(f64_to_variant(result))
 			} $else $if method.return_type is ToVariant {
 				result := inst.$method(...params)
 				variant := result.to_variant()
-				ret.from_variant(&variant)
+				ret.from_variant(variant)
 			} $else {
 				// void
 				inst.$method(...params)
