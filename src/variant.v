@@ -18,6 +18,12 @@ pub fn (v &Variant) deinit() {
 	gdf.variant_destroy(v)
 }
 
+pub fn (v &Variant) from_variant(src &Variant) {
+	unsafe {
+		C.memcpy(&v.godot_data, &src.godot_data, sizeof(v.godot_data))
+	}
+}
+
 pub fn (v &Variant) to_bool() bool {
 	var_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_bool)
 	t := false
@@ -25,9 +31,9 @@ pub fn (v &Variant) to_bool() bool {
 	return t
 }
 
-pub fn (v &Variant) from_bool(value &bool) {
+pub fn (v &Variant) from_bool(src &bool) {
 	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_bool)
-	to_variant(GDExtensionUninitializedVariantPtr(v), GDExtensionTypePtr(value))
+	to_variant(GDExtensionUninitializedVariantPtr(v), GDExtensionTypePtr(src))
 }
 
 pub fn (v &Variant) to_int() int {

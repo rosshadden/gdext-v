@@ -456,6 +456,9 @@ fn call_func[T](user_data voidptr, instance GDExtensionClassInstancePtr, args &&
 			} $else $if method.return_type is f64 {
 			} $else $if method.return_type is i64 {
 			} $else $if method.return_type is ToVariant {
+				result := inst.$method(...params)
+				variant := result.to_variant()
+				ret.from_variant(&variant)
 			} $else {
 				// void
 				inst.$method(...params)
