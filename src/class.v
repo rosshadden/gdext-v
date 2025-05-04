@@ -405,77 +405,6 @@ fn class_get_virtual_func[T](user_data voidptr, method_name &StringName, hash in
 	return GDExtensionClassCallVirtual(unsafe { nil })
 }
 
-// TODO: handle arbitrary returns
-// TODO: see if we can leverage the passed-in FunctionData
-fn call_func[T](user_data voidptr, instance GDExtensionClassInstancePtr, args &&Variant, arg_count GDExtensionInt, ret &Variant, err &GDExtensionCallError) {
-	mut inst := unsafe { &T(instance) }
-	method_data := unsafe { &FunctionData(user_data) }
-	// HACK: there is no way this nested `$for` is actually necessary...
-	$for method in T.methods {
-		if method == method_data {
-			mut params := []voidptr{}
-
-			// handle params
-			// TODO: expand arg type coverage
-			// TODO: leverage `ToVariant` and `FromVariant` interfaces
-			mut p := 0
-			$for param in method.params {
-				match typeof(param.typ).name {
-					'&bool' {
-						value := unsafe { args[p].to_bool() }
-						params << &value
-					}
-					'&int' {
-						value := unsafe { args[p].to_int() }
-						params << &value
-					}
-					'&string' {
-						value := unsafe { args[p].to_string() }
-						params << &value
-					}
-					'&gd.String' {
-						mut value := String{}
-						value.from_variant(unsafe { args[p] })
-						params << &value
-					}
-					else {
-						value := unsafe { args[p] }
-						params << &value
-					}
-				}
-				p += 1
-			}
-			if p != arg_count {
-				panic('call_func: argument count mismatch')
-			}
-
-			// handle return value
-			$if method.return_type is bool {
-				result := inst.$method(...params)
-				ret.from_bool(result)
-			} $else $if method.return_type is string {
-				result := inst.$method(...params)
-				str := String.new(result)
-				variant := str.to_variant()
-				ret.from_variant(variant)
-			} $else $if method.return_type is i64 {
-				result := inst.$method(...params)
-				ret.from_variant(i64_to_variant(result))
-			} $else $if method.return_type is f64 {
-				result := inst.$method(...params)
-				ret.from_variant(f64_to_variant(result))
-			} $else $if method.return_type is ToVariant {
-				result := inst.$method(...params)
-				variant := result.to_variant()
-				ret.from_variant(variant)
-			} $else {
-				// void
-				inst.$method(...params)
-			}
-		}
-	}
-}
-
 pub fn register_class_methods[T](mut ci ClassInfo) {
 	$for method in T.methods {
 		if 'gd.expose' in method.attrs {
@@ -492,7 +421,7 @@ pub fn register_class_methods[T](mut ci ClassInfo) {
 				method_flags:           1
 				has_return_value:       GDExtensionBool(false)
 				return_value_info:      unsafe { nil }
-				return_value_metadata:  unsafe { nil }
+				return_value_metadata:  .gdextension_method_argument_metadata_none
 				argument_count:         0
 				arguments_info:         unsafe { nil }
 				arguments_metadata:     unsafe { nil }

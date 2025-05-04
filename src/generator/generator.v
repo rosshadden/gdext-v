@@ -185,6 +185,103 @@ fn (g &Generator) gen_functions() ! {
 		buf.writeln('}')
 	}
 
+	// call_func
+	buf.writeln("
+		|// TODO: see if we can leverage the passed-in FunctionData
+		|fn call_func[T](user_data voidptr, instance GDExtensionClassInstancePtr, args &&Variant, arg_count GDExtensionInt, ret &Variant, err &GDExtensionCallError) {
+		|	mut inst := unsafe { &T(instance) }
+		|	method_data := unsafe { &FunctionData(user_data) }
+		|	// HACK: there is no way this nested `\$for` is actually necessary...
+		|	\$for method in T.methods {
+		|		if method == method_data {
+		|			mut params := []voidptr{}
+		|
+		|			// handle params
+		|			// TODO: expand arg type coverage
+		|			// TODO: leverage `ToVariant` and `FromVariant` interfaces
+		|			mut p := 0
+		|			\$for param in method.params {
+		|				\$if param.typ is &bool {
+		|					value := unsafe { args[p].to_bool() }
+		|					params << &value
+		|				} \$else \$if param.typ is &string {
+		|					value := unsafe { args[p].to_string() }
+		|					params << &value
+		|				} \$else \$if param.typ is &int {
+		|					println('int')
+		|					value := unsafe { args[p].to_int() }
+		|					params << &value
+		|				} \$else \$if param.typ is &i64 {
+		|					println('i64')
+		|					value := unsafe { i64_from_variant(args[p]) }
+		|					params << &value
+		|				} \$else \$if param.typ is &f64 {
+		|					println('f64')
+		|					value := unsafe { f64_from_variant(args[p]) }
+		|					params << &value
+	".strip_margin().trim_right('\n'))
+
+	for class in g.api.builtin_classes {
+		if class.name.is_lower() {
+			continue
+		}
+		buf.writeln('
+			|				} \$else \$if param.typ is &${class.name} {
+			|					mut value := ${class.name}{}
+			|					value.from_variant(unsafe { args[p] })
+			|					params << &value
+		'.strip_margin().trim('\n'))
+	}
+
+	for class in g.api.classes {
+		buf.writeln('
+			|				} \$else \$if param.typ is &${class.name} {
+			|					mut value := ${class.name}{}
+			|					value.from_variant(unsafe { args[p] })
+			|					params << &value
+		'.strip_margin().trim('\n'))
+	}
+
+	buf.writeln("
+		|				} \$else {
+		|					value := unsafe { args[p] }
+		|					params << &value
+		|				}
+		|				p += 1
+		|			}
+		|			if p != arg_count {
+		|				panic('call_func: argument count mismatch')
+		|			}
+		|
+		|			// handle return value
+		|			\$if method.return_type is bool {
+		|				result := inst.\$method(...params)
+		|				ret.from_bool(result)
+		|			} \$else \$if method.return_type is string {
+		|				result := inst.\$method(...params)
+		|				str := String.new(result)
+		|				variant := str.to_variant()
+		|				ret.from_variant(variant)
+		|			} \$else \$if method.return_type is i64 {
+		|				result := inst.\$method(...params)
+		|				ret.from_variant(i64_to_variant(result))
+		|			} \$else \$if method.return_type is f64 {
+		|				result := inst.\$method(...params)
+		|				ret.from_variant(f64_to_variant(result))
+		|			} \$else \$if method.return_type is ToVariant {
+		|				result := inst.\$method(...params)
+		|				variant := result.to_variant()
+		|				ret.from_variant(variant)
+		|			} \$else {
+		|				// TODO: \$if method.return_type == 1
+		|				// void
+		|				inst.\$method(...params)
+		|			}
+		|		}
+		|	}
+		|}
+	".strip_margin().trim('\n'))
+
 	mut f := os.create('src/__functions.v')!
 	defer { f.close() }
 	f.write(buf)!
