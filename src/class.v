@@ -34,7 +34,7 @@ pub fn register_class_with_name[T](parent_class string, class_name string) {
 		is_virtual:               GDExtensionBool(false)
 		is_abstract:              GDExtensionBool(false)
 		is_exposed:               GDExtensionBool(true)
-		is_runtime:               GDExtensionBool(false)
+		is_runtime:               GDExtensionBool(true)
 		icon_path:                unsafe { nil }
 		set_func:                 class_set_func[T]
 		get_func:                 class_get_func[T]
