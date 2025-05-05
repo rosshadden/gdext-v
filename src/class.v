@@ -30,11 +30,19 @@ pub fn register_class_with_name[T](parent_class string, class_name string) {
 	ci.parent_name = pn
 	ci.virtual_methods = Dictionary.new0()
 
+	// @tool support
+	mut is_runtime := true
+	$for attr in T.attributes {
+		$if attr.name == 'gd.tool' {
+			is_runtime = false
+		}
+	}
+
 	info := GDExtensionClassCreationInfo4{
 		is_virtual:               GDExtensionBool(false)
 		is_abstract:              GDExtensionBool(false)
 		is_exposed:               GDExtensionBool(true)
-		is_runtime:               GDExtensionBool(true)
+		is_runtime:               GDExtensionBool(is_runtime)
 		icon_path:                unsafe { nil }
 		set_func:                 class_set_func[T]
 		get_func:                 class_get_func[T]
