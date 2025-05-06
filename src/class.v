@@ -245,6 +245,9 @@ fn class_get_property_list[T](instance GDExtensionClassInstancePtr, return_count
 			$if field.typ is PackedColorArray {
 				type_ = .type_packedcolorarray
 			}
+			$if field.typ is PackedVector4Array {
+				type_ = .type_packedvector4array
+			}
 
 			info := GDExtensionPropertyInfo{
 				type_:       type_
