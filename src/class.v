@@ -67,6 +67,7 @@ pub fn register_class_with_name[T](parent_class string, class_name string) {
 	register_virtual_methods[T](mut ci)
 	register_signal_methods[T](mut ci)
 	register_class_methods[T](mut ci)
+	register_class_properties[T](mut ci)
 }
 
 pub fn register_class[T](parent_class string) {
@@ -130,7 +131,7 @@ fn class_get_property_list[T](instance GDExtensionClassInstancePtr, return_count
 		$if field.typ is ToVariant {
 			field_name := StringName.new(field.name)
 			class_name := StringName.new(T.name)
-			hint := String.new('test hint')
+			hint := String.new('hint_string')
 
 			mut type_ := GDExtensionVariantType.type_nil
 			$if field.typ is bool {
@@ -260,7 +261,7 @@ fn class_get_property_list[T](instance GDExtensionClassInstancePtr, return_count
 		} $else $if field.typ is f64 {
 			field_name := StringName.new(field.name)
 			class_name := StringName.new(T.name)
-			hint := String.new('test hint')
+			hint := unsafe { nil }
 			info := GDExtensionPropertyInfo{
 				type_:       .type_f64
 				name:        &field_name
@@ -420,13 +421,12 @@ pub fn register_class_methods[T](mut ci ClassInfo) {
 		if 'gd.expose' in method.attrs {
 			method_data := method
 			method_sn := StringName.new(method.name)
-
-			method_info := GDExtensionClassMethodInfo{
+			info := GDExtensionClassMethodInfo{
 				name:                   &method_sn
 				method_userdata:        &method_data
 				call_func:              call_func[T]
 				ptrcall_func:           fn (user_data voidptr, instance GDExtensionClassInstancePtr, args &GDExtensionConstTypePtr, ret GDExtensionTypePtr) {
-					println('ptrcall_func')
+					dump('ptrcall_func')
 				}
 				method_flags:           1
 				has_return_value:       GDExtensionBool(false)
@@ -438,8 +438,28 @@ pub fn register_class_methods[T](mut ci ClassInfo) {
 				default_argument_count: 0
 				default_arguments:      unsafe { nil }
 			}
+			gdf.classdb_register_extension_class_method(gdf.clp, &ci.class_name, &info)
+		}
+	}
+}
 
-			gdf.classdb_register_extension_class_method(gdf.clp, &ci.class_name, &method_info)
+pub fn register_class_properties[T](mut ci ClassInfo) {
+	$for field in T.fields {
+		if 'gd.export' in field.attrs {
+			field_name := StringName.new(field.name)
+			setter_name := unsafe { nil }
+			getter_name := unsafe { nil }
+			hint := String.new('hint_string')
+			info := GDExtensionPropertyInfo{
+				type_:       .type_nil
+				name:        &field_name
+				class_name:  &ci.class_name
+				hint:        .property_hint_none
+				hint_string: &hint
+				usage:       .property_usage_default
+			}
+			gdf.classdb_register_extension_class_property(gdf.clp, &ci.class_name, &info,
+				&setter_name, &getter_name)
 		}
 	}
 }
