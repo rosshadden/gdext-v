@@ -37,7 +37,6 @@ pub fn register_class_with_name[T](parent_class string, class_name string) {
 			is_runtime = false
 		}
 	}
-
 	info := GDExtensionClassCreationInfo4{
 		is_virtual:               GDExtensionBool(false)
 		is_abstract:              GDExtensionBool(false)

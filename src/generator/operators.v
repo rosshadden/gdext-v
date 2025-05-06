@@ -4,7 +4,7 @@ import strings
 
 @[params]
 struct OpOptions {
-	is_binary      bool
+	is_binary       bool
 	different_types bool
 }
 
@@ -68,7 +68,7 @@ fn gen_operator(mut buf strings.Builder, class_name string, op_name string, op_t
 	}
 
 	// use $tmpl which will have access to all the variables we've defined
-	code := $tmpl('./templates/operator.v').trim_space_right()
+	code := $tmpl('./templates/operator.vtmpl').trim_space_right()
 	buf.writeln('')
 	buf.writeln(code)
 }
@@ -90,7 +90,10 @@ fn gen_operators(mut buf strings.Builder, class_name string, operators []APIOper
 		}
 		// different type operators
 		if op.right_type != 'Variant' {
-			gen_operator(mut buf, class_name, op_prefixes[op.name], op_type, op, is_binary: is_binary, different_types: true)
+			gen_operator(mut buf, class_name, op_prefixes[op.name], op_type, op,
+				is_binary:       is_binary
+				different_types: true
+			)
 		}
 	}
 }

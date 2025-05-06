@@ -454,20 +454,22 @@ fn (g &Generator) gen_builtin_classes() ! {
 		}
 
 		// to variant
-		buf.writeln('')
-		buf.writeln('pub fn (v &${class.name}) to_variant() Variant {')
-		buf.writeln('\tto_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_${class.name.to_lower()})')
-		buf.writeln('\tresult := Variant{}')
-		buf.writeln('\tto_variant(GDExtensionUninitializedVariantPtr(&result), GDExtensionTypePtr(v))')
-		buf.writeln('\treturn result')
-		buf.writeln('}')
+		buf.writeln('
+			|pub fn (s &${class.name}) to_variant() Variant {
+			|	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_${class.name.to_lower()})
+			|	result := Variant{}
+			|	to_variant(GDExtensionUninitializedVariantPtr(&result), GDExtensionTypePtr(s))
+			|	return result
+			|}
+		'.strip_margin().trim_right('\n'))
 
 		// from variant
-		buf.writeln('')
-		buf.writeln('pub fn (mut t ${class.name}) from_variant(var &Variant) {')
-		buf.writeln('\tvariant_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_${class.name.to_lower()})')
-		buf.writeln('\tvariant_to_type(voidptr(&t), var)')
-		buf.writeln('}')
+		buf.writeln('
+			|pub fn (mut s ${class.name}) from_variant(variant &Variant) {
+			|	variant_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_${class.name.to_lower()})
+			|	variant_to_type(voidptr(&s), variant)
+			|}
+		'.strip_margin().trim_right('\n'))
 
 		if class.indexing_return_type != '' {
 			return_type := convert_type(class.indexing_return_type)
@@ -475,76 +477,82 @@ fn (g &Generator) gen_builtin_classes() ! {
 			// keyed
 			if class.is_keyed {
 				// get
-				buf.writeln('')
-				buf.writeln('pub fn (v &${class.name}) index_get(i &Variant) ?Variant {')
-				buf.writeln('\tas_var := v.to_variant()')
-				buf.writeln('\tret := Variant{}')
-				buf.writeln('\tsuc := GDExtensionBool(false)')
-				buf.writeln('\tgdf.variant_get(&as_var, i, voidptr(&ret), &suc)')
-				buf.writeln('\tif suc != GDExtensionBool(true) {')
-				buf.writeln('\treturn none')
-				buf.writeln('\t}')
-				buf.writeln('\treturn ret')
-				buf.writeln('}')
+				buf.writeln('
+					|pub fn (v &${class.name}) index_get(i &Variant) ?Variant {
+					|	as_var := v.to_variant()
+					|	ret := Variant{}
+					|	suc := GDExtensionBool(false)
+					|	gdf.variant_get(&as_var, i, voidptr(&ret), &suc)
+					|	if suc != GDExtensionBool(true) {
+					|		return none
+					|	}
+					|	return ret
+					|}
+				'.strip_margin().trim_right('\n'))
 
 				// get_named
-				buf.writeln('')
-				buf.writeln('pub fn (v &${class.name}) index_get_named(sn &StringName) ?Variant {')
-				buf.writeln('\tas_var := v.to_variant()')
-				buf.writeln('\tret := Variant{}')
-				buf.writeln('\tsuc := GDExtensionBool(false)')
-				buf.writeln('\tgdf.variant_get_named(&as_var, sn, voidptr(&ret), &suc)')
-				buf.writeln('\tif suc != GDExtensionBool(true) {')
-				buf.writeln('\treturn none')
-				buf.writeln('\t}')
-				buf.writeln('\treturn ret')
-				buf.writeln('}')
+				buf.writeln('
+					|pub fn (v &${class.name}) index_get_named(sn &StringName) ?Variant {
+					|	as_var := v.to_variant()
+					|	ret := Variant{}
+					|	suc := GDExtensionBool(false)
+					|	gdf.variant_get_named(&as_var, sn, voidptr(&ret), &suc)
+					|	if suc != GDExtensionBool(true) {
+					|		return none
+					|	}
+					|	return ret
+					|}
+				'.strip_margin().trim_right('\n'))
 
 				// get_keyed
-				buf.writeln('')
-				buf.writeln('pub fn (v &${class.name}) index_get_keyed(i &Variant) ?Variant {')
-				buf.writeln('\tas_var := v.to_variant()')
-				buf.writeln('\tret := Variant{}')
-				buf.writeln('\tsuc := GDExtensionBool(false)')
-				buf.writeln('\tgdf.variant_get_keyed(&as_var, i, voidptr(&ret), &suc)')
-				buf.writeln('\tif suc != GDExtensionBool(true) {')
-				buf.writeln('\treturn none')
-				buf.writeln('\t}')
-				buf.writeln('\treturn ret')
-				buf.writeln('}')
+				buf.writeln('
+					|pub fn (v &${class.name}) index_get_keyed(i &Variant) ?Variant {
+					|	as_var := v.to_variant()
+					|	ret := Variant{}
+					|	suc := GDExtensionBool(false)
+					|	gdf.variant_get_keyed(&as_var, i, voidptr(&ret), &suc)
+					|	if suc != GDExtensionBool(true) {
+					|		return none
+					|	}
+					|	return ret
+					|}
+				'.strip_margin().trim_right('\n'))
 
 				// set
-				buf.writeln('')
-				buf.writeln('pub fn (v &${class.name}) index_set(key &Variant, value &Variant) ! {')
-				buf.writeln('\tas_var := v.to_variant()')
-				buf.writeln('\tsuc := GDExtensionBool(false)')
-				buf.writeln('\tgdf.variant_set(&as_var, key, value, &suc)')
-				buf.writeln('\tif suc != GDExtensionBool(true) {')
-				buf.writeln('\treturn error("invalid set on ${class.name}")')
-				buf.writeln('\t}')
-				buf.writeln('}')
+				buf.writeln('
+					|pub fn (v &${class.name}) index_set(key &Variant, value &Variant) ! {
+					|	as_var := v.to_variant()
+					|	suc := GDExtensionBool(false)
+					|	gdf.variant_set(&as_var, key, value, &suc)
+					|	if suc != GDExtensionBool(true) {
+					|		return error("invalid set on ${class.name}")
+					|	}
+					|}
+				'.strip_margin().trim_right('\n'))
 
-				buf.writeln('')
 				// set_named
-				buf.writeln('pub fn (v &${class.name}) index_set_named(key &StringName, value &Variant) ! {')
-				buf.writeln('\tas_var := v.to_variant()')
-				buf.writeln('\tsuc := GDExtensionBool(false)')
-				buf.writeln('\tgdf.variant_set_named(&as_var, key, value, &suc)')
-				buf.writeln('\tif suc != GDExtensionBool(true) {')
-				buf.writeln('\treturn error("invalid set_named on ${class.name}")')
-				buf.writeln('\t}')
-				buf.writeln('}')
+				buf.writeln('
+					|pub fn (v &${class.name}) index_set_named(key &StringName, value &Variant) ! {
+					|	as_var := v.to_variant()
+					|	suc := GDExtensionBool(false)
+					|	gdf.variant_set_named(&as_var, key, value, &suc)
+					|	if suc != GDExtensionBool(true) {
+					|		return error("invalid set_named on ${class.name}")
+					|	}
+					|}
+				'.strip_margin().trim_right('\n'))
 
 				// set_keyed
-				buf.writeln('')
-				buf.writeln('pub fn (v &${class.name}) index_set_keyed(key &Variant, value &Variant) ! {')
-				buf.writeln('\tas_var := v.to_variant()')
-				buf.writeln('\tsuc := GDExtensionBool(false)')
-				buf.writeln('\tgdf.variant_set_keyed(&as_var, key, value, &suc)')
-				buf.writeln('\tif suc != GDExtensionBool(true) {')
-				buf.writeln('\treturn error("invalid set_keyed on ${class.name}")')
-				buf.writeln('\t}')
-				buf.writeln('}')
+				buf.writeln('
+					|pub fn (v &${class.name}) index_set_keyed(key &Variant, value &Variant) ! {
+					|	as_var := v.to_variant()
+					|	suc := GDExtensionBool(false)
+					|	gdf.variant_set_keyed(&as_var, key, value, &suc)
+					|	if suc != GDExtensionBool(true) {
+					|		return error("invalid set_keyed on ${class.name}")
+					|	}
+					|}
+				'.strip_margin().trim_right('\n'))
 			} else {
 				// index
 				buf.writeln('')
@@ -619,32 +627,35 @@ fn (g &Generator) gen_classes() ! {
 		// singleton
 		singletons := g.api.singletons.filter(it.type == class.name)
 		if singletons.len > 0 {
-			buf.writeln('')
-			buf.writeln('pub fn ${class.name}.singleton() ${class.name} {')
-			buf.writeln('\tsn := StringName.new("${class.name}")')
-			buf.writeln('\tresult := ${class.name}{')
-			buf.writeln('\t\tptr: gdf.global_get_singleton(sn)')
-			buf.writeln('\t}')
-			buf.writeln('\tsn.deinit()')
-			buf.writeln('\treturn result')
-			buf.writeln('}')
+			buf.writeln("
+				|pub fn ${class.name}.singleton() ${class.name} {
+				|	sn := StringName.new('${class.name}')
+				|	result := ${class.name}{
+				|		ptr: gdf.global_get_singleton(sn)
+				|	}
+				|	sn.deinit()
+				|	return result
+				|}
+			".strip_margin().trim_right('\n'))
 		}
 
 		// to variant
-		buf.writeln('')
-		buf.writeln('pub fn (s &${class.name}) to_variant() Variant {')
-		buf.writeln('\tto_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_object)')
-		buf.writeln('\tresult := Variant{}')
-		buf.writeln('\tto_variant(GDExtensionUninitializedVariantPtr(&result), s.ptr)')
-		buf.writeln('\treturn result')
-		buf.writeln('}')
+		buf.writeln('
+			|pub fn (s &${class.name}) to_variant() Variant {
+			|	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_object)
+			|	result := Variant{}
+			|	to_variant(GDExtensionUninitializedVariantPtr(&result), s.ptr)
+			|	return result
+			|}
+		'.strip_margin().trim_right('\n'))
 
 		// from variant
-		buf.writeln('')
-		buf.writeln('pub fn (mut s ${class.name}) from_variant(var &Variant) {')
-		buf.writeln('\tvariant_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_object)')
-		buf.writeln('\tvariant_to_type(voidptr(&s.ptr), var)')
-		buf.writeln('}')
+		buf.writeln('
+			|pub fn (mut s ${class.name}) from_variant(variant &Variant) {
+			|	variant_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_object)
+			|	variant_to_type(voidptr(&s.ptr), variant)
+			|}
+		'.strip_margin().trim_right('\n'))
 
 		// methods
 		for method in class.methods {
@@ -922,23 +933,25 @@ fn (g &Generator) gen_signals() ! {
 	for class in g.api.classes {
 		for signal in class.signals {
 			i_name := interface_name(.signal, class.name, signal.name)
-			buf.writeln('fn ${i_name.to_lower()}_call[T](method_userdata voidptr, inst GDExtensionClassInstancePtr, args &&Variant, arg_count GDExtensionInt, ret &Variant, err &GDExtensionCallError) {')
-			buf.writeln('\tmut raw_args := []GDExtensionConstTypePtr{}')
-			buf.writeln('\tfor i in 0 .. int(arg_count) {')
-			buf.writeln('\t\to := gdf.mem_alloc(sizeof[voidptr]())')
-			buf.writeln('\t\tf := gdf.get_variant_to_type_constructor(gdf.variant_get_type(unsafe { args[i] }))')
-			buf.writeln('\t\tf(o, unsafe { args[i] })')
-			buf.writeln('\t\traw_args << GDExtensionConstTypePtr(o)')
-			buf.writeln('\t}')
-			buf.writeln('\tif int(arg_count) > 0 {')
-			buf.writeln('\t\t${i_name.to_lower()}_ptrcall[T](method_userdata, inst, unsafe { &raw_args[0] }, unsafe { nil })')
-			buf.writeln('\t}else{')
-			buf.writeln('\t\t${i_name.to_lower()}_ptrcall[T](method_userdata, inst, unsafe { nil }, unsafe { nil })')
-			buf.writeln('\t}')
-			buf.writeln('\tfor i in 0 .. int(arg_count) {')
-			buf.writeln('\t\tgdf.mem_free(raw_args[i])')
-			buf.writeln('\t}')
-			buf.writeln('}')
+			buf.writeln('
+				|fn ${i_name.to_lower()}_call[T](method_userdata voidptr, inst GDExtensionClassInstancePtr, args &&Variant, arg_count GDExtensionInt, ret &Variant, err &GDExtensionCallError) {
+				|	mut raw_args := []GDExtensionConstTypePtr{}
+				|	for i in 0 .. int(arg_count) {
+				|		o := gdf.mem_alloc(sizeof[voidptr]())
+				|		f := gdf.get_variant_to_type_constructor(gdf.variant_get_type(unsafe { args[i] }))
+				|		f(o, unsafe { args[i] })
+				|		raw_args << GDExtensionConstTypePtr(o)
+				|	}
+				|	if int(arg_count) > 0 {
+				|		${i_name.to_lower()}_ptrcall[T](method_userdata, inst, unsafe { &raw_args[0] }, unsafe { nil })
+				|	}else{
+				|		${i_name.to_lower()}_ptrcall[T](method_userdata, inst, unsafe { nil }, unsafe { nil })
+				|	}
+				|	for i in 0 .. int(arg_count) {
+				|		gdf.mem_free(raw_args[i])
+				|	}
+				|}
+			'.strip_margin().trim_right('\n'))
 		}
 	}
 
