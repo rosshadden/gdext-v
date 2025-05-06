@@ -445,18 +445,24 @@ pub fn register_class_methods[T](mut ci ClassInfo) {
 
 pub fn register_class_properties[T](mut ci ClassInfo) {
 	$for field in T.fields {
-		if 'gd.export' in field.attrs {
+		if 'gd.export' in field.attrs || 'gd.expose' in field.attrs {
+			is_export := 'gd.export' in field.attrs
 			field_name := StringName.new(field.name)
 			setter_name := unsafe { nil }
 			getter_name := unsafe { nil }
 			hint := String.new('hint_string')
+			usage := if is_export {
+				PropertyUsageFlags.property_usage_default
+			} else {
+				PropertyUsageFlags.property_usage_script_variable
+			}
 			info := GDExtensionPropertyInfo{
 				type_:       .type_nil
 				name:        &field_name
 				class_name:  &ci.class_name
 				hint:        .property_hint_none
 				hint_string: &hint
-				usage:       .property_usage_default
+				usage:       usage
 			}
 			gdf.classdb_register_extension_class_property(gdf.clp, &ci.class_name, &info,
 				&setter_name, &getter_name)
