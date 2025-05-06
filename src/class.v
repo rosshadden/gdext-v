@@ -252,9 +252,9 @@ fn class_get_property_list[T](instance GDExtensionClassInstancePtr, return_count
 				type_:       type_
 				name:        &field_name
 				class_name:  &class_name
-				hint:        u32(PropertyHint.property_hint_none)
+				hint:        .property_hint_none
 				hint_string: &hint
-				usage:       u32(PropertyUsageFlags.property_usage_default)
+				usage:       .property_usage_default
 			}
 			infos << info
 		} $else $if field.typ is f64 {
@@ -265,22 +265,22 @@ fn class_get_property_list[T](instance GDExtensionClassInstancePtr, return_count
 				type_:       .type_f64
 				name:        &field_name
 				class_name:  &class_name
-				hint:        u32(PropertyHint.property_hint_none)
+				hint:        .property_hint_none
 				hint_string: &hint
-				usage:       u32(PropertyUsageFlags.property_usage_default)
+				usage:       .property_usage_default
 			}
 			infos << info
 		} $else $if field.typ is i64 {
 			field_name := StringName.new(field.name)
 			class_name := StringName.new(T.name)
-			hint := String.new('test hint')
+			hint := unsafe { nil }
 			info := GDExtensionPropertyInfo{
 				type_:       .type_i64
 				name:        &field_name
 				class_name:  &class_name
-				hint:        u32(PropertyHint.property_hint_none)
+				hint:        .property_hint_none
 				hint_string: &hint
-				usage:       u32(PropertyUsageFlags.property_usage_default)
+				usage:       .property_usage_default
 			}
 			infos << info
 		}

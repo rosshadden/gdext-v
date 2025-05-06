@@ -972,9 +972,9 @@ fn (g &Generator) gen_signals() ! {
 					buf.writeln('\t\t\ttype_: ${vartype}')
 					buf.writeln('\t\t\tname: &arg_name_${i}')
 					buf.writeln('\t\t\tclass_name: &ci.class_name')
-					buf.writeln('\t\t\thint: u32(PropertyHint.property_hint_none)')
+					buf.writeln('\t\t\thint: .property_hint_none')
 					buf.writeln('\t\t\thint_string: &arg_hint_${i}')
-					buf.writeln('\t\t\tusage: u32(PropertyUsageFlags.property_usage_default)')
+					buf.writeln('\t\t\tusage: .property_usage_default')
 					buf.writeln('\t\t}')
 
 					match vartype {

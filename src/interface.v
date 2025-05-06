@@ -158,9 +158,9 @@ pub struct GDExtensionPropertyInfo {
 	type_       GDExtensionVariantType
 	name        &StringName = unsafe { nil }
 	class_name  &StringName = unsafe { nil }
-	hint        u32
+	hint        PropertyHint
 	hint_string &String = unsafe { nil }
-	usage       u32
+	usage       PropertyUsageFlags
 }
 
 pub struct GDExtensionMethodInfo {
