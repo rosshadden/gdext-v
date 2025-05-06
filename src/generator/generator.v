@@ -604,6 +604,18 @@ fn (g &Generator) gen_classes() ! {
 		}
 		buf.writeln('}')
 
+		// constructor
+		if class.is_instantiable {
+			buf.writeln("
+				|pub fn ${class.name}.new() ${class.name} {
+				|	variant := gd.ClassDB.singleton().instantiate('${class.name}')
+				|	mut result := gd.${class.name}{}
+				|	result.from_variant(variant)
+				|	return result
+				|}
+			".strip_margin().trim_right('\n'))
+		}
+
 		// singleton
 		singletons := g.api.singletons.filter(it.type == class.name)
 		if singletons.len > 0 {
