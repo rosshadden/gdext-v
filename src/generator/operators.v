@@ -8,18 +8,47 @@ struct OpOptions {
 	different_types bool
 }
 
+const binary_ops = ['<', '>', '==', '!=', '<=', '>=', 'in']
+
+const op_types = {
+	'+':  '.op_add'
+	'-':  '.op_subtract'
+	'*':  '.op_multiply'
+	'/':  '.op_divide'
+	'%':  '.op_module'
+	'<':  '.op_less'
+	'>':  '.op_greater'
+	'==': '.op_equal'
+	'!=': '.op_not_equal'
+	'<=': '.op_less_equal'
+	'>=': '.op_greater_equal'
+	'in': '.op_in'
+}
+
+const op_prefixes = {
+	'+':  'add_'
+	'-':  'sub_'
+	'*':  'mul_'
+	'/':  'div_'
+	'%':  'mod_'
+	'<':  'lt_'
+	'>':  'gt_'
+	'==': 'eq_'
+	'!=': 'ne_'
+	'<=': 'le_'
+	'>=': 'ge_'
+	'in': 'in_'
+}
+
 fn gen_operator(mut buf strings.Builder, class_name string, op_name string, op_type string, op APIOperator, opts OpOptions) {
-	// Common variables
 	class_name_lower := class_name.to_lower()
 
-	// Variables for different types case
 	mut right_type := class_name
 	mut right_type_lower := class_name_lower
 	mut return_type := if opts.is_binary { 'bool' } else { class_name }
 	mut res_init := if opts.is_binary { 'false' } else { '${class_name}{}' }
 	mut right_type_suffix := ''
 
-	// Handle case with different types (only for op_fn variants)
 	if opts.different_types {
 		right_type = convert_type(op.right_type)
 		right_type_lower = right_type.to_lower()
@@ -38,7 +67,7 @@ fn gen_operator(mut buf strings.Builder, class_name string, op_name string, op_t
 		}
 	}
 
-	// Use $tmpl which will have access to all the variables we've defined
+	// use $tmpl which will have access to all the variables we've defined
 	code := $tmpl('./templates/operator.v').trim_space_right()
 	buf.writeln('')
 	buf.writeln(code)
@@ -46,72 +75,22 @@ fn gen_operator(mut buf strings.Builder, class_name string, op_name string, op_t
 
 fn gen_operators(mut buf strings.Builder, class_name string, operators []APIOperator) {
 	for op in operators {
-		if op.right_type == class_name {
-			match op.name {
-				'+' {
-					gen_operator(mut buf, class_name, '+', '.op_add', op)
-				}
-				'-' {
-					gen_operator(mut buf, class_name, '-', '.op_subtract', op)
-				}
-				'*' {
-					gen_operator(mut buf, class_name, '*', '.op_multiply', op)
-				}
-				'/' {
-					gen_operator(mut buf, class_name, '/', '.op_divide', op)
-				}
-				'%' {
-					gen_operator(mut buf, class_name, '%', '.op_module', op)
-				}
-				'<' {
-					gen_operator(mut buf, class_name, '<', '.op_less', op, is_binary: true)
-				}
-				'==' {
-					gen_operator(mut buf, class_name, '==', '.op_equal', op, is_binary: true)
-				}
-				else {}
-			}
+		// skip if operator type is not supported
+		if op.name !in op_types {
+			// println('Warning: Operator `${op.name}` not supported for class `${class_name}`')
+			continue
 		}
+
+		op_type := op_types[op.name]
+		is_binary := op.name in binary_ops
+
+		// same type operators
+		if op.right_type == class_name && op.name !in ['!=', '>', '<=', '>='] {
+			gen_operator(mut buf, class_name, '${op.name} ', op_type, op, is_binary: is_binary)
+		}
+		// different type operators
 		if op.right_type != 'Variant' {
-			match op.name {
-				'+' {
-					gen_operator(mut buf, class_name, 'add_', '.op_add', op, different_types: true)
-				}
-				'-' {
-					gen_operator(mut buf, class_name, 'sub_', '.op_subtract', op, different_types: true)
-				}
-				'*' {
-					gen_operator(mut buf, class_name, 'mul_', '.op_multiply', op, different_types: true)
-				}
-				'/' {
-					gen_operator(mut buf, class_name, 'div_', '.op_divide', op, different_types: true)
-				}
-				'%' {
-					gen_operator(mut buf, class_name, 'mod_', '.op_module', op, different_types: true)
-				}
-				'<' {
-					gen_operator(mut buf, class_name, 'lt_', '.op_less', op, is_binary: true, different_types: true)
-				}
-				'>' {
-					gen_operator(mut buf, class_name, 'gt_', '.op_greater', op, is_binary: true, different_types: true)
-				}
-				'==' {
-					gen_operator(mut buf, class_name, 'eq_', '.op_equal', op, is_binary: true, different_types: true)
-				}
-				'!=' {
-					gen_operator(mut buf, class_name, 'ne_', '.op_not_equal', op, is_binary: true, different_types: true)
-				}
-				'<=' {
-					gen_operator(mut buf, class_name, 'le_', '.op_less_equal', op, is_binary: true, different_types: true)
-				}
-				'>=' {
-					gen_operator(mut buf, class_name, 'ge_', '.op_greater_equal', op, is_binary: true, different_types: true)
-				}
-				'in' {
-					gen_operator(mut buf, class_name, 'in_', '.op_in', op, is_binary: true, different_types: true)
-				}
-				else {}
-			}
+			gen_operator(mut buf, class_name, op_prefixes[op.name], op_type, op, is_binary: is_binary, different_types: true)
 		}
 	}
 }
