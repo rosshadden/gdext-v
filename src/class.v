@@ -125,6 +125,55 @@ fn class_get_func[T](instance GDExtensionClassInstancePtr, name &StringName, mut
 	return GDExtensionBool(handled)
 }
 
+const prop_map = {
+	'bool': GDExtensionVariantType.type_bool
+	'int': GDExtensionVariantType.type_i64
+	'i64': GDExtensionVariantType.type_i64
+	'f64': GDExtensionVariantType.type_f64
+	'string': GDExtensionVariantType.type_string
+	'String': GDExtensionVariantType.type_string
+	'Vector2': GDExtensionVariantType.type_vector2
+	'Vector2i': GDExtensionVariantType.type_vector2i
+	'Rect2': GDExtensionVariantType.type_rect2
+	'Rect2i': GDExtensionVariantType.type_rect2i
+	'Vector3': GDExtensionVariantType.type_vector3
+	'Vector3i': GDExtensionVariantType.type_vector3i
+	'Transform2D': GDExtensionVariantType.type_transform2d
+	'Vector4': GDExtensionVariantType.type_vector4
+	'Vector4i': GDExtensionVariantType.type_vector4i
+	'Plane': GDExtensionVariantType.type_plane
+	'Quaternion': GDExtensionVariantType.type_quaternion
+	'AABB': GDExtensionVariantType.type_aabb
+	'Basis': GDExtensionVariantType.type_basis
+	'Transform3D': GDExtensionVariantType.type_transform3d
+	'Projection': GDExtensionVariantType.type_projection
+	'Color': GDExtensionVariantType.type_color
+	'StringName': GDExtensionVariantType.type_stringname
+	'NodePath': GDExtensionVariantType.type_nodepath
+	'RID': GDExtensionVariantType.type_rid
+	'Object': GDExtensionVariantType.type_object
+	'Callable': GDExtensionVariantType.type_callable
+	'Signal': GDExtensionVariantType.type_signal
+	'Dictionary': GDExtensionVariantType.type_dictionary
+	'Array': GDExtensionVariantType.type_array
+	'PackedByteArray': GDExtensionVariantType.type_packedbytearray
+	'PackedInt32Array': GDExtensionVariantType.type_packedint32array
+	'PackedInt64Array': GDExtensionVariantType.type_packedint64array
+	'PackedFloat32Array': GDExtensionVariantType.type_packedfloat32array
+	'PackedFloat64Array': GDExtensionVariantType.type_packedfloat64array
+	'PackedStringArray': GDExtensionVariantType.type_packedstringarray
+	'PackedVector2Array': GDExtensionVariantType.type_packedvector2array
+	'PackedVector3Array': GDExtensionVariantType.type_packedvector3array
+	'PackedColorArray': GDExtensionVariantType.type_packedcolorarray
+	'PackedVector4Array': GDExtensionVariantType.type_packedvector4array
+}
+
+fn get_property_type(typ string) GDExtensionVariantType {
+	return prop_map[typ] or {
+		return .type_nil
+	}
+}
+
 fn class_get_property_list[T](instance GDExtensionClassInstancePtr, return_count &u32) &GDExtensionPropertyInfo {
 	mut infos := []GDExtensionPropertyInfo{}
 	$for field in T.fields {
@@ -133,121 +182,7 @@ fn class_get_property_list[T](instance GDExtensionClassInstancePtr, return_count
 			class_name := StringName.new(T.name)
 			hint := String.new('hint_string')
 
-			mut type_ := GDExtensionVariantType.type_nil
-			$if field.typ is bool {
-				type_ = .type_bool
-			}
-			$if field.typ is i64 {
-				type_ = .type_i64
-			}
-			$if field.typ is f64 {
-				type_ = .type_f64
-			}
-			$if field.typ is String {
-				type_ = .type_string
-			}
-			$if field.typ is Vector2 {
-				type_ = .type_vector2
-			}
-			$if field.typ is Vector2i {
-				type_ = .type_vector2i
-			}
-			$if field.typ is Rect2 {
-				type_ = .type_rect2
-			}
-			$if field.typ is Rect2i {
-				type_ = .type_rect2i
-			}
-			$if field.typ is Vector3 {
-				type_ = .type_vector3
-			}
-			$if field.typ is Vector3i {
-				type_ = .type_vector3i
-			}
-			$if field.typ is Transform2D {
-				type_ = .type_transform2d
-			}
-			$if field.typ is Vector4 {
-				type_ = .type_vector4
-			}
-			$if field.typ is Vector4i {
-				type_ = .type_vector4i
-			}
-			$if field.typ is Plane {
-				type_ = .type_plane
-			}
-			$if field.typ is Quaternion {
-				type_ = .type_quaternion
-			}
-			$if field.typ is AABB {
-				type_ = .type_aabb
-			}
-			$if field.typ is Basis {
-				type_ = .type_basis
-			}
-			$if field.typ is Transform3D {
-				type_ = .type_transform3d
-			}
-			$if field.typ is Projection {
-				type_ = .type_projection
-			}
-			$if field.typ is Color {
-				type_ = .type_color
-			}
-			$if field.typ is StringName {
-				type_ = .type_stringname
-			}
-			$if field.typ is NodePath {
-				type_ = .type_nodepath
-			}
-			$if field.typ is RID {
-				type_ = .type_rid
-			}
-			$if field.typ is Object {
-				type_ = .type_object
-			}
-			$if field.typ is Callable {
-				type_ = .type_callable
-			}
-			$if field.typ is Signal {
-				type_ = .type_signal
-			}
-			$if field.typ is Dictionary {
-				type_ = .type_dictionary
-			}
-			$if field.typ is Array {
-				type_ = .type_array
-			}
-			$if field.typ is PackedByteArray {
-				type_ = .type_packedbytearray
-			}
-			$if field.typ is PackedInt32Array {
-				type_ = .type_packedint32array
-			}
-			$if field.typ is PackedInt64Array {
-				type_ = .type_packedint64array
-			}
-			$if field.typ is PackedFloat32Array {
-				type_ = .type_packedfloat32array
-			}
-			$if field.typ is PackedFloat64Array {
-				type_ = .type_packedfloat64array
-			}
-			$if field.typ is PackedStringArray {
-				type_ = .type_packedstringarray
-			}
-			$if field.typ is PackedVector2Array {
-				type_ = .type_packedvector2array
-			}
-			$if field.typ is PackedVector3Array {
-				type_ = .type_packedvector3array
-			}
-			$if field.typ is PackedColorArray {
-				type_ = .type_packedcolorarray
-			}
-			$if field.typ is PackedVector4Array {
-				type_ = .type_packedvector4array
-			}
+			type_ := get_property_type(typeof(field.typ).name)
 
 			info := GDExtensionPropertyInfo{
 				type_:       type_
@@ -457,7 +392,7 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 				PropertyUsageFlags.property_usage_script_variable
 			}
 			info := GDExtensionPropertyInfo{
-				type_:       .type_nil
+				type_:       get_property_type(typeof(field.typ).name)
 				name:        &field_name
 				class_name:  &ci.class_name
 				hint:        .property_hint_none
