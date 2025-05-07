@@ -126,52 +126,50 @@ fn class_get_func[T](instance GDExtensionClassInstancePtr, name &StringName, mut
 }
 
 const prop_map = {
-	'bool': GDExtensionVariantType.type_bool
-	'int': GDExtensionVariantType.type_i64
-	'i64': GDExtensionVariantType.type_i64
-	'f64': GDExtensionVariantType.type_f64
-	'string': GDExtensionVariantType.type_string
-	'String': GDExtensionVariantType.type_string
-	'Vector2': GDExtensionVariantType.type_vector2
-	'Vector2i': GDExtensionVariantType.type_vector2i
-	'Rect2': GDExtensionVariantType.type_rect2
-	'Rect2i': GDExtensionVariantType.type_rect2i
-	'Vector3': GDExtensionVariantType.type_vector3
-	'Vector3i': GDExtensionVariantType.type_vector3i
-	'Transform2D': GDExtensionVariantType.type_transform2d
-	'Vector4': GDExtensionVariantType.type_vector4
-	'Vector4i': GDExtensionVariantType.type_vector4i
-	'Plane': GDExtensionVariantType.type_plane
-	'Quaternion': GDExtensionVariantType.type_quaternion
-	'AABB': GDExtensionVariantType.type_aabb
-	'Basis': GDExtensionVariantType.type_basis
-	'Transform3D': GDExtensionVariantType.type_transform3d
-	'Projection': GDExtensionVariantType.type_projection
-	'Color': GDExtensionVariantType.type_color
-	'StringName': GDExtensionVariantType.type_stringname
-	'NodePath': GDExtensionVariantType.type_nodepath
-	'RID': GDExtensionVariantType.type_rid
-	'Object': GDExtensionVariantType.type_object
-	'Callable': GDExtensionVariantType.type_callable
-	'Signal': GDExtensionVariantType.type_signal
-	'Dictionary': GDExtensionVariantType.type_dictionary
-	'Array': GDExtensionVariantType.type_array
-	'PackedByteArray': GDExtensionVariantType.type_packedbytearray
-	'PackedInt32Array': GDExtensionVariantType.type_packedint32array
-	'PackedInt64Array': GDExtensionVariantType.type_packedint64array
+	'bool':               GDExtensionVariantType.type_bool
+	'int':                GDExtensionVariantType.type_i64
+	'i64':                GDExtensionVariantType.type_i64
+	'f64':                GDExtensionVariantType.type_f64
+	'string':             GDExtensionVariantType.type_string
+	'String':             GDExtensionVariantType.type_string
+	'Vector2':            GDExtensionVariantType.type_vector2
+	'Vector2i':           GDExtensionVariantType.type_vector2i
+	'Rect2':              GDExtensionVariantType.type_rect2
+	'Rect2i':             GDExtensionVariantType.type_rect2i
+	'Vector3':            GDExtensionVariantType.type_vector3
+	'Vector3i':           GDExtensionVariantType.type_vector3i
+	'Transform2D':        GDExtensionVariantType.type_transform2d
+	'Vector4':            GDExtensionVariantType.type_vector4
+	'Vector4i':           GDExtensionVariantType.type_vector4i
+	'Plane':              GDExtensionVariantType.type_plane
+	'Quaternion':         GDExtensionVariantType.type_quaternion
+	'AABB':               GDExtensionVariantType.type_aabb
+	'Basis':              GDExtensionVariantType.type_basis
+	'Transform3D':        GDExtensionVariantType.type_transform3d
+	'Projection':         GDExtensionVariantType.type_projection
+	'Color':              GDExtensionVariantType.type_color
+	'StringName':         GDExtensionVariantType.type_stringname
+	'NodePath':           GDExtensionVariantType.type_nodepath
+	'RID':                GDExtensionVariantType.type_rid
+	'Object':             GDExtensionVariantType.type_object
+	'Callable':           GDExtensionVariantType.type_callable
+	'Signal':             GDExtensionVariantType.type_signal
+	'Dictionary':         GDExtensionVariantType.type_dictionary
+	'Array':              GDExtensionVariantType.type_array
+	'PackedByteArray':    GDExtensionVariantType.type_packedbytearray
+	'PackedInt32Array':   GDExtensionVariantType.type_packedint32array
+	'PackedInt64Array':   GDExtensionVariantType.type_packedint64array
 	'PackedFloat32Array': GDExtensionVariantType.type_packedfloat32array
 	'PackedFloat64Array': GDExtensionVariantType.type_packedfloat64array
-	'PackedStringArray': GDExtensionVariantType.type_packedstringarray
+	'PackedStringArray':  GDExtensionVariantType.type_packedstringarray
 	'PackedVector2Array': GDExtensionVariantType.type_packedvector2array
 	'PackedVector3Array': GDExtensionVariantType.type_packedvector3array
-	'PackedColorArray': GDExtensionVariantType.type_packedcolorarray
+	'PackedColorArray':   GDExtensionVariantType.type_packedcolorarray
 	'PackedVector4Array': GDExtensionVariantType.type_packedvector4array
 }
 
 fn get_property_type(typ string) GDExtensionVariantType {
-	return prop_map[typ] or {
-		return .type_nil
-	}
+	return prop_map[typ] or { return .type_nil }
 }
 
 fn class_get_property_list[T](instance GDExtensionClassInstancePtr, return_count &u32) &GDExtensionPropertyInfo {
