@@ -348,7 +348,7 @@ pub struct GDExtensionClassMethodInfo {
 	method_userdata        voidptr
 	call_func              GDExtensionClassMethodCall    = unsafe { nil }
 	ptrcall_func           GDExtensionClassMethodPtrCall = unsafe { nil }
-	method_flags           u32
+	method_flags           GDExtensionClassMethodFlags
 	has_return_value       GDExtensionBool
 	return_value_info      &GDExtensionPropertyInfo
 	return_value_metadata  GDExtensionClassMethodArgumentMetadata

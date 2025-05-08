@@ -361,7 +361,7 @@ pub fn register_class_methods[T](mut ci ClassInfo) {
 				ptrcall_func:           fn (user_data voidptr, instance GDExtensionClassInstancePtr, args &GDExtensionConstTypePtr, ret GDExtensionTypePtr) {
 					dump('ptrcall_func')
 				}
-				method_flags:           1
+				method_flags:           .gdextension_method_flag_normal
 				has_return_value:       GDExtensionBool(false)
 				return_value_info:      unsafe { nil }
 				return_value_metadata:  .gdextension_method_argument_metadata_none
