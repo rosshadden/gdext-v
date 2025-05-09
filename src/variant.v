@@ -14,44 +14,44 @@ mut:
 	from_variant(var &Variant)
 }
 
-pub fn (v &Variant) deinit() {
-	gdf.variant_destroy(v)
+pub fn (s &Variant) deinit() {
+	gdf.variant_destroy(s)
 }
 
-pub fn (v &Variant) from_variant(src &Variant) {
+pub fn (s &Variant) from_variant(src &Variant) {
 	unsafe {
-		C.memcpy(&v.godot_data, &src.godot_data, sizeof(v.godot_data))
+		C.memcpy(&s.godot_data, &src.godot_data, sizeof(s.godot_data))
 	}
 }
 
-pub fn (v &Variant) to_bool() bool {
+pub fn (s &Variant) to_bool() bool {
 	var_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_bool)
 	t := false
-	var_to_type(voidptr(&t), v)
+	var_to_type(voidptr(&t), s)
 	return t
 }
 
-pub fn (v &Variant) from_bool(src &bool) {
+pub fn (s &Variant) from_bool(src &bool) {
 	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_bool)
-	to_variant(GDExtensionUninitializedVariantPtr(v), GDExtensionTypePtr(src))
+	to_variant(GDExtensionUninitializedVariantPtr(s), GDExtensionTypePtr(src))
 }
 
-pub fn (v &Variant) to_int() int {
+pub fn (s &Variant) to_int() int {
 	var_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_i64)
 	t := 0
-	var_to_type(voidptr(&t), v)
+	var_to_type(voidptr(&t), s)
 	return t
 }
 
-pub fn (v &Variant) from_int(src &int) {
+pub fn (s &Variant) from_int(src &int) {
 	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_i64)
-	to_variant(GDExtensionUninitializedVariantPtr(v), GDExtensionTypePtr(src))
+	to_variant(GDExtensionUninitializedVariantPtr(s), GDExtensionTypePtr(src))
 }
 
-pub fn (v &Variant) to_string() string {
+pub fn (s &Variant) to_string() string {
 	var_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_string)
 	t := String{}
-	var_to_type(voidptr(&t), v)
+	var_to_type(voidptr(&t), s)
 	return t.to_v()
 }
 
@@ -87,12 +87,12 @@ pub fn f64_from_variant(var &Variant) f64 {
 	return t
 }
 
-pub fn (o &Object) cast_to[T]() ?T {
+pub fn (s &Object) try_cast_to[T]() ?T {
 	sn := StringName.new(T.name.split('.').last())
 	class_tag := gdf.classdb_get_class_tag(sn)
 	sn.deinit()
 	t := T{
-		ptr: gdf.object_cast_to(o.ptr, class_tag)
+		ptr: gdf.object_cast_to(s.ptr, class_tag)
 	}
 
 	if t.ptr == unsafe { nil } {
@@ -102,18 +102,23 @@ pub fn (o &Object) cast_to[T]() ?T {
 	}
 }
 
-pub fn (o &Object) cast_to_v[T](type_name string) ?&T {
+// TODO: unify all these misc cast/path methods
+
+pub fn (s &Object) cast_to[T]() T {
+	return s.try_cast_to[T]() or { panic('cannot cast: ${s} -> ${T.name.split('.').last()}') }
+}
+
+pub fn (s &Object) try_cast_to_v[T]() ?&T {
+	type_name := T.name.split('.').last()
 	sn := StringName.new(type_name)
 	class_tag := gdf.classdb_get_class_tag(sn)
 	sn.deinit()
 	t := Object{
-		ptr: gdf.object_cast_to(o.ptr, class_tag)
+		ptr: gdf.object_cast_to(s.ptr, class_tag)
 	}
-
 	if t.ptr == unsafe { nil } {
 		return none
 	}
-
 	gdf.object_get_class_name(t.ptr, gdf.clp, GDExtensionUninitializedStringNamePtr(&sn))
 	o_name := sn.to_v()
 	sn.deinit()
@@ -128,11 +133,20 @@ pub fn (o &Object) cast_to_v[T](type_name string) ?&T {
 	return v
 }
 
-pub fn (r &Node) get_node_v(path string) Node {
+pub fn (s &Object) cast_to_v[T]() &T {
+	type_name := T.name.split('.').last()
+	return s.try_cast_to_v[T](type_name) or { panic('cannot cast: ${s} -> ${type_name}') }
+}
+
+pub fn (s &Node) get_node_v(path string) Node {
 	np := NodePath.new(path)
-	node := r.get_node(np)
+	node := s.get_node(np)
 	np.deinit()
 	return node
+}
+
+pub fn (s &Node) get_node_as[T](path string) T {
+	return s.get_node_v(path).cast_to[T]()
 }
 
 pub fn Callable.new(object &Object, method string) Callable {
