@@ -600,7 +600,7 @@ fn (g &Generator) gen_classes() ! {
 
 		// struct
 		buf.writeln('')
-		// buf.writeln('@[noinit]')
+		buf.writeln('@[noinit]')
 		buf.writeln('pub struct ${class.name} {')
 		if class.inherits == '' {
 			buf.writeln('pub mut:')

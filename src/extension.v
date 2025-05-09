@@ -100,7 +100,7 @@ pub fn (mut l GodotLogger) debug(s string) {
 	defer { str.deinit() }
 	v := str.to_variant()
 	defer { v.deinit() }
-	print(v)
+	dump(v)
 }
 
 pub fn (mut l GodotLogger) set_level(level log.Level) {
