@@ -195,7 +195,6 @@ fn (g &Generator) gen_functions() ! {
 		|	\$for method in T.methods {
 		|		if method == method_data {
 		|			mut params := []voidptr{}
-		|
 		|			// handle params
 		|			// TODO: expand arg type coverage
 		|			// TODO: leverage `ToVariant` and `FromVariant` interfaces
@@ -252,7 +251,6 @@ fn (g &Generator) gen_functions() ! {
 		|			if p != arg_count {
 		|				panic('call_func: argument count mismatch')
 		|			}
-		|
 		|			// handle return value
 		|			\$if method.return_type is bool {
 		|				result := inst.\$method(...params)

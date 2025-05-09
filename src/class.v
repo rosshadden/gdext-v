@@ -58,7 +58,9 @@ pub fn register_class_with_name[T](parent_class string, class_name string) {
 		free_instance_func:         class_free_instance[T]
 		recreate_instance_func:     class_recreate_instance[T]
 		get_virtual_func:           class_get_virtual_func[T]
-		get_virtual_call_data_func: fn (user_data voidptr, method_name &StringName, hash int) {}
+		get_virtual_call_data_func: fn (user_data voidptr, method_name &StringName, hash int) {
+			dump('TODO: get_virtual_call_data_func')
+		}
 		// call_virtual_with_data_func
 		class_userdata: ci
 	}
@@ -71,8 +73,7 @@ pub fn register_class_with_name[T](parent_class string, class_name string) {
 }
 
 pub fn register_class[T](parent_class string) {
-	parts := T.name.split('.')
-	register_class_with_name[T](parent_class, parts.last())
+	register_class_with_name[T](parent_class, T.name.split('.').last())
 }
 
 fn class_set_func[T](instance GDExtensionClassInstancePtr, name &StringName, variant &Variant) GDExtensionBool {
@@ -381,24 +382,147 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 		if 'gd.export' in field.attrs || 'gd.expose' in field.attrs {
 			is_export := 'gd.export' in field.attrs
 			field_name := StringName.new(field.name)
-			setter_name := unsafe { nil }
-			getter_name := unsafe { nil }
 			hint := String.new('hint_string')
 			usage := if is_export {
 				PropertyUsageFlags.property_usage_default
 			} else {
 				PropertyUsageFlags.property_usage_script_variable
 			}
+
+			// Get proper type for this field
+			field_type := get_property_type(typeof(field.typ).name)
+			println('field (${field.name}): ${typeof(field.typ).name} ${field_type}')
+			// field_data := unsafe { nil }
+			field_data := field
+			// field_data := typeof(field.typ).name
+
 			info := GDExtensionPropertyInfo{
-				type_:       get_property_type(typeof(field.typ).name)
+				type_:       field_type
 				name:        &field_name
 				class_name:  &ci.class_name
 				hint:        .property_hint_none
 				hint_string: &hint
 				usage:       usage
 			}
+
+			getter_name := StringName.new('get_${field.name}')
+			getter_info := GDExtensionClassMethodInfo{
+				name:                   &getter_name
+				method_userdata:        &field_data
+				call_func:              property_getter[T]
+				ptrcall_func:           fn (user_data voidptr, instance GDExtensionClassInstancePtr, args &GDExtensionConstTypePtr, ret GDExtensionTypePtr) {
+					dump('TODO: ptrcall_func')
+				}
+				method_flags:           .gdextension_method_flag_normal
+				has_return_value:       GDExtensionBool(true)
+				return_value_info:      unsafe { &info } // Return the property type
+				return_value_metadata:  .gdextension_method_argument_metadata_none
+				argument_count:         0              // No arguments for getter
+				arguments_info:         unsafe { nil } // No arguments
+				arguments_metadata:     unsafe { nil } // No metadata
+				default_argument_count: 0
+				default_arguments:      unsafe { nil }
+			}
+			gdf.classdb_register_extension_class_method(gdf.clp, &ci.class_name, &getter_info)
+
+			// Set up setter
+			setter_name := StringName.new('set_${field.name}')
+			value_sn := StringName.new('value')
+
+			// Create setter argument info
+			arg_info_size := int(sizeof(GDExtensionPropertyInfo))
+			arg_info_ptr := unsafe { &GDExtensionPropertyInfo(C.malloc(arg_info_size)) }
+			if unsafe { arg_info_ptr == nil } {
+				panic('Failed to allocate memory for arguments_info')
+			}
+
+			// Create the argument metadata
+			setter_arg_metadata_size := int(sizeof(GDExtensionClassMethodArgumentMetadata))
+			arg_metadata_ptr := unsafe { &GDExtensionClassMethodArgumentMetadata(C.malloc(setter_arg_metadata_size)) }
+			if unsafe { arg_metadata_ptr == nil } {
+				panic('Failed to allocate memory for arguments_metadata')
+			}
+			unsafe {
+				*arg_metadata_ptr = .gdextension_method_argument_metadata_none
+			}
+			// We need a mutable version of GDExtensionPropertyInfo to set fields
+			// Since struct fields are immutable by default
+			property_info := GDExtensionPropertyInfo{
+				type_: field_type
+				name: &value_sn
+				class_name: &ci.class_name
+				hint: .property_hint_none
+				hint_string: &hint
+				usage: .property_usage_default
+			}
+
+			// Copy the property info to our allocated memory
+			unsafe { C.memcpy(arg_info_ptr, &property_info, arg_info_size) }
+
+			// Register setter method
+			setter_info := GDExtensionClassMethodInfo{
+				name:                   &setter_name
+				method_userdata:        &field_data
+				call_func:              property_setter[T]
+				ptrcall_func:           fn (user_data voidptr, instance GDExtensionClassInstancePtr, args &GDExtensionConstTypePtr, ret GDExtensionTypePtr) {
+					dump('TODO: ptrcall_func')
+				}
+				method_flags:           .gdextension_method_flag_normal
+				has_return_value:       GDExtensionBool(false)
+				return_value_info:      unsafe { nil }
+				return_value_metadata:  .gdextension_method_argument_metadata_none
+				argument_count:         1
+				arguments_info:         unsafe { arg_info_ptr }
+				arguments_metadata:     unsafe { arg_metadata_ptr }
+				default_argument_count: 0
+				default_arguments:      unsafe { nil }
+			}
+			gdf.classdb_register_extension_class_method(gdf.clp, &ci.class_name, &setter_info)
+
+			// Register the property
 			gdf.classdb_register_extension_class_property(gdf.clp, &ci.class_name, &info,
 				&setter_name, &getter_name)
+		}
+	}
+}
+
+// Generic getter function for properties
+fn property_getter[T](user_data voidptr, instance GDExtensionClassInstancePtr, args &&Variant, arg_count GDExtensionInt, ret &Variant, err &GDExtensionCallError) {
+	// You'll need to implement the actual property getting logic here
+	// This will depend on how your V class is structured
+	dump('property getter called')
+
+	// Example implementation (pseudocode):
+	// instance_obj := get_instance_from_ptr[T](instance)
+	// property_name := get_property_name_from_context()
+	// property_value := instance_obj.$(property_name)
+	// set_variant_from_value(ret, property_value)
+}
+
+// Generic setter function for properties
+fn property_setter[T](user_data voidptr, instance GDExtensionClassInstancePtr, args &&Variant, arg_count GDExtensionInt, ret &Variant, err &GDExtensionCallError) {
+	mut inst := unsafe { &T(instance) }
+	value := unsafe { &args[0] }
+	field_data := unsafe { &FieldData(user_data) }
+
+	$for field in T.fields {
+		if field.name == field_data.name {
+			type_name := typeof(field.typ).name
+			println('setter called for ${field.name}')
+			dump(field)
+			$if field.typ is bool {
+				inst.$(field.name) = value.to_bool()
+			} $else $if field.typ is string {
+				inst.$(field.name) = value.to_string()
+			} $else $if field.typ is int {
+				inst.$(field.name) = value.to_int()
+			} $else $if field.typ is i64 {
+				inst.$(field.name) = i64_from_variant(value)
+			} $else $if field.typ is f64 {
+				inst.$(field.name) = f64_from_variant(value)
+			} $else $if field.typ is Vector2 {
+				println('TODO: Vector2')
+			} $else {}
 		}
 	}
 }
