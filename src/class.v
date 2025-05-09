@@ -292,7 +292,7 @@ fn class_create_instance[T](user_data voidptr, notify_postinitialize &GDExtensio
 	gdf.object_set_instance_binding(w.ptr, gdf.clp, t, cb)
 
 	$if T is ClassInitable {
-		mut ci := ClassInitable(t)
+		ci := ClassInitable(t)
 		ci.init()
 	}
 	return w.ptr
@@ -302,7 +302,7 @@ fn class_free_instance[T](user_data voidptr, instance GDExtensionClassInstancePt
 	unsafe {
 		t := &T(instance)
 		$if T is ClassDeinitable {
-			mut cd := ClassDeinitable(t)
+			cd := ClassDeinitable(t)
 			cd.deinit()
 		}
 		gdf.mem_free(t)

@@ -14,25 +14,19 @@ pub fn String.new(str string) String {
 
 pub fn StringName.new(str string) StringName {
 	s := String.new(str)
-	defer {
-		s.deinit()
-	}
+	defer { s.deinit() }
 	return StringName.new2(s)
 }
 
 pub fn NodePath.new(path string) NodePath {
 	s := String.new(path)
-	defer {
-		s.deinit()
-	}
+	defer { s.deinit() }
 	return NodePath.new2(s)
 }
 
 pub fn (s &StringName) to_v() string {
 	pba := s.to_utf8_buffer()
-	defer {
-		pba.deinit()
-	}
+	defer { pba.deinit() }
 	length := pba.size()
 	mut array := []u8{cap: int(length)}
 	for i in 0 .. length {
@@ -43,9 +37,7 @@ pub fn (s &StringName) to_v() string {
 
 pub fn (s &String) to_v() string {
 	pba := s.to_utf8_buffer()
-	defer {
-		pba.deinit()
-	}
+	defer { pba.deinit() }
 	length := pba.size()
 	mut array := []u8{cap: int(length)}
 	for i in 0 .. length {
@@ -65,41 +57,51 @@ pub fn (l GodotLogger) get_level() log.Level {
 
 pub fn (mut l GodotLogger) fatal(s string) {
 	str := String.new(s)
-	defer { str.deinit() }
 	v := str.to_variant()
-	defer { v.deinit() }
+	defer {
+		str.deinit()
+		v.deinit()
+	}
 	printerr(v)
 }
 
 pub fn (mut l GodotLogger) error(s string) {
 	str := String.new(s)
-	defer { str.deinit() }
 	v := str.to_variant()
-	defer { v.deinit() }
+	defer {
+		str.deinit()
+		v.deinit()
+	}
 	printerr(v)
 }
 
 pub fn (mut l GodotLogger) warn(s string) {
 	str := String.new(s)
-	defer { str.deinit() }
 	v := str.to_variant()
-	defer { v.deinit() }
+	defer {
+		str.deinit()
+		v.deinit()
+	}
 	print(v)
 }
 
 pub fn (mut l GodotLogger) info(s string) {
 	str := String.new(s)
-	defer { str.deinit() }
 	v := str.to_variant()
-	defer { v.deinit() }
+	defer {
+		str.deinit()
+		v.deinit()
+	}
 	print(v)
 }
 
 pub fn (mut l GodotLogger) debug(s string) {
 	str := String.new(s)
-	defer { str.deinit() }
 	v := str.to_variant()
-	defer { v.deinit() }
+	defer {
+		str.deinit()
+		v.deinit()
+	}
 	dump(v)
 }
 

@@ -122,6 +122,8 @@ fn (g &Generator) gen_functions() ! {
 				g.enum_defaults)}')
 		}
 		buf.writeln('\tfnname := StringName.new("${method_name}")')
+		buf.writeln('\tdefer { fnname.deinit() }')
+
 		buf.writeln('\tf := gdf.variant_get_ptr_utility_function(voidptr(&fnname), ${method.hash})')
 
 		// Handle args
@@ -172,9 +174,6 @@ fn (g &Generator) gen_functions() ! {
 				buf.writeln('\tf(unsafe{nil}, unsafe{nil}, 0)')
 			}
 		}
-
-		// cleanup
-		buf.writeln('\tfnname.deinit()')
 
 		// return
 		if has_return {
@@ -420,6 +419,8 @@ fn (g &Generator) gen_builtin_classes() ! {
 					g.enum_defaults)}')
 			}
 			buf.writeln('\tfnname := StringName.new("${method.name}")')
+			buf.writeln('\tdefer { fnname.deinit() }')
+
 			buf.writeln('\tf := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_${class.name.to_lower()}, voidptr(&fnname), ${method.hash})')
 
 			if has_return {
@@ -438,9 +439,6 @@ fn (g &Generator) gen_builtin_classes() ! {
 			} else {
 				buf.writeln('\tf(${ptr}, unsafe{nil}, unsafe{nil}, ${method.arguments.len})')
 			}
-
-			// cleanup
-			buf.writeln('\tfnname.deinit()')
 
 			// return
 			if has_return {
@@ -628,10 +626,10 @@ fn (g &Generator) gen_classes() ! {
 			buf.writeln("
 				|pub fn ${class.name}.singleton() ${class.name} {
 				|	sn := StringName.new('${class.name}')
+				|	defer { sn.deinit() }
 				|	result := ${class.name}{
 				|		ptr: gdf.global_get_singleton(sn)
 				|	}
-				|	sn.deinit()
 				|	return result
 				|}
 			".strip_margin().trim_right('\n'))
@@ -749,6 +747,10 @@ fn (g &Generator) gen_classes() ! {
 			}
 			buf.writeln('\tclassname := StringName.new("${class.name}")')
 			buf.writeln('\tfnname := StringName.new("${method.name}")')
+			buf.writeln('\tdefer {')
+			buf.writeln('\t\tclassname.deinit()')
+			buf.writeln('\t\tfnname.deinit()')
+			buf.writeln('\t}')
 			buf.writeln('\tmb := gdf.classdb_get_method_bind(&classname, &fnname, ${method.hash})')
 
 			if method.arguments.len > 0 {
@@ -763,6 +765,7 @@ fn (g &Generator) gen_classes() ! {
 					match true {
 						arg.type in strings {
 							buf.writeln('\targ_sn${a} := ${arg.type}.new(${name_prefix}${name})')
+							buf.writeln('\tdefer { arg_sn${a}.deinit() }')
 							buf.writeln('\targs[${a}] = unsafe{voidptr(&arg_sn${a})}')
 						}
 						convert_type(arg.type) in g.class_names {
@@ -790,21 +793,12 @@ fn (g &Generator) gen_classes() ! {
 				}
 			}
 
-			// cleanup
-			for a, arg in method.arguments {
-				if arg.type in strings {
-					buf.writeln('\targ_sn${a}.deinit()')
-				}
-			}
-			buf.writeln('\tclassname.deinit()')
-			buf.writeln('\tfnname.deinit()')
-
 			// return
 			if has_return {
 				match true {
 					method.return_value.type in strings {
 						buf.writeln('\tresult_v := result.to_v()')
-						buf.writeln('\tresult.deinit()')
+						buf.writeln('\tdefer { result.deinit() }')
 						buf.writeln('\treturn result_v')
 					}
 					method.return_value.type.starts_with('enum::')
@@ -1090,8 +1084,8 @@ fn (g &Generator) gen_virtual_methods() ! {
 			buf.writeln('\t\tivar := i64(func)')
 			buf.writeln('\t\tvar := i64_to_variant(ivar)')
 			buf.writeln('\t\tsn := StringName.new("${method.name}")')
+			buf.writeln('\t\tdefer { sn.deinit() }')
 			buf.writeln('\t\tci.virtual_methods.index_set_named(sn, var) or {panic(err)}')
-			buf.writeln('\t\tsn.deinit()')
 
 			buf.writeln('\t}}')
 		}

@@ -89,8 +89,8 @@ pub fn f64_from_variant(var &Variant) f64 {
 
 pub fn (s &Object) try_cast_to[T]() ?T {
 	sn := StringName.new(T.name.split('.').last())
+	defer { sn.deinit() }
 	class_tag := gdf.classdb_get_class_tag(sn)
-	sn.deinit()
 	t := T{
 		ptr: gdf.object_cast_to(s.ptr, class_tag)
 	}
@@ -111,8 +111,8 @@ pub fn (s &Object) cast_to[T]() T {
 pub fn (s &Object) try_cast_to_v[T]() ?&T {
 	type_name := T.name.split('.').last()
 	sn := StringName.new(type_name)
+	defer { sn.deinit() }
 	class_tag := gdf.classdb_get_class_tag(sn)
-	sn.deinit()
 	t := Object{
 		ptr: gdf.object_cast_to(s.ptr, class_tag)
 	}
@@ -121,7 +121,6 @@ pub fn (s &Object) try_cast_to_v[T]() ?&T {
 	}
 	gdf.object_get_class_name(t.ptr, gdf.clp, GDExtensionUninitializedStringNamePtr(&sn))
 	o_name := sn.to_v()
-	sn.deinit()
 	if o_name != type_name {
 		return none
 	}
@@ -140,8 +139,8 @@ pub fn (s &Object) cast_to_v[T]() &T {
 
 pub fn (s &Node) get_node_v(path string) Node {
 	np := NodePath.new(path)
+	defer { np.deinit() }
 	node := s.get_node(np)
-	np.deinit()
 	return node
 }
 
@@ -151,7 +150,7 @@ pub fn (s &Node) get_node_as[T](path string) T {
 
 pub fn Callable.new(object &Object, method string) Callable {
 	sn := StringName.new(method)
+	defer { sn.deinit() }
 	c := Callable.new2(object, sn)
-	sn.deinit()
 	return c
 }
