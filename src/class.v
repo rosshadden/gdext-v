@@ -233,14 +233,14 @@ fn class_get_property_list[T](instance GDExtensionClassInstancePtr, return_count
 
 fn class_free_property_list[T](instance GDExtensionClassInstancePtr, info &GDExtensionPropertyInfo) {
 	mut index := 0
-	unsafe {
-		$for field in T.fields {
-			$if field.typ is ToVariant {
+	$for field in T.fields {
+		$if field.typ is ToVariant {
+			unsafe {
 				info[index].name.deinit()
 				info[index].class_name.deinit()
 				info[index].hint_string.deinit()
-				index += 1
 			}
+			index += 1
 		}
 	}
 }
@@ -346,7 +346,7 @@ fn class_get_virtual_func[T](user_data voidptr, method_name &StringName, hash in
 		if virt == 0 {
 			return GDExtensionClassCallVirtual(unsafe { nil })
 		}
-		return GDExtensionClassCallVirtual(unsafe { voidptr(virt) })
+		return GDExtensionClassCallVirtual(voidptr(virt))
 	}
 	return GDExtensionClassCallVirtual(unsafe { nil })
 }
@@ -413,7 +413,7 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 				}
 				method_flags:           .gdextension_method_flag_normal
 				has_return_value:       GDExtensionBool(true)
-				return_value_info:      unsafe { &info } // Return the property type
+				return_value_info:      &info // Return the property type
 				return_value_metadata:  .gdextension_method_argument_metadata_none
 				argument_count:         0              // No arguments for getter
 				arguments_info:         unsafe { nil } // No arguments
@@ -470,8 +470,8 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 				return_value_info:      unsafe { nil }
 				return_value_metadata:  .gdextension_method_argument_metadata_none
 				argument_count:         1
-				arguments_info:         unsafe { arg_info_ptr }
-				arguments_metadata:     unsafe { arg_metadata_ptr }
+				arguments_info:         arg_info_ptr
+				arguments_metadata:     arg_metadata_ptr
 				default_argument_count: 0
 				default_arguments:      unsafe { nil }
 			}
@@ -490,11 +490,6 @@ fn property_getter[T](user_data voidptr, instance GDExtensionClassInstancePtr, a
 	field_data := unsafe { &FieldData(user_data) }
 	$for field in T.fields {
 		if field.name == field_data.name {
-			$if field.typ is int {
-				println('int')
-			} $else $if field.typ is i64 {
-				println('i64')
-			}
 			$if field.typ is bool {
 				result := inst.$(field.name)
 				ret.from_bool(result)

@@ -186,7 +186,7 @@ fn (g &Generator) gen_functions() ! {
 	}
 
 	// call_func
-	buf.writeln("
+	buf.writeln('
 		|// TODO: see if we can leverage the passed-in FunctionData
 		|fn call_func[T](user_data voidptr, instance GDExtensionClassInstancePtr, args &&Variant, arg_count GDExtensionInt, ret &Variant, err &GDExtensionCallError) {
 		|	mut inst := unsafe { &T(instance) }
@@ -200,25 +200,23 @@ fn (g &Generator) gen_functions() ! {
 		|			// TODO: leverage `ToVariant` and `FromVariant` interfaces
 		|			mut p := 0
 		|			\$for param in method.params {
+		|				prm := unsafe { &args[p] }
 		|				\$if param.typ is &bool {
-		|					value := unsafe { args[p].to_bool() }
+		|					value := prm.to_bool()
 		|					params << &value
 		|				} \$else \$if param.typ is &string {
-		|					value := unsafe { args[p].to_string() }
+		|					value := prm.to_string()
 		|					params << &value
 		|				} \$else \$if param.typ is &int {
-		|					println('int')
-		|					value := unsafe { args[p].to_int() }
+		|					value := prm.to_int()
 		|					params << &value
 		|				} \$else \$if param.typ is &i64 {
-		|					println('i64')
-		|					value := unsafe { i64_from_variant(args[p]) }
+		|					value := i64_from_variant(prm)
 		|					params << &value
 		|				} \$else \$if param.typ is &f64 {
-		|					println('f64')
-		|					value := unsafe { f64_from_variant(args[p]) }
+		|					value := f64_from_variant(prm)
 		|					params << &value
-	".strip_margin().trim_right('\n'))
+	'.strip_margin().trim_right('\n'))
 
 	for class in g.api.builtin_classes {
 		if class.name.is_lower() {
@@ -227,7 +225,7 @@ fn (g &Generator) gen_functions() ! {
 		buf.writeln('
 			|				} \$else \$if param.typ is &${class.name} {
 			|					mut value := ${class.name}{}
-			|					value.from_variant(unsafe { args[p] })
+			|					value.from_variant(prm)
 			|					params << &value
 		'.strip_margin().trim('\n'))
 	}
@@ -236,15 +234,14 @@ fn (g &Generator) gen_functions() ! {
 		buf.writeln('
 			|				} \$else \$if param.typ is &${class.name} {
 			|					mut value := ${class.name}{}
-			|					value.from_variant(unsafe { args[p] })
+			|					value.from_variant(prm)
 			|					params << &value
 		'.strip_margin().trim('\n'))
 	}
 
 	buf.writeln("
 		|				} \$else {
-		|					value := unsafe { args[p] }
-		|					params << &value
+		|					params << &prm
 		|				}
 		|				p += 1
 		|			}
