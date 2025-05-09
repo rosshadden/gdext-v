@@ -170,7 +170,8 @@ const prop_map = {
 }
 
 fn get_property_type(typ string) GDExtensionVariantType {
-	return prop_map[typ] or { return .type_nil }
+	// TODO: make better
+	return prop_map[typ.split('.').last()] or { return .type_nil }
 }
 
 fn class_get_property_list[T](instance GDExtensionClassInstancePtr, return_count &u32) &GDExtensionPropertyInfo {
@@ -253,11 +254,11 @@ fn class_property_get_revert[T](instance GDExtensionClassInstancePtr, prop_name 
 }
 
 fn class_notification[T](instance GDExtensionClassInstancePtr, what int, reversed &GDExtensionBool) {
-	// println('TODO: notification')
+	// dump('TODO: notification')
 }
 
 fn class_to_string[T](instance GDExtensionClassInstancePtr, valid &GDExtensionBool, out &String) {
-	println('class to string')
+	dump('TODO: class to string')
 	unsafe {
 		*valid = GDExtensionBool(true)
 		*out = String.new(T.name)
@@ -265,11 +266,11 @@ fn class_to_string[T](instance GDExtensionClassInstancePtr, valid &GDExtensionBo
 }
 
 fn class_reference[T](instance GDExtensionClassInstancePtr) {
-	println('TODO: ref')
+	dump('TODO: ref')
 }
 
 fn class_unreference[T](instance GDExtensionClassInstancePtr) {
-	println('TODO: unref')
+	dump('TODO: unref')
 }
 
 fn class_create_instance1[T](user_data voidptr) &Object {
@@ -391,10 +392,7 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 
 			// Get proper type for this field
 			field_type := get_property_type(typeof(field.typ).name)
-			println('field (${field.name}): ${typeof(field.typ).name} ${field_type}')
-			// field_data := unsafe { nil }
 			field_data := field
-			// field_data := typeof(field.typ).name
 
 			info := GDExtensionPropertyInfo{
 				type_:       field_type
@@ -448,12 +446,12 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 			// We need a mutable version of GDExtensionPropertyInfo to set fields
 			// Since struct fields are immutable by default
 			property_info := GDExtensionPropertyInfo{
-				type_: field_type
-				name: &value_sn
-				class_name: &ci.class_name
-				hint: .property_hint_none
+				type_:       field_type
+				name:        &value_sn
+				class_name:  &ci.class_name
+				hint:        .property_hint_none
 				hint_string: &hint
-				usage: .property_usage_default
+				usage:       .property_usage_default
 			}
 
 			// Copy the property info to our allocated memory
@@ -507,9 +505,6 @@ fn property_setter[T](user_data voidptr, instance GDExtensionClassInstancePtr, a
 
 	$for field in T.fields {
 		if field.name == field_data.name {
-			type_name := typeof(field.typ).name
-			println('setter called for ${field.name}')
-			dump(field)
 			$if field.typ is bool {
 				inst.$(field.name) = value.to_bool()
 			} $else $if field.typ is string {
@@ -520,9 +515,8 @@ fn property_setter[T](user_data voidptr, instance GDExtensionClassInstancePtr, a
 				inst.$(field.name) = i64_from_variant(value)
 			} $else $if field.typ is f64 {
 				inst.$(field.name) = f64_from_variant(value)
-			} $else $if field.typ is Vector2 {
-				println('TODO: Vector2')
-			} $else {}
+			} $else {
+			}
 		}
 	}
 }
