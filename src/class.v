@@ -486,15 +486,41 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 
 // Generic getter function for properties
 fn property_getter[T](user_data voidptr, instance GDExtensionClassInstancePtr, args &&Variant, arg_count GDExtensionInt, ret &Variant, err &GDExtensionCallError) {
-	// You'll need to implement the actual property getting logic here
-	// This will depend on how your V class is structured
-	dump('property getter called')
-
-	// Example implementation (pseudocode):
-	// instance_obj := get_instance_from_ptr[T](instance)
-	// property_name := get_property_name_from_context()
-	// property_value := instance_obj.$(property_name)
-	// set_variant_from_value(ret, property_value)
+	mut inst := unsafe { &T(instance) }
+	field_data := unsafe { &FieldData(user_data) }
+	$for field in T.fields {
+		if field.name == field_data.name {
+			$if field.typ is int {
+				println('int')
+			} $else $if field.typ is i64 {
+				println('i64')
+			}
+			$if field.typ is bool {
+				result := inst.$(field.name)
+				ret.from_bool(result)
+			} $else $if field.typ is string {
+				result := inst.$(field.name)
+				str := String.new(result)
+				variant := str.to_variant()
+				ret.from_variant(variant)
+			} $else $if field.typ is int {
+				result := inst.$(field.name)
+				ret.from_int(result)
+			} $else $if field.typ is i64 {
+				result := inst.$(field.name)
+				ret.from_variant(i64_to_variant(result))
+			} $else $if field.typ is f64 {
+				result := inst.$(field.name)
+				ret.from_variant(f64_to_variant(result))
+			} $else $if field.typ is ToVariant {
+				result := inst.$(field.name)
+				variant := result.to_variant()
+				ret.from_variant(variant)
+			} $else {
+				dump('unhandled type: ${field.typ}')
+			}
+		}
+	}
 }
 
 // Generic setter function for properties
@@ -502,7 +528,6 @@ fn property_setter[T](user_data voidptr, instance GDExtensionClassInstancePtr, a
 	mut inst := unsafe { &T(instance) }
 	value := unsafe { &args[0] }
 	field_data := unsafe { &FieldData(user_data) }
-
 	$for field in T.fields {
 		if field.name == field_data.name {
 			$if field.typ is bool {
@@ -516,6 +541,7 @@ fn property_setter[T](user_data voidptr, instance GDExtensionClassInstancePtr, a
 			} $else $if field.typ is f64 {
 				inst.$(field.name) = f64_from_variant(value)
 			} $else {
+				dump('unhandled type: ${field.typ}')
 			}
 		}
 	}

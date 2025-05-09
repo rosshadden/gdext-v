@@ -260,6 +260,9 @@ fn (g &Generator) gen_functions() ! {
 		|				str := String.new(result)
 		|				variant := str.to_variant()
 		|				ret.from_variant(variant)
+		|			} \$else \$if method.return_type is int {
+		|				result := inst.\$method(...params)
+		|				ret.from_int(result)
 		|			} \$else \$if method.return_type is i64 {
 		|				result := inst.\$method(...params)
 		|				ret.from_variant(i64_to_variant(result))

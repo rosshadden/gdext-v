@@ -43,6 +43,11 @@ pub fn (v &Variant) to_int() int {
 	return t
 }
 
+pub fn (v &Variant) from_int(src &int) {
+	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_i64)
+	to_variant(GDExtensionUninitializedVariantPtr(v), GDExtensionTypePtr(src))
+}
+
 pub fn (v &Variant) to_string() string {
 	var_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_string)
 	t := String{}
