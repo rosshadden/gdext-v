@@ -398,7 +398,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 				buf.write_string('pub fn (s &${class.name}) ${method_name}(')
 			}
 
-			// args
+			// args signature
 			for a, arg in method.arguments {
 				if a != 0 {
 					buf.write_string(', ')
@@ -423,22 +423,27 @@ fn (g &Generator) gen_builtin_classes() ! {
 
 			buf.writeln('\tf := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_${class.name.to_lower()}, voidptr(&fnname), ${method.hash})')
 
-			if has_return {
-				if method.arguments.len > 0 {
-					buf.writeln('\tmut args := unsafe { [${method.arguments.len}]voidptr{} }')
-
-					for a, arg in method.arguments {
-						mut name := convert_name(arg.name)
-						buf.writeln('\targs[${a}] = voidptr(&${name})')
-					}
-
-					buf.writeln('\tf(${ptr}, voidptr(&args[0]), voidptr(&result), ${method.arguments.len})')
-				} else {
-					buf.writeln('\tf(${ptr}, unsafe{nil}, voidptr(&result), ${method.arguments.len})')
+			// args
+			if method.arguments.len > 0 {
+				buf.writeln('\tmut args := unsafe { [${method.arguments.len}]voidptr{} }')
+				for a, arg in method.arguments {
+					mut name := convert_name(arg.name)
+					buf.writeln('\targs[${a}] = voidptr(&${name})')
 				}
-			} else {
-				buf.writeln('\tf(${ptr}, unsafe{nil}, unsafe{nil}, ${method.arguments.len})')
 			}
+
+			// call
+			arg_ptr := if method.arguments.len > 0 {
+				'voidptr(&args[0])'
+			} else {
+				'unsafe{nil}'
+			}
+			return_ptr := if has_return {
+				'voidptr(&result)'
+			} else {
+				'unsafe{nil}'
+			}
+			buf.writeln('\tf(${ptr}, ${arg_ptr}, ${return_ptr}, ${method.arguments.len})')
 
 			// return
 			if has_return {
