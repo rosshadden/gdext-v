@@ -100,7 +100,7 @@ patchelf --clear-exexstack lib/libvlang.so
 ## State
 
 Just about everything needed to make games with V has been implemented.
-The only things left that I am currently aware of are signal support and class constants, both of which I know exactly how to do.
+The only things left that I am currently aware of are signal support and ~class constants~, ~both~ one of which I know exactly how to do.
 Which is why I haven't gotten to them yet---I was prioritizing things I wanted but didn't know how to do to tackle the hard problems first.
 
 The [Are we game yet?](https://github.com/rosshadden/gdext-v/milestone/1) milestone tracks the feasibility of using these bindings for a full game.
