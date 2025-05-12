@@ -97,11 +97,23 @@ v -shared -enable-globals -o lib/libvlang.so -d no_backtrace .
 patchelf --clear-exexstack lib/libvlang.so
 ```
 
-## Prior art
+## State
+
+Just about everything needed to make games with V has been implemented.
+The only things left that I am currently aware of are signal support and class constants, both of which I know exactly how to do.
+Which is why I haven't gotten to them yet---I was prioritizing things I wanted but didn't know how to do to tackle the hard problems first.
+
+The [Are we game yet?](https://github.com/rosshadden/gdext-v/milestone/1) milestone tracks the feasibility of using these bindings for a full game.
+The [Are we there yet?](https://github.com/rosshadden/gdext-v/milestone/3) milestone tracks how pleasant it is to work with, after which I plan to announce the project more publicly to the world and encourage devs to use it.
+I have a _lot_ of things planned, many of which should drastically improve the ergonomics of working with these bindings.
+It's not bad as is, to be honest, because I have already been spending time making certain parts ergonomic and simple to use.
+I just have a really low tolerance for friction and I want to make these really nice to work with.
+
+## Helpful resources
 
 - [godot-cpp](https://github.com/godotengine/godot-cpp)
 - [godot-rust](https://github.com/godot-rust/gdext)
 - [gdext-nim](https://github.com/godot-nim/gdext-nim)
-- jcweaver997's work on his [vgdextension](https://github.com/jcweaver997/vgdextension) was _invaluable_ to this project.
+- jcweaver997's work on his [vgdextension](https://github.com/jcweaver997/vgdextension) was invaluable to this project.
 I found it while bashing my head against the wall on something and searching Github with `path:*.v` queries.
 Had I known about it from the outset I might have used it as a starting point 😅.
