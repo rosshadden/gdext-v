@@ -643,6 +643,7 @@ fn (g &Generator) gen_classes() ! {
 		// to variant
 		buf.writeln('
 			|pub fn (s &${class.name}) to_variant() Variant {
+			|	if s.ptr == unsafe { nil } { return Variant{} }
 			|	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_object)
 			|	result := Variant{}
 			|	to_variant(GDExtensionUninitializedVariantPtr(&result), s.ptr)
