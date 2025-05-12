@@ -2,7 +2,7 @@ module gd
 
 @[heap]
 pub struct Variant {
-	godot_data [24]u8 // filler
+	data_ [24]u8
 }
 
 pub interface ToVariant {
@@ -20,7 +20,7 @@ pub fn (s &Variant) deinit() {
 
 pub fn (s &Variant) from_variant(src &Variant) {
 	unsafe {
-		C.memcpy(&s.godot_data, &src.godot_data, sizeof(s.godot_data))
+		C.memcpy(&s.data_, &src.data_, sizeof(s.data_))
 	}
 }
 

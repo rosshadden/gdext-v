@@ -334,7 +334,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 		}
 		class_size := g.api.builtin_class_sizes[platform_index].sizes.filter(it.name == class.name).first().size
 		if defined_size < class_size {
-			buf.writeln('\tgodot_data [${class_size - defined_size}]u8 // filler')
+			buf.writeln('\tdata_ [${class_size - defined_size}]u8 // filler')
 		}
 
 		if defined_size > class_size {
