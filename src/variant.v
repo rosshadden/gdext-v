@@ -134,7 +134,7 @@ pub fn (s &Object) try_cast_to_v[T]() ?&T {
 
 pub fn (s &Object) cast_to_v[T]() &T {
 	type_name := T.name.split('.').last()
-	return s.try_cast_to_v[T](type_name) or { panic('cannot cast: ${s} -> ${type_name}') }
+	return s.try_cast_to_v[T]() or { panic('cannot cast: ${s} -> ${type_name}') }
 }
 
 pub fn (s &Node) get_node_v(path string) Node {
