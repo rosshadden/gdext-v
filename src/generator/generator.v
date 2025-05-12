@@ -311,8 +311,6 @@ fn (g &Generator) gen_builtin_classes() ! {
 			buf.writeln('}')
 		}
 
-		// TODO: constants
-
 		// struct
 		buf.writeln('')
 		buf.writeln('@[packed]')
@@ -343,6 +341,41 @@ fn (g &Generator) gen_builtin_classes() ! {
 			println('${class.name} defined size ${defined_size} does not match class size ${class_size}')
 		}
 		buf.writeln('}')
+
+		// constants
+		for constant in class.constants {
+			const_name := '${class.name.to_lower()}_${convert_name(constant.name)}'
+			mut value := constant.value.replace('${class.name}(', '').replace(')', '')
+			args := value.split(',').map(it.trim_space())
+			value = match class.name {
+				'Basis' {
+					'Vector3{${args[0]}, ${args[1]}, ${args[2]}}, Vector3{${args[3]}, ${args[4]}, ${args[5]}}, Vector3{${args[6]}, ${args[7]}, ${args[8]}}'
+				}
+				'Plane' {
+					'Vector3{${args[0]}, ${args[1]}, ${args[2]}}, ${args[3]}'
+				}
+				'Projection' {
+					'Vector4{${args[0]}, ${args[1]}, ${args[2]}, ${args[3]}}, Vector4{${args[4]}, ${args[5]}, ${args[6]}, ${args[7]}}, Vector4{${args[8]}, ${args[9]}, ${args[10]}, ${args[11]}}, Vector4{${args[12]}, ${args[13]}, ${args[14]}, ${args[15]}}'
+				}
+				'Transform2D' {
+					'Vector2{${args[0]}, ${args[1]}}, Vector2{${args[2]}, ${args[3]}}, Vector2{${args[4]}, ${args[5]}}'
+				}
+				'Transform3D' {
+					'Basis{ Vector3{${args[0]}, ${args[1]}, ${args[2]}}, Vector3{${args[3]}, ${args[4]}, ${args[5]}}, Vector3{${args[6]}, ${args[7]}, ${args[8]}} }, Vector3{${args[9]}, ${args[10]}, ${args[11]}}'
+				}
+				else {
+					value.replace('inf', 'max_i32')
+				}
+			}
+			value = '${class.name}{ ${value} }'
+			buf.writeln('
+				|pub const ${const_name} = ${value}
+				|@[inline]
+				|pub fn ${class.name}.${convert_name(constant.name)}() ${constant.type} {
+				|	return ${const_name}
+				|}
+			'.strip_margin().trim_right('\n'))
+		}
 
 		// constructors
 		for constructor in class.constructors {
