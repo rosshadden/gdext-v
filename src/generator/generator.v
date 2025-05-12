@@ -646,6 +646,18 @@ fn (g &Generator) gen_classes() ! {
 		}
 		buf.writeln('}')
 
+		// constants
+		for constant in class.constants {
+			const_name := '${class.name.to_lower()}_${convert_name(constant.name)}'
+			buf.writeln('
+				|pub const ${const_name} = ${constant.value}
+				|@[inline]
+				|pub fn ${class.name}.${convert_name(constant.name)}() int {
+				|	return ${const_name}
+				|}
+			'.strip_margin().trim_right('\n'))
+		}
+
 		// constructor
 		if class.is_instantiable {
 			buf.writeln("
