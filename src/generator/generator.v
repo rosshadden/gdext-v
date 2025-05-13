@@ -334,7 +334,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 		}
 		class_size := g.api.builtin_class_sizes[platform_index].sizes.filter(it.name == class.name).first().size
 		if defined_size < class_size {
-			buf.writeln('\tdata_ [${class_size - defined_size}]u8 // filler')
+			buf.writeln('\tdata_ [${class_size - defined_size}]u8')
 		}
 
 		if defined_size > class_size {
@@ -345,29 +345,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 		// constants
 		for constant in class.constants {
 			const_name := '${class.name.to_lower()}_${convert_name(constant.name)}'
-			mut value := constant.value.replace('${class.name}(', '').replace(')', '')
-			args := value.split(',').map(it.trim_space())
-			value = match class.name {
-				'Basis' {
-					'Vector3{${args[0]}, ${args[1]}, ${args[2]}}, Vector3{${args[3]}, ${args[4]}, ${args[5]}}, Vector3{${args[6]}, ${args[7]}, ${args[8]}}'
-				}
-				'Plane' {
-					'Vector3{${args[0]}, ${args[1]}, ${args[2]}}, ${args[3]}'
-				}
-				'Projection' {
-					'Vector4{${args[0]}, ${args[1]}, ${args[2]}, ${args[3]}}, Vector4{${args[4]}, ${args[5]}, ${args[6]}, ${args[7]}}, Vector4{${args[8]}, ${args[9]}, ${args[10]}, ${args[11]}}, Vector4{${args[12]}, ${args[13]}, ${args[14]}, ${args[15]}}'
-				}
-				'Transform2D' {
-					'Vector2{${args[0]}, ${args[1]}}, Vector2{${args[2]}, ${args[3]}}, Vector2{${args[4]}, ${args[5]}}'
-				}
-				'Transform3D' {
-					'Basis{ Vector3{${args[0]}, ${args[1]}, ${args[2]}}, Vector3{${args[3]}, ${args[4]}, ${args[5]}}, Vector3{${args[6]}, ${args[7]}, ${args[8]}} }, Vector3{${args[9]}, ${args[10]}, ${args[11]}}'
-				}
-				else {
-					value.replace('inf', 'max_i32')
-				}
-			}
-			value = '${class.name}{ ${value} }'
+			value := convert_dumb_value(class.name, constant.value) or { 'none' }
 			buf.writeln('
 				|pub const ${const_name} = ${value}
 				|@[inline]
@@ -746,10 +724,18 @@ fn (g &Generator) gen_classes() ! {
 				buf.writeln('pub struct ${class.name}_${method_name}_Cfg {')
 				buf.writeln('pub:')
 				for arg in method.arguments {
+					// skip required args
 					if arg.default_value == '' {
 						continue
 					}
-					buf.writeln('\t${convert_name(arg.name)} ${convert_strings(convert_type(arg.type))}')
+					field_name := convert_name(arg.name)
+					field_type := convert_strings(convert_type(arg.type))
+					field_value := if val := convert_dumb_value(arg.type, arg.default_value) {
+						' = ${val}'
+					} else {
+						''
+					}
+					buf.writeln('\t${field_name} ${field_type}${field_value}')
 				}
 				buf.writeln('}')
 			}

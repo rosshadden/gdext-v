@@ -157,6 +157,61 @@ fn convert_strings(type string) string {
 	return type
 }
 
+// convert fake value types from Godot's nonsensical and unused dump format to V
+fn convert_dumb_value(type string, value_text string) ?string {
+	value := value_text.replace('(', '{').replace(')', '}')
+	value_inner := value_text.replace('${type}(', '').replace(')', '')
+	args := value_inner.split(',').map(it.trim_space())
+	return match true {
+		value == '""' || value == '&""' {
+			none
+		}
+		(type in numbers || type == 'float') && value != '0' {
+			value
+		}
+		type.starts_with('enum::') {
+			'unsafe { ${convert_type(type)}(${value}) }'
+		}
+		type == 'StringName' {
+			value.replace('&', '')
+		}
+		type == 'NodePath' {
+			'NodePath.new0()'
+		}
+		type == 'Basis' {
+			'${type}{Vector3{${args[0]}, ${args[1]}, ${args[2]}}, Vector3{${args[3]}, ${args[4]}, ${args[5]}}, Vector3{${args[6]}, ${args[7]}, ${args[8]}}}'
+		}
+		type == 'Plane' {
+			'${type}{Vector3{${args[0]}, ${args[1]}, ${args[2]}}, ${args[3]}}'
+		}
+		type == 'Projection' {
+			'${type}{Vector4{${args[0]}, ${args[1]}, ${args[2]}, ${args[3]}}, Vector4{${args[4]}, ${args[5]}, ${args[6]}, ${args[7]}}, Vector4{${args[8]}, ${args[9]}, ${args[10]}, ${args[11]}}, Vector4{${args[12]}, ${args[13]}, ${args[14]}, ${args[15]}}}'
+		}
+		type == 'Transform2D' {
+			'${type}{Vector2{${args[0]}, ${args[1]}}, Vector2{${args[2]}, ${args[3]}}, Vector2{${args[4]}, ${args[5]}}}'
+		}
+		type == 'Transform3D' {
+			'${type}{Basis{Vector3{${args[0]}, ${args[1]}, ${args[2]}}, Vector3{${args[3]}, ${args[4]}, ${args[5]}}, Vector3{${args[6]}, ${args[7]}, ${args[8]}} }, Vector3{${args[9]}, ${args[10]}, ${args[11]}}}'
+		}
+		type.starts_with('Rect2') {
+			mut suffix := ''
+			if type.ends_with('i') {
+				suffix = 'i'
+			}
+			'${type}{Vector2${suffix}{${args[0]}, ${args[1]}}, Vector2${suffix}{${args[2]}, ${args[3]}}}'
+		}
+		type.contains('Vector') {
+			value.replace('inf', 'max_i32')
+		}
+		value.starts_with(type) {
+			value.replace('(', '{').replace(')', '}')
+		}
+		else {
+			none
+		}
+	}
+}
+
 enum InterfaceType {
 	virtual
 	signal
