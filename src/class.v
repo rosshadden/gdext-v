@@ -292,7 +292,7 @@ fn class_create_instance[T](user_data voidptr, notify_postinitialize &GDExtensio
 	gdf.object_set_instance_binding(w.ptr, gdf.clp, t, cb)
 
 	$if T is ClassInitable {
-		ci := ClassInitable(t)
+		mut ci := ClassInitable(t)
 		ci.init()
 	}
 	return w.ptr
@@ -356,6 +356,7 @@ pub fn register_class_methods[T](mut ci ClassInfo) {
 		if 'gd.expose' in method.attrs {
 			method_data := method
 			method_sn := StringName.new(method.name)
+			// TODO: fill out arg and return info
 			info := GDExtensionClassMethodInfo{
 				name:                   &method_sn
 				method_userdata:        &method_data
