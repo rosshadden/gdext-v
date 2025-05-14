@@ -984,6 +984,7 @@ fn (g &Generator) gen_signals() ! {
 		}
 	}
 
+	buf.writeln('')
 	buf.writeln('pub fn register_signal_methods[T](mut ci ClassInfo) {')
 	for class in g.api.classes {
 		for signal in class.signals {
@@ -1026,7 +1027,7 @@ fn (g &Generator) gen_signals() ! {
 			buf.writeln('\t\t\tmethod_userdata: unsafe{nil}')
 			buf.writeln('\t\t\tcall_func: ${i_name.to_lower()}_call[T]')
 			buf.writeln('\t\t\tptrcall_func: ${i_name.to_lower()}_ptrcall[T]')
-			buf.writeln('\t\t\tmethod_flags: 1')
+			buf.writeln('\t\t\tmethod_flags: .gdextension_method_flag_normal')
 			buf.writeln('\t\t\thas_return_value: GDExtensionBool(false)')
 			buf.writeln('\t\t\treturn_value_info: unsafe{nil}')
 			buf.writeln('\t\t\treturn_value_metadata: GDExtensionClassMethodArgumentMetadata{}')
