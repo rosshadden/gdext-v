@@ -86,6 +86,7 @@ fn (g &Generator) gen_functions() ! {
 	buf.writeln('module gd')
 
 	for method in g.api.utility_functions {
+		has_args := method.arguments.len > 0
 		has_return := method.return_type != ''
 		return_type := convert_type(method.return_type)
 		method_name := convert_name(method.name)
@@ -127,54 +128,48 @@ fn (g &Generator) gen_functions() ! {
 			|	f := gdf.variant_get_ptr_utility_function(voidptr(&fnname), ${method.hash})
 		'.strip_margin().trim('\n'))
 
-		// handle args
-		if method.arguments.len == 0 && method.is_vararg {
-			panic('🚨 case not handled: ${method.name} 🚨')
-		}
-		if method.arguments.len > 0 {
-			if method.is_vararg {
-				// calculate total args: regular args + varargs
-				buf.writeln('\ttotal_args := ${method.arguments.len} + varargs.len')
-				// create array to hold all arguments
-				buf.writeln('\tmut args := []voidptr{cap: total_args}')
-
-				// add the fixed arguments
-				for arg in method.arguments[..method.arguments.len] {
-					buf.writeln('\targs << voidptr(&${convert_name(arg.name)})')
-				}
-
-				// add each vararg
-				buf.writeln('
-					|	for i in 0..varargs.len {
-					|		args << voidptr(&varargs[i])
-					|	}
-				'.strip_margin().trim('\n'))
-
-				// function call with args
-				if has_return {
-					buf.writeln('\tf(voidptr(&result), unsafe { &args[0] }, total_args)')
-				} else {
-					buf.writeln('\tf(unsafe{nil}, unsafe { &args[0] }, total_args)')
-				}
-			} else {
-				// regular non-vararg function
-				arg_list := method.arguments.map('voidptr(&${convert_name(it.name)})')
-				buf.writeln('\targs := [${arg_list.join(', ')}]!')
-				// function call with args
-				if has_return {
-					buf.writeln('\tf(voidptr(&result), &args[0], ${method.arguments.len})')
-				} else {
-					buf.writeln('\tf(unsafe{nil}, &args[0], ${method.arguments.len})')
-				}
+		// args
+		if method.is_vararg {
+			// varargs can't used a fixed-size array
+			buf.writeln('\ttotal_args := ${method.arguments.len} + varargs.len')
+			buf.writeln('\tmut args := []voidptr{cap: total_args}')
+			// add the fixed arguments
+			for arg in method.arguments[..method.arguments.len] {
+				buf.writeln('\targs << voidptr(&${convert_name(arg.name)})')
 			}
+			// add each vararg
+			buf.writeln('
+				|	for i in 0..varargs.len {
+				|		args << voidptr(&varargs[i])
+				|	}
+			'.strip_margin().trim('\n'))
+		} else if has_args {
+			// use fixed-size array
+			arg_list := method.arguments.map('voidptr(&${convert_name(it.name)})')
+			buf.writeln('\targs := [${arg_list.join(', ')}]!')
+		}
+		arg_ptr := match true {
+			method.is_vararg {
+				'unsafe { &args[0] }'
+			}
+			has_args {
+				'&args[0]'
+			}
+			else {
+				'unsafe{nil}'
+			}
+		}
+		ret_ptr := if has_return {
+			'voidptr(&result)'
 		} else {
-			// no args function call
-			if has_return {
-				buf.writeln('\tf(voidptr(&result), unsafe{nil}, 0)')
-			} else {
-				buf.writeln('\tf(unsafe{nil}, unsafe{nil}, 0)')
-			}
+			'unsafe { nil }'
 		}
+		arg_len := if method.is_vararg {
+			'total_args'
+		} else {
+			'${method.arguments.len}'
+		}
+		buf.writeln('\tf(${ret_ptr}, ${arg_ptr}, ${arg_len})')
 
 		// return
 		if has_return {
