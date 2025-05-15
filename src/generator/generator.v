@@ -128,6 +128,9 @@ fn (g &Generator) gen_functions() ! {
 		'.strip_margin().trim('\n'))
 
 		// handle args
+		if method.arguments.len == 0 && method.is_vararg {
+			panic('🚨 case not handled: ${method.name} 🚨')
+		}
 		if method.arguments.len > 0 {
 			if method.is_vararg {
 				// calculate total args: regular args + varargs
@@ -149,13 +152,14 @@ fn (g &Generator) gen_functions() ! {
 
 				// function call with args
 				if has_return {
-					buf.writeln('\tf(voidptr(&result), unsafe { voidptr(&args[0]) }, total_args)')
+					buf.writeln('\tf(voidptr(&result), unsafe { &args[0] }, total_args)')
 				} else {
-					buf.writeln('\tf(unsafe{nil}, unsafe { voidptr(&args[0]) }, total_args)')
+					buf.writeln('\tf(unsafe{nil}, unsafe { &args[0] }, total_args)')
 				}
 			} else {
 				// regular non-vararg function
-				buf.writeln('\targs := [${method.arguments.map('voidptr(&${convert_name(it.name)})').join(', ')}]!')
+				arg_list := method.arguments.map('voidptr(&${convert_name(it.name)})')
+				buf.writeln('\targs := [${arg_list.join(', ')}]!')
 				// function call with args
 				if has_return {
 					buf.writeln('\tf(voidptr(&result), &args[0], ${method.arguments.len})')
@@ -747,16 +751,22 @@ fn (g &Generator) gen_classes() ! {
 
 			// args
 			mut first_arg_optional := true
-			for arg in method.arguments {
+			for a, arg in method.arguments {
 				if arg.default_value != '' {
 					continue
 				}
-				if first_arg_optional {
-					first_arg_optional = false
-				} else {
+				first_arg_optional = false
+				if a != 0 {
 					buf.write_string(', ')
 				}
 				buf.write_string('${convert_name(arg.name)} ${convert_strings(convert_type(arg.type))}')
+			}
+			// varargs get tacked on to the end
+			if method.is_vararg {
+				if method.arguments.len > 0 {
+					buf.write_string(', ')
+				}
+				buf.write_string('varargs ...Variant')
 			}
 
 			// trailing struct
@@ -779,13 +789,15 @@ fn (g &Generator) gen_classes() ! {
 				buf.writeln('\tmut result := ${convert_return(return_type, method.return_value.type,
 					g.enum_defaults)}')
 			}
-			buf.writeln('\tclassname := StringName.new("${class.name}")')
-			buf.writeln('\tfnname := StringName.new("${method.name}")')
-			buf.writeln('\tdefer {')
-			buf.writeln('\t\tclassname.deinit()')
-			buf.writeln('\t\tfnname.deinit()')
-			buf.writeln('\t}')
-			buf.writeln('\tmb := gdf.classdb_get_method_bind(&classname, &fnname, ${method.hash})')
+			buf.writeln('
+			|	classname := StringName.new("${class.name}")
+			|	fnname := StringName.new("${method.name}")
+			|	defer {
+			|		classname.deinit()
+			|		fnname.deinit()
+			|	}
+			|	mb := gdf.classdb_get_method_bind(&classname, &fnname, ${method.hash})
+		'.strip_margin().trim('\n'))
 
 			if method.arguments.len > 0 {
 				buf.writeln('\tmut args := unsafe { [${method.arguments.len}]voidptr{} }')
@@ -815,9 +827,9 @@ fn (g &Generator) gen_classes() ! {
 					}
 				}
 				if has_return {
-					buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, voidptr(&args[0]), voidptr(&result))')
+					buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, &args[0], voidptr(&result))')
 				} else {
-					buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, voidptr(&args[0]), unsafe{nil})')
+					buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, &args[0], unsafe{nil})')
 				}
 			} else {
 				if has_return {
