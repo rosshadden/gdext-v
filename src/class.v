@@ -67,7 +67,6 @@ pub fn register_class_with_name[T](parent_class string, class_name string) {
 
 	gdf.classdb_register_extension_class4(gdf.clp, &sn, &pn, &info)
 	register_virtual_methods[T](mut ci)
-	register_signal_methods[T](mut ci)
 	register_class_methods[T](mut ci)
 	register_class_properties[T](mut ci)
 }
