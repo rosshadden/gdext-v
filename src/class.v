@@ -390,7 +390,7 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 				PropertyUsageFlags.property_usage_script_variable
 			}
 
-			// Get proper type for this field
+			// get proper type for this field
 			field_type := get_property_type(typeof(field.typ).name)
 			field_data := field
 
@@ -413,28 +413,28 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 				}
 				method_flags:           .gdextension_method_flag_normal
 				has_return_value:       GDExtensionBool(true)
-				return_value_info:      &info // Return the property type
+				return_value_info:      &info
 				return_value_metadata:  .gdextension_method_argument_metadata_none
-				argument_count:         0              // No arguments for getter
-				arguments_info:         unsafe { nil } // No arguments
-				arguments_metadata:     unsafe { nil } // No metadata
+				argument_count:         0
+				arguments_info:         unsafe { nil }
+				arguments_metadata:     unsafe { nil }
 				default_argument_count: 0
 				default_arguments:      unsafe { nil }
 			}
 			gdf.classdb_register_extension_class_method(gdf.clp, &ci.class_name, &getter_info)
 
-			// Set up setter
+			// set up setter
 			setter_name := StringName.new('set_${field.name}')
 			value_sn := StringName.new('value')
 
-			// Create setter argument info
+			// create setter argument info
 			arg_info_size := int(sizeof(GDExtensionPropertyInfo))
 			arg_info_ptr := unsafe { &GDExtensionPropertyInfo(C.malloc(arg_info_size)) }
 			if unsafe { arg_info_ptr == nil } {
 				panic('Failed to allocate memory for arguments_info')
 			}
 
-			// Create the argument metadata
+			// create the argument metadata
 			setter_arg_metadata_size := int(sizeof(GDExtensionClassMethodArgumentMetadata))
 			arg_metadata_ptr := unsafe { &GDExtensionClassMethodArgumentMetadata(C.malloc(setter_arg_metadata_size)) }
 			if unsafe { arg_metadata_ptr == nil } {
@@ -443,8 +443,8 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 			unsafe {
 				*arg_metadata_ptr = .gdextension_method_argument_metadata_none
 			}
-			// We need a mutable version of GDExtensionPropertyInfo to set fields
-			// Since struct fields are immutable by default
+			// we need a mutable version of GDExtensionPropertyInfo to set fields
+			// since struct fields are immutable by default
 			property_info := GDExtensionPropertyInfo{
 				type_:       field_type
 				name:        &value_sn
@@ -454,10 +454,10 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 				usage:       .property_usage_default
 			}
 
-			// Copy the property info to our allocated memory
+			// copy the property info to our allocated memory
 			unsafe { C.memcpy(arg_info_ptr, &property_info, arg_info_size) }
 
-			// Register setter method
+			// register setter method
 			setter_info := GDExtensionClassMethodInfo{
 				name:                   &setter_name
 				method_userdata:        &field_data
@@ -477,14 +477,14 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 			}
 			gdf.classdb_register_extension_class_method(gdf.clp, &ci.class_name, &setter_info)
 
-			// Register the property
+			// register the property
 			gdf.classdb_register_extension_class_property(gdf.clp, &ci.class_name, &info,
 				&setter_name, &getter_name)
 		}
 	}
 }
 
-// Generic getter function for properties
+// generic getter function for properties
 fn property_getter[T](user_data voidptr, instance GDExtensionClassInstancePtr, args &&Variant, arg_count GDExtensionInt, ret &Variant, err &GDExtensionCallError) {
 	mut inst := unsafe { &T(instance) }
 	field_data := unsafe { &FieldData(user_data) }
@@ -518,7 +518,7 @@ fn property_getter[T](user_data voidptr, instance GDExtensionClassInstancePtr, a
 	}
 }
 
-// Generic setter function for properties
+// generic setter function for properties
 fn property_setter[T](user_data voidptr, instance GDExtensionClassInstancePtr, args &&Variant, arg_count GDExtensionInt, ret &Variant, err &GDExtensionCallError) {
 	mut inst := unsafe { &T(instance) }
 	value := unsafe { &args[0] }

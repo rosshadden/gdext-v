@@ -99,13 +99,14 @@ fn (g &Generator) gen_functions() ! {
 			if a != 0 {
 				buf.write_string(', ')
 			}
-
-			// For the last argument in a vararg function, make it vararg
-			if method.is_vararg && a == method.arguments.len - 1 {
-				buf.write_string('varargs ...${convert_type(arg.type)}')
-			} else {
-				buf.write_string('${convert_name(arg.name)} ${convert_type(arg.type)}')
+			buf.write_string('${convert_name(arg.name)} ${convert_type(arg.type)}')
+		}
+		// varargs get tacked on to the end
+		if method.is_vararg {
+			if method.arguments.len > 0 {
+				buf.write_string(', ')
 			}
+			buf.write_string('varargs ...Variant')
 		}
 
 		// return signature
@@ -120,53 +121,50 @@ fn (g &Generator) gen_functions() ! {
 			buf.writeln('\tmut result := ${convert_return(return_type, method.return_type,
 				g.enum_defaults)}')
 		}
-		buf.writeln('\tfnname := StringName.new("${method_name}")')
-		buf.writeln('\tdefer { fnname.deinit() }')
+		buf.writeln('
+			|	fnname := StringName.new("${method_name}")
+			|	defer { fnname.deinit() }
+			|	f := gdf.variant_get_ptr_utility_function(voidptr(&fnname), ${method.hash})
+		'.strip_margin().trim('\n'))
 
-		buf.writeln('\tf := gdf.variant_get_ptr_utility_function(voidptr(&fnname), ${method.hash})')
-
-		// Handle args
+		// handle args
 		if method.arguments.len > 0 {
 			if method.is_vararg {
-				// Calculate total args: regular args + varargs
-				fixed_args_count := method.arguments.len - 1
-				buf.writeln('\ttotal_args := ${fixed_args_count} + varargs.len')
-
-				// Create array to hold all arguments
+				// calculate total args: regular args + varargs
+				buf.writeln('\ttotal_args := ${method.arguments.len} + varargs.len')
+				// create array to hold all arguments
 				buf.writeln('\tmut args := []voidptr{cap: total_args}')
 
-				// Add the fixed arguments
-				for arg in method.arguments[..fixed_args_count] {
+				// add the fixed arguments
+				for arg in method.arguments[..method.arguments.len] {
 					buf.writeln('\targs << voidptr(&${convert_name(arg.name)})')
 				}
 
-				// Add each vararg - we need to create a copy of each value
-				buf.writeln('\tfor i in 0..varargs.len {')
-				buf.writeln('\t\targs << voidptr(&varargs[i])')
-				buf.writeln('\t}')
+				// add each vararg
+				buf.writeln('
+					|	for i in 0..varargs.len {
+					|		args << voidptr(&varargs[i])
+					|	}
+				'.strip_margin().trim('\n'))
 
-				// Function call with args
+				// function call with args
 				if has_return {
 					buf.writeln('\tf(voidptr(&result), unsafe { voidptr(&args[0]) }, total_args)')
 				} else {
 					buf.writeln('\tf(unsafe{nil}, unsafe { voidptr(&args[0]) }, total_args)')
 				}
 			} else {
-				// Regular non-vararg function
-				buf.writeln('\tmut args := unsafe { [${method.arguments.len}]voidptr{} }')
-				for a, arg in method.arguments {
-					buf.writeln('\targs[${a}] = voidptr(&${convert_name(arg.name)})')
-				}
-
-				// Function call with args
+				// regular non-vararg function
+				buf.writeln('\targs := [${method.arguments.map('voidptr(&${convert_name(it.name)})').join(', ')}]!')
+				// function call with args
 				if has_return {
-					buf.writeln('\tf(voidptr(&result), voidptr(&args[0]), ${method.arguments.len})')
+					buf.writeln('\tf(voidptr(&result), &args[0], ${method.arguments.len})')
 				} else {
-					buf.writeln('\tf(unsafe{nil}, voidptr(&args[0]), ${method.arguments.len})')
+					buf.writeln('\tf(unsafe{nil}, &args[0], ${method.arguments.len})')
 				}
 			}
 		} else {
-			// No args function call
+			// no args function call
 			if has_return {
 				buf.writeln('\tf(voidptr(&result), unsafe{nil}, 0)')
 			} else {
@@ -748,13 +746,13 @@ fn (g &Generator) gen_classes() ! {
 			}
 
 			// args
-			mut first_arg := true
+			mut first_arg_optional := true
 			for arg in method.arguments {
 				if arg.default_value != '' {
 					continue
 				}
-				if first_arg {
-					first_arg = false
+				if first_arg_optional {
+					first_arg_optional = false
 				} else {
 					buf.write_string(', ')
 				}
@@ -763,7 +761,7 @@ fn (g &Generator) gen_classes() ! {
 
 			// trailing struct
 			if has_optionals {
-				if !first_arg {
+				if !first_arg_optional {
 					buf.write_string(', ')
 				}
 				buf.write_string('cfg ${class.name}_${method_name}_Cfg')
