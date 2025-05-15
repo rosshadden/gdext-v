@@ -162,7 +162,7 @@ fn (g &Generator) gen_functions() ! {
 		ret_ptr := if has_return {
 			'voidptr(&result)'
 		} else {
-			'unsafe { nil }'
+			'unsafe{nil}'
 		}
 		arg_len := if method.is_vararg {
 			'total_args'
@@ -662,7 +662,7 @@ fn (g &Generator) gen_classes() ! {
 		// to variant
 		buf.writeln('
 			|pub fn (s &${class.name}) to_variant() Variant {
-			|	if s.ptr == unsafe { nil } { return Variant{} }
+			|	if s.ptr == unsafe{nil} { return Variant{} }
 			|	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_object)
 			|	result := Variant{}
 			|	to_variant(GDExtensionUninitializedVariantPtr(&result), s.ptr)
@@ -680,6 +680,7 @@ fn (g &Generator) gen_classes() ! {
 
 		// methods
 		for method in class.methods {
+			has_args := method.arguments.len > 0
 			has_return := method.return_value.type != ''
 			return_type := convert_type(method.return_value.type)
 			method_name := convert_name(method.name)
@@ -794,45 +795,67 @@ fn (g &Generator) gen_classes() ! {
 			|	mb := gdf.classdb_get_method_bind(&classname, &fnname, ${method.hash})
 		'.strip_margin().trim('\n'))
 
-			if method.arguments.len > 0 {
-				buf.writeln('\tmut args := unsafe { [${method.arguments.len}]voidptr{} }')
-				for a, arg in method.arguments {
-					mut name := convert_name(arg.name)
-					name_prefix := if has_optionals && arg.default_value != '' {
-						'cfg.'
-					} else {
-						''
-					}
-					match true {
-						arg.type in strings {
-							buf.writeln('\targ_sn${a} := ${arg.type}.new(${name_prefix}${name})')
-							buf.writeln('\tdefer { arg_sn${a}.deinit() }')
-							buf.writeln('\targs[${a}] = unsafe{voidptr(&arg_sn${a})}')
-						}
-						convert_type(arg.type) in g.class_names {
-							buf.writeln('\targs[${a}] = voidptr(&${name_prefix}${name}.ptr)')
-						}
-						arg.type.starts_with('enum::') || arg.type.starts_with('bitfield::') {
-							buf.writeln('\ti64_${name} := i64(${name_prefix}${name})')
-							buf.writeln('\targs[${a}] = unsafe{voidptr(&i64_${name})}')
-						}
-						else {
-							buf.writeln('\targs[${a}] = unsafe{voidptr(&${name_prefix}${name})}')
-						}
-					}
-				}
-				if has_return {
-					buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, &args[0], voidptr(&result))')
+			// args
+			if method.is_vararg {
+				// varargs can't used a fixed-size array
+				buf.writeln('\ttotal_args := ${method.arguments.len} + varargs.len')
+				buf.writeln('\tmut args := []voidptr{cap: total_args}')
+			} else if has_args {
+				// TODO: try to unroll unsafe like with util fns
+				// buf.writeln('\tmut args := unsafe { [${method.arguments.len}]voidptr{} }')
+				buf.writeln('\tmut args := []voidptr{cap: ${method.arguments.len}}')
+			}
+			// add the fixed arguments
+			for a, arg in method.arguments {
+				mut name := convert_name(arg.name)
+				name_prefix := if has_optionals && arg.default_value != '' {
+					'cfg.'
 				} else {
-					buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, &args[0], unsafe{nil})')
+					''
 				}
-			} else {
-				if has_return {
-					buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, unsafe{nil}, voidptr(&result))')
-				} else {
-					buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, unsafe{nil}, unsafe{nil})')
+				match true {
+					arg.type in strings {
+						buf.writeln('\targ_sn${a} := ${arg.type}.new(${name_prefix}${name})')
+						buf.writeln('\tdefer { arg_sn${a}.deinit() }')
+						buf.writeln('\targs << unsafe{voidptr(&arg_sn${a})}')
+					}
+					convert_type(arg.type) in g.class_names {
+						buf.writeln('\targs << voidptr(&${name_prefix}${name}.ptr)')
+					}
+					arg.type.starts_with('enum::') || arg.type.starts_with('bitfield::') {
+						buf.writeln('\ti64_${name} := i64(${name_prefix}${name})')
+						buf.writeln('\targs << unsafe{voidptr(&i64_${name})}')
+					}
+					else {
+						buf.writeln('\targs << unsafe{voidptr(&${name_prefix}${name})}')
+					}
 				}
 			}
+			if method.is_vararg {
+				// add each vararg
+				buf.writeln('
+					|	for i in 0..varargs.len {
+					|		args << voidptr(&varargs[i])
+					|	}
+				'.strip_margin().trim('\n'))
+			}
+			arg_ptr := match true {
+				method.is_vararg {
+					'unsafe { &args[0] }'
+				}
+				has_args {
+					'unsafe { &args[0] }'
+				}
+				else {
+					'unsafe{nil}'
+				}
+			}
+			ret_ptr := if has_return {
+				'voidptr(&result)'
+			} else {
+				'unsafe{nil}'
+			}
+			buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, ${arg_ptr}, ${ret_ptr})')
 
 			// return
 			if has_return {
