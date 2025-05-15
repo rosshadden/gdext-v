@@ -175,6 +175,9 @@ fn convert_dumb_value(type string, value_text string) ?string {
 		type == 'StringName' {
 			value.replace('&', '')
 		}
+		type == 'Array' {
+			'${type}.new0()'
+		}
 		type == 'NodePath' {
 			'NodePath.new0()'
 		}
