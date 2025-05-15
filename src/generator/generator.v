@@ -191,7 +191,7 @@ fn (g &Generator) gen_functions() ! {
 		|	method_data := unsafe { &FunctionData(user_data) }
 		|	// HACK: there is no way this nested `\$for` is actually necessary...
 		|	\$for method in T.methods {
-		|		if method == method_data {
+		|		if method.name == method_data.name {
 		|			mut params := []voidptr{}
 		|			// handle params
 		|			// TODO: expand arg type coverage
