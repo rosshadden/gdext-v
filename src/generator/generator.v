@@ -781,10 +781,6 @@ fn (g &Generator) gen_classes() ! {
 			}
 
 			// body
-			if has_return {
-				buf.writeln('\tmut result := ${convert_return(return_type, method.return_value.type,
-					g.enum_defaults)}')
-			}
 			buf.writeln('
 			|	classname := StringName.new("${class.name}")
 			|	fnname := StringName.new("${method.name}")
@@ -813,21 +809,39 @@ fn (g &Generator) gen_classes() ! {
 				} else {
 					''
 				}
+				// TODO: I think if I pull out the arg value before adding, I can make all the vararg stuff happen in one place
 				match true {
 					arg.type in strings {
-						buf.writeln('\targ_sn${a} := ${arg.type}.new(${name_prefix}${name})')
-						buf.writeln('\tdefer { arg_sn${a}.deinit() }')
-						buf.writeln('\targs << unsafe{voidptr(&arg_sn${a})}')
+						buf.writeln('\targ${a} := ${arg.type}.new(${name_prefix}${name})')
+						buf.writeln('\tdefer { arg${a}.deinit() }')
+						if method.is_vararg {
+							buf.writeln('\targ${a}_var := arg${a}.to_variant()')
+							buf.writeln('\tdefer { arg${a}_var.deinit() }')
+							buf.writeln('\targs << &arg${a}_var')
+						} else {
+							buf.writeln('\targs << &arg${a}')
+						}
 					}
 					convert_type(arg.type) in g.class_names {
-						buf.writeln('\targs << voidptr(&${name_prefix}${name}.ptr)')
+						buf.writeln('\targ${a} := ${name_prefix}${name}.ptr')
+						if method.is_vararg {
+							println('TODO: varargs for classes: ${class.name}#${method.name}')
+						} else {
+						}
+						buf.writeln('\targs << &arg${a}')
 					}
 					arg.type.starts_with('enum::') || arg.type.starts_with('bitfield::') {
 						buf.writeln('\ti64_${name} := i64(${name_prefix}${name})')
-						buf.writeln('\targs << unsafe{voidptr(&i64_${name})}')
+						buf.writeln('\targs << &i64_${name}')
+						if method.is_vararg {
+							println('TODO: varargs for enums: ${class.name}#${method.name}')
+						}
 					}
 					else {
-						buf.writeln('\targs << unsafe{voidptr(&${name_prefix}${name})}')
+						buf.writeln('\targs << unsafe{&${name_prefix}${name}}')
+						if method.is_vararg {
+							println('TODO: varargs for else: ${class.name}#${method.name}')
+						}
 					}
 				}
 			}
@@ -835,7 +849,8 @@ fn (g &Generator) gen_classes() ! {
 				// add each vararg
 				buf.writeln('
 					|	for i in 0..varargs.len {
-					|		args << voidptr(&varargs[i])
+							args << voidptr(&varargs[i])
+					|		args << &varargs[i]
 					|	}
 				'.strip_margin().trim('\n'))
 			}
@@ -855,7 +870,16 @@ fn (g &Generator) gen_classes() ! {
 			} else {
 				'unsafe{nil}'
 			}
-			buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, ${arg_ptr}, ${ret_ptr})')
+			if has_return {
+				buf.writeln('\tmut result := ${convert_return(return_type, method.return_value.type,
+					g.enum_defaults)}')
+			}
+			if method.is_vararg {
+				buf.writeln('\tmut err := GDExtensionCallError{}')
+				buf.writeln('\tgdf.object_method_bind_call(mb, ${ptr}, voidptr(${arg_ptr}), total_args, ${ret_ptr}, &err)')
+			} else {
+				buf.writeln('\tgdf.object_method_bind_ptrcall(mb, ${ptr}, ${arg_ptr}, ${ret_ptr})')
+			}
 
 			// return
 			if has_return {
