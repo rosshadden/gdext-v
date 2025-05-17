@@ -389,6 +389,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 
 		// methods
 		for method in class.methods {
+			has_args := method.arguments.len > 0
 			has_return := method.return_type != ''
 			return_type := convert_type(method.return_type)
 			method_name := convert_name(method.name)
@@ -444,7 +445,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 			}
 			// varargs get tacked on to the end
 			if method.is_vararg {
-				if method.arguments.len > 0 {
+				if has_args {
 					buf.write_string(', ')
 				}
 				buf.write_string('varargs ...Variant')
@@ -466,17 +467,18 @@ fn (g &Generator) gen_builtin_classes() ! {
 			}
 
 			// body
-			if has_return {
-				buf.writeln('\tmut result := ${convert_return(return_type, method.return_type,
-					g.enum_defaults)}')
-			}
 			buf.writeln('\tfnname := StringName.new("${method.name}")')
 			buf.writeln('\tdefer { fnname.deinit() }')
 
 			buf.writeln('\tf := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_${class.name.to_lower()}, voidptr(&fnname), ${method.hash})')
 
 			// args
-			if method.arguments.len > 0 {
+			// NOTE: this won't handle optionals + varargs if any were ever added
+			if method.is_vararg {
+				// varargs can't used a fixed-size array
+				buf.writeln('\ttotal_args := ${method.arguments.len} + varargs.len')
+				buf.writeln('\tmut args := []voidptr{cap: total_args}')
+			} else if has_args {
 				buf.writeln('\tmut args := unsafe { [${method.arguments.len}]voidptr{} }')
 				for a, arg in method.arguments {
 					name := convert_name(arg.name)
@@ -488,19 +490,43 @@ fn (g &Generator) gen_builtin_classes() ! {
 					buf.writeln('\targs[${a}] = &${name_prefix}${name}')
 				}
 			}
+			if method.is_vararg {
+				// add each vararg
+				buf.writeln('
+					|	for i in 0..varargs.len {
+					|		args << &varargs[i]
+					|	}
+				'.strip_margin().trim('\n'))
+			}
 
 			// call
-			arg_ptr := if method.arguments.len > 0 {
-				'voidptr(&args[0])'
-			} else {
-				'unsafe{nil}'
+			arg_ptr := match true {
+				method.is_vararg {
+					'unsafe { &args[0] }'
+				}
+				has_args {
+					'&args[0]'
+				}
+				else {
+					'unsafe{nil}'
+				}
 			}
 			return_ptr := if has_return {
 				'voidptr(&result)'
 			} else {
 				'unsafe{nil}'
 			}
-			buf.writeln('\tf(${ptr}, ${arg_ptr}, ${return_ptr}, ${method.arguments.len})')
+			if has_return {
+				buf.writeln('\tmut result := ${convert_return(return_type, method.return_type,
+					g.enum_defaults)}')
+			}
+			if method.is_vararg {
+				// buf.writeln('\tmut err := GDExtensionCallError{}')
+				// buf.writeln('\tgdf.object_method_bind_call(mb, ${ptr}, voidptr(${arg_ptr}), total_args, ${ret_ptr}, &err)')
+				buf.writeln('\tf(${ptr}, ${arg_ptr}, ${return_ptr}, total_args)')
+			} else {
+				buf.writeln('\tf(${ptr}, ${arg_ptr}, ${return_ptr}, ${method.arguments.len})')
+			}
 
 			// return
 			if has_return {
@@ -842,6 +868,7 @@ fn (g &Generator) gen_classes() ! {
 		'.strip_margin().trim('\n'))
 
 			// args
+			// NOTE: this won't handle optionals + varargs if any were ever added
 			if method.is_vararg {
 				// varargs can't used a fixed-size array
 				buf.writeln('\ttotal_args := ${method.arguments.len} + varargs.len')
@@ -899,11 +926,12 @@ fn (g &Generator) gen_classes() ! {
 				// add each vararg
 				buf.writeln('
 					|	for i in 0..varargs.len {
-							args << voidptr(&varargs[i])
 					|		args << &varargs[i]
 					|	}
 				'.strip_margin().trim('\n'))
 			}
+
+			// call
 			arg_ptr := match true {
 				method.is_vararg {
 					'unsafe { &args[0] }'
