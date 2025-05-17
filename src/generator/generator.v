@@ -379,11 +379,12 @@ fn (g &Generator) gen_builtin_classes() ! {
 
 		// destructor
 		if class.has_destructor {
-			buf.writeln('')
-			buf.writeln('pub fn (s &${class.name}) deinit() {')
-			buf.writeln('\tdestructor := gdf.variant_get_ptr_destructor(GDExtensionVariantType.type_${class.name.to_lower()})')
-			buf.writeln('\tdestructor(voidptr(s))')
-			buf.writeln('}')
+			buf.writeln('
+				|pub fn (s &${class.name}) deinit() {
+				|	destructor := gdf.variant_get_ptr_destructor(GDExtensionVariantType.type_${class.name.to_lower()})
+				|	destructor(voidptr(s))
+				|}
+			'.strip_margin().trim_right('\n'))
 		}
 
 		// methods
@@ -391,10 +392,34 @@ fn (g &Generator) gen_builtin_classes() ! {
 			has_return := method.return_type != ''
 			return_type := convert_type(method.return_type)
 			method_name := convert_name(method.name)
+			has_optionals := method.arguments.any(it.default_value != '')
 			ptr := match true {
 				method.is_static { 'unsafe{nil}' }
 				class.name in g.class_names { 's.ptr' }
 				else { 'voidptr(s)' }
+			}
+
+			// create trailing struct for optional arguments
+			if has_optionals {
+				buf.writeln('')
+				buf.writeln('@[params]')
+				buf.writeln('pub struct ${class.name}_${method_name}_Cfg {')
+				buf.writeln('pub:')
+				for arg in method.arguments {
+					// skip required args
+					if arg.default_value == '' {
+						continue
+					}
+					field_name := convert_name(arg.name)
+					field_type := convert_strings(convert_type(arg.type))
+					field_value := if val := convert_dumb_value(arg.type, arg.default_value) {
+						' = ${val}'
+					} else {
+						''
+					}
+					buf.writeln('\t${field_name} ${field_type}${field_value}')
+				}
+				buf.writeln('}')
 			}
 
 			// fn def
@@ -405,12 +430,32 @@ fn (g &Generator) gen_builtin_classes() ! {
 				buf.write_string('pub fn (s &${class.name}) ${method_name}(')
 			}
 
-			// args signature
+			// args
+			mut first_arg_optional := true
 			for a, arg in method.arguments {
+				if arg.default_value != '' {
+					continue
+				}
+				first_arg_optional = false
 				if a != 0 {
 					buf.write_string(', ')
 				}
 				buf.write_string('${convert_name(arg.name)} ${convert_type(arg.type)}')
+			}
+			// varargs get tacked on to the end
+			if method.is_vararg {
+				if method.arguments.len > 0 {
+					buf.write_string(', ')
+				}
+				buf.write_string('varargs ...Variant')
+			}
+
+			// trailing struct
+			if has_optionals {
+				if !first_arg_optional {
+					buf.write_string(', ')
+				}
+				buf.write_string('cfg ${class.name}_${method_name}_Cfg')
 			}
 
 			// return signature
@@ -434,8 +479,13 @@ fn (g &Generator) gen_builtin_classes() ! {
 			if method.arguments.len > 0 {
 				buf.writeln('\tmut args := unsafe { [${method.arguments.len}]voidptr{} }')
 				for a, arg in method.arguments {
-					mut name := convert_name(arg.name)
-					buf.writeln('\targs[${a}] = voidptr(&${name})')
+					name := convert_name(arg.name)
+					name_prefix := if has_optionals && arg.default_value != '' {
+						'cfg.'
+					} else {
+						''
+					}
+					buf.writeln('\targs[${a}] = &${name_prefix}${name}')
 				}
 			}
 
@@ -803,7 +853,7 @@ fn (g &Generator) gen_classes() ! {
 			}
 			// add the fixed arguments
 			for a, arg in method.arguments {
-				mut name := convert_name(arg.name)
+				name := convert_name(arg.name)
 				name_prefix := if has_optionals && arg.default_value != '' {
 					'cfg.'
 				} else {
