@@ -413,4 +413,6 @@ pub fn setup_lib(gpaddr fn (&i8) GDExtensionInterfaceFunctionPtr, clp GDExtensio
 		editor_add_plugin:                                  unsafe { GDExtensionInterfaceEditorAddPlugin(gpaddr(c'editor_add_plugin')) }
 		editor_remove_plugin:                               unsafe { GDExtensionInterfaceEditorRemovePlugin(gpaddr(c'editor_remove_plugin')) }
 	}
+
+	enable_hot_reload()
 }

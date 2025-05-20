@@ -87,7 +87,7 @@ patchelf --clear-exexstack lib/libvlang.so
 ```
 
 I have this stuff in a bin file that I run.
-Again, check out my [babel](https://github.com/gamma-ray-studios/babel/blob/main/bin/build.vsh) project for now until I add bettor docs and tooling.
+Again, check out my [babel](https://github.com/gamma-ray-studios/babel/blob/main/bin/build.vsh) project for now until I add better docs and tooling.
 
 ## Usage
 
