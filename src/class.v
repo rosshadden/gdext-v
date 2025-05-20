@@ -380,106 +380,134 @@ pub fn register_class_methods[T](mut ci ClassInfo) {
 
 pub fn register_class_properties[T](mut ci ClassInfo) {
 	$for field in T.fields {
-		if 'gd.export' in field.attrs || 'gd.expose' in field.attrs {
-			is_export := 'gd.export' in field.attrs
-			field_name := StringName.new(field.name)
-			hint := String.new('hint_string')
-			usage := if is_export {
-				PropertyUsageFlags.property_usage_default
-			} else {
-				PropertyUsageFlags.property_usage_script_variable
-			}
-
-			// get proper type for this field
-			field_type := get_property_type(typeof(field.typ).name)
-			field_data := field
-
-			info := GDExtensionPropertyInfo{
-				type_:       field_type
-				name:        &field_name
-				class_name:  &ci.class_name
-				hint:        .property_hint_none
-				hint_string: &hint
-				usage:       usage
-			}
-
-			getter_name := StringName.new('get_${field.name}')
-			getter_info := GDExtensionClassMethodInfo{
-				name:                   &getter_name
-				method_userdata:        &field_data
-				call_func:              property_getter[T]
-				ptrcall_func:           fn (user_data voidptr, instance GDExtensionClassInstancePtr, args &GDExtensionConstTypePtr, ret GDExtensionTypePtr) {
-					dump('TODO: ptrcall_func')
+		mut attrs := []VAttribute{}
+		for attr in field.attrs {
+			parts := attr.split_n(':', 2).map(it.trim_space())
+			match parts.len {
+				1 {
+					attrs << VAttribute{
+						name: parts[0]
+					}
 				}
-				method_flags:           .gdextension_method_flag_normal
-				has_return_value:       GDExtensionBool(true)
-				return_value_info:      &info
-				return_value_metadata:  .gdextension_method_argument_metadata_none
-				argument_count:         0
-				arguments_info:         unsafe { nil }
-				arguments_metadata:     unsafe { nil }
-				default_argument_count: 0
-				default_arguments:      unsafe { nil }
-			}
-			gdf.classdb_register_extension_class_method(gdf.clp, &ci.class_name, &getter_info)
-
-			// set up setter
-			setter_name := StringName.new('set_${field.name}')
-			value_sn := StringName.new('value')
-
-			// create setter argument info
-			arg_info_size := int(sizeof(GDExtensionPropertyInfo))
-			arg_info_ptr := unsafe { &GDExtensionPropertyInfo(C.malloc(arg_info_size)) }
-			if unsafe { arg_info_ptr == nil } {
-				panic('Failed to allocate memory for arguments_info')
-			}
-
-			// create the argument metadata
-			setter_arg_metadata_size := int(sizeof(GDExtensionClassMethodArgumentMetadata))
-			arg_metadata_ptr := unsafe { &GDExtensionClassMethodArgumentMetadata(C.malloc(setter_arg_metadata_size)) }
-			if unsafe { arg_metadata_ptr == nil } {
-				panic('Failed to allocate memory for arguments_metadata')
-			}
-			unsafe {
-				*arg_metadata_ptr = .gdextension_method_argument_metadata_none
-			}
-			// we need a mutable version of GDExtensionPropertyInfo to set fields
-			// since struct fields are immutable by default
-			property_info := GDExtensionPropertyInfo{
-				type_:       field_type
-				name:        &value_sn
-				class_name:  &ci.class_name
-				hint:        .property_hint_none
-				hint_string: &hint
-				usage:       .property_usage_default
-			}
-
-			// copy the property info to our allocated memory
-			unsafe { C.memcpy(arg_info_ptr, &property_info, arg_info_size) }
-
-			// register setter method
-			setter_info := GDExtensionClassMethodInfo{
-				name:                   &setter_name
-				method_userdata:        &field_data
-				call_func:              property_setter[T]
-				ptrcall_func:           fn (user_data voidptr, instance GDExtensionClassInstancePtr, args &GDExtensionConstTypePtr, ret GDExtensionTypePtr) {
-					dump('TODO: ptrcall_func')
+				2 {
+					attrs << VAttribute{
+						name:    parts[0]
+						arg:     parts[1]
+						has_arg: true
+					}
 				}
-				method_flags:           .gdextension_method_flag_normal
-				has_return_value:       GDExtensionBool(false)
-				return_value_info:      unsafe { nil }
-				return_value_metadata:  .gdextension_method_argument_metadata_none
-				argument_count:         1
-				arguments_info:         arg_info_ptr
-				arguments_metadata:     arg_metadata_ptr
-				default_argument_count: 0
-				default_arguments:      unsafe { nil }
+				else {
+					panic('Invalid attribute format')
+				}
 			}
-			gdf.classdb_register_extension_class_method(gdf.clp, &ci.class_name, &setter_info)
+		}
 
-			// register the property
-			gdf.classdb_register_extension_class_property(gdf.clp, &ci.class_name, &info,
-				&setter_name, &getter_name)
+		for attr in attrs {
+			match attr.name {
+				'gd.export', 'gd.expose' {
+					field_name := StringName.new(field.name)
+					hint := String.new('hint_string')
+					usage := if attr.name == 'gd.export' {
+						PropertyUsageFlags.property_usage_default
+					} else {
+						PropertyUsageFlags.property_usage_script_variable
+					}
+
+					// get proper type for this field
+					field_type := get_property_type(typeof(field.typ).name)
+					field_data := field
+
+					info := GDExtensionPropertyInfo{
+						type_:       field_type
+						name:        &field_name
+						class_name:  &ci.class_name
+						hint:        .property_hint_none
+						hint_string: &hint
+						usage:       usage
+					}
+
+					getter_name := StringName.new('get_${field.name}')
+					getter_info := GDExtensionClassMethodInfo{
+						name:                   &getter_name
+						method_userdata:        &field_data
+						call_func:              property_getter[T]
+						ptrcall_func:           fn (user_data voidptr, instance GDExtensionClassInstancePtr, args &GDExtensionConstTypePtr, ret GDExtensionTypePtr) {
+							dump('TODO: ptrcall_func')
+						}
+						method_flags:           .gdextension_method_flag_normal
+						has_return_value:       GDExtensionBool(true)
+						return_value_info:      &info
+						return_value_metadata:  .gdextension_method_argument_metadata_none
+						argument_count:         0
+						arguments_info:         unsafe { nil }
+						arguments_metadata:     unsafe { nil }
+						default_argument_count: 0
+						default_arguments:      unsafe { nil }
+					}
+					gdf.classdb_register_extension_class_method(gdf.clp, &ci.class_name,
+						&getter_info)
+
+					// set up setter
+					setter_name := StringName.new('set_${field.name}')
+					value_sn := StringName.new('value')
+
+					// create setter argument info
+					arg_info_size := int(sizeof(GDExtensionPropertyInfo))
+					arg_info_ptr := unsafe { &GDExtensionPropertyInfo(C.malloc(arg_info_size)) }
+					if unsafe { arg_info_ptr == nil } {
+						panic('Failed to allocate memory for arguments_info')
+					}
+
+					// create the argument metadata
+					setter_arg_metadata_size := int(sizeof(GDExtensionClassMethodArgumentMetadata))
+					arg_metadata_ptr := unsafe { &GDExtensionClassMethodArgumentMetadata(C.malloc(setter_arg_metadata_size)) }
+					if unsafe { arg_metadata_ptr == nil } {
+						panic('Failed to allocate memory for arguments_metadata')
+					}
+					unsafe {
+						*arg_metadata_ptr = .gdextension_method_argument_metadata_none
+					}
+					// we need a mutable version of GDExtensionPropertyInfo to set fields
+					// since struct fields are immutable by default
+					property_info := GDExtensionPropertyInfo{
+						type_:       field_type
+						name:        &value_sn
+						class_name:  &ci.class_name
+						hint:        .property_hint_none
+						hint_string: &hint
+						usage:       .property_usage_default
+					}
+
+					// copy the property info to our allocated memory
+					unsafe { C.memcpy(arg_info_ptr, &property_info, arg_info_size) }
+
+					// register setter method
+					setter_info := GDExtensionClassMethodInfo{
+						name:                   &setter_name
+						method_userdata:        &field_data
+						call_func:              property_setter[T]
+						ptrcall_func:           fn (user_data voidptr, instance GDExtensionClassInstancePtr, args &GDExtensionConstTypePtr, ret GDExtensionTypePtr) {
+							dump('TODO: ptrcall_func')
+						}
+						method_flags:           .gdextension_method_flag_normal
+						has_return_value:       GDExtensionBool(false)
+						return_value_info:      unsafe { nil }
+						return_value_metadata:  .gdextension_method_argument_metadata_none
+						argument_count:         1
+						arguments_info:         arg_info_ptr
+						arguments_metadata:     arg_metadata_ptr
+						default_argument_count: 0
+						default_arguments:      unsafe { nil }
+					}
+					gdf.classdb_register_extension_class_method(gdf.clp, &ci.class_name,
+						&setter_info)
+
+					// register the property
+					gdf.classdb_register_extension_class_property(gdf.clp, &ci.class_name,
+						&info, &setter_name, &getter_name)
+				}
+				else {}
+			}
 		}
 	}
 }
