@@ -2,6 +2,7 @@ module gd
 
 pub struct ClassInfo {
 mut:
+	name            string
 	class_name      StringName
 	parent_name     StringName
 	virtual_methods Dictionary
@@ -26,6 +27,7 @@ pub fn register_class_with_name[T](parent_class string, class_name string) {
 	// copy default values:
 	ci_v := ClassInfo{}
 	unsafe { C.memcpy(ci, &ci_v, sizeof[ClassInfo]()) }
+	ci.name = T.name
 	ci.class_name = sn
 	ci.parent_name = pn
 	ci.virtual_methods = Dictionary.new0()
@@ -78,7 +80,6 @@ pub fn register_class[T](parent_class string) {
 fn class_set_func[T](instance GDExtensionClassInstancePtr, name &StringName, variant &Variant) GDExtensionBool {
 	vname := name.to_v()
 	mut handled := false
-
 	$for field in T.fields {
 		if field.name == vname {
 			$if field.typ is FromVariant {
@@ -103,7 +104,6 @@ fn class_set_func[T](instance GDExtensionClassInstancePtr, name &StringName, var
 fn class_get_func[T](instance GDExtensionClassInstancePtr, name &StringName, mut variant Variant) GDExtensionBool {
 	vname := name.to_v()
 	mut handled := false
-
 	$for field in T.fields {
 		if field.name == vname {
 			$if field.typ is ToVariant {
@@ -322,12 +322,10 @@ fn class_recreate_instance[T](user_data voidptr, object &Object) GDExtensionClas
 	cb := GDExtensionInstanceBindingCallbacks{}
 	gdf.object_set_instance_binding(object, gdf.clp, t, cb)
 
-	// call init if T implements ClassInitable
 	$if T is ClassInitable {
 		mut ci := ClassInitable(t)
 		ci.init()
 	}
-
 	return unsafe { GDExtensionClassInstancePtr(t) }
 }
 
@@ -379,7 +377,10 @@ pub fn register_class_methods[T](mut ci ClassInfo) {
 }
 
 pub fn register_class_properties[T](mut ci ClassInfo) {
+	mut needs_ready := false
+
 	$for field in T.fields {
+		// TODO: abstract.exe
 		mut attrs := []VAttribute{}
 		for attr in field.attrs {
 			parts := attr.split_n(':', 2).map(it.trim_space())
@@ -506,13 +507,86 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 					gdf.classdb_register_extension_class_property(gdf.clp, &ci.class_name,
 						&info, &setter_name, &getter_name)
 				}
-				else {}
+				'gd.onready', 'gd.signal' {
+					needs_ready = true
+				}
+				else {
+					println('
+						|T: ${T.name}
+						|field: ${field.name}
+						|attribute: ${attr.name}
+						|arg: ${attr.arg}
+					'.strip_margin())
+				}
 			}
 		}
 	}
+
+	if needs_ready {
+		register_ready[T](mut ci)
+	}
 }
 
-// generic getter function for properties
+fn register_ready[T](mut ci ClassInfo) {
+	func := call_func_ready[T]
+	ivar := i64(func)
+	var := i64_to_variant(ivar)
+	sn := StringName.new('_ready')
+	defer { sn.deinit() }
+	ci.virtual_methods.index_set_named(sn, var) or { panic(err) }
+}
+
+// Custom ready methed.
+fn call_func_ready[T](instance GDExtensionClassInstancePtr, args &GDExtensionConstTypePtr, ret GDExtensionTypePtr) {
+	mut inst := unsafe { &T(instance) }
+
+	$for field in T.fields {
+		mut attrs := map[string]VAttribute{}
+		for attr in field.attrs {
+			parts := attr.split_n(':', 2).map(it.trim_space())
+			match parts.len {
+				1 {
+					attrs[parts[0]] = VAttribute{
+						name: parts[0]
+					}
+				}
+				2 {
+					attrs[parts[0]] = VAttribute{
+						name:    parts[0]
+						arg:     parts[1]
+						has_arg: true
+					}
+				}
+				else {
+					panic('Invalid attribute format')
+				}
+			}
+		}
+		if attr := attrs['gd.onready'] {
+			path := if attr.arg == '' { field.name } else { attr.arg }
+			node := &Node(inst)
+			// inst.$(field.name) = node.get_node_as[field.typ](path)
+			// inst.$(field.name) = unsafe { node.get_node_v[(field.typ)](path) }
+			// idea: make an interface fn that returns a node with its type
+		}
+		if attr := attrs['gd.signal'] {
+			$if field.typ is Signal {
+				name := if attr.arg == '' { field.name } else { attr.arg }
+				inst_node := &Node(inst)
+				inst_obj := &Object(inst)
+				inst_node.add_user_signal(name)
+				inst.$(field.name) = Signal.new2(inst_obj, StringName.new(name))
+			}
+		}
+	}
+
+	$if T is INodeReady {
+		mut v_inst := &INodeReady(inst)
+		v_inst.ready_()
+	}
+}
+
+// Generic getter function for properties.
 fn property_getter[T](user_data voidptr, instance GDExtensionClassInstancePtr, args &&Variant, arg_count GDExtensionInt, ret &Variant, err &GDExtensionCallError) {
 	mut inst := unsafe { &T(instance) }
 	field_data := unsafe { &FieldData(user_data) }
@@ -546,7 +620,7 @@ fn property_getter[T](user_data voidptr, instance GDExtensionClassInstancePtr, a
 	}
 }
 
-// generic setter function for properties
+// Generic setter function for properties.
 fn property_setter[T](user_data voidptr, instance GDExtensionClassInstancePtr, args &&Variant, arg_count GDExtensionInt, ret &Variant, err &GDExtensionCallError) {
 	mut inst := unsafe { &T(instance) }
 	value := unsafe { &args[0] }
