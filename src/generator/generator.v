@@ -1057,7 +1057,7 @@ fn (g &Generator) gen_virtual_methods() ! {
 
 			buf.writeln('')
 			buf.writeln('fn ${convert_type(class.name).to_lower()}_${convert_name(method.name)}[T] (inst GDExtensionClassInstancePtr, args &GDExtensionConstTypePtr, ret GDExtensionTypePtr) {')
-			buf.writeln('\tmut v_inst := &${name}(unsafe{&T(voidptr(inst))})')
+			buf.writeln('\tmut v_inst := &${name}(unsafe{&T(inst)})')
 
 			for i, arg in method.arguments {
 				buf.writeln('\t${convert_name(arg.name)} := unsafe{&${convert_type(arg.type)}(args[${i}])}')
@@ -1081,6 +1081,7 @@ fn (g &Generator) gen_virtual_methods() ! {
 	}
 
 	// registrar
+	buf.writeln('')
 	buf.writeln('fn register_virtual_methods[T](mut ci ClassInfo) {')
 	for class in g.api.classes {
 		for method in class.methods {
@@ -1091,19 +1092,19 @@ fn (g &Generator) gen_virtual_methods() ! {
 			name := interface_name(.virtual, class.name, method.name)
 			full_name := '${convert_type(class.name).to_lower()}_${convert_name(method.name)}'
 
-			buf.writeln('\t\$if T is ${name} {{')
-
 			// HACK: force function generation
-			buf.writeln('\t\t// HACK: force function generation')
-			buf.writeln('\t\tif false { unsafe { ${full_name}[T](nil, nil, nil) } }')
-			buf.writeln('\t\tfunc := ${full_name}[T]')
-			buf.writeln('\t\tivar := i64(func)')
-			buf.writeln('\t\tvar := i64_to_variant(ivar)')
-			buf.writeln('\t\tsn := StringName.new("${method.name}")')
-			buf.writeln('\t\tdefer { sn.deinit() }')
-			buf.writeln('\t\tci.virtual_methods.index_set_named(sn, var) or {panic(err)}')
-
-			buf.writeln('\t}}')
+			buf.writeln('
+				|	\$if T is ${name} {
+				|		// HACK: force function generation
+				|		if false { unsafe { ${full_name}[T](nil, nil, nil) } }
+				|		func := ${full_name}[T]
+				|		ivar := i64(func)
+				|		var := i64_to_variant(ivar)
+				|		sn := StringName.new("${method.name}")
+				|		defer { sn.deinit() }
+				|		ci.virtual_methods.index_set_named(sn, var) or {panic(err)}
+				|	}
+			'.strip_margin().trim('\n'))
 		}
 	}
 	buf.writeln('}')
