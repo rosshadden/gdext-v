@@ -537,7 +537,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 			buf.writeln('}')
 		}
 
-		// to variant
+		// to Variant
 		buf.writeln('
 			|pub fn (s &${class.name}) to_variant() Variant {
 			|	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_${class.name.to_lower()})
@@ -547,7 +547,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 			|}
 		'.strip_margin().trim_right('\n'))
 
-		// from variant
+		// from Variant
 		buf.writeln('
 			|pub fn (mut s ${class.name}) from_variant(variant &Variant) {
 			|	variant_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_${class.name.to_lower()})
@@ -735,7 +735,7 @@ fn (g &Generator) gen_classes() ! {
 			".strip_margin().trim_right('\n'))
 		}
 
-		// to variant
+		// to Variant
 		buf.writeln('
 			|pub fn (s &${class.name}) to_variant() Variant {
 			|	if s.ptr == unsafe{nil} { return Variant{} }
@@ -746,7 +746,7 @@ fn (g &Generator) gen_classes() ! {
 			|}
 		'.strip_margin().trim_right('\n'))
 
-		// from variant
+		// from Variant
 		buf.writeln('
 			|pub fn (mut s ${class.name}) from_variant(variant &Variant) {
 			|	variant_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_object)

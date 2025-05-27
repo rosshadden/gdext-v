@@ -87,6 +87,8 @@ pub fn f64_from_variant(var &Variant) f64 {
 	return t
 }
 
+// TODO: unify all these misc cast/path methods
+
 pub fn (s &Object) try_cast_to[T]() ?T {
 	sn := StringName.new(T.name.split('.').last())
 	defer { sn.deinit() }
@@ -94,18 +96,20 @@ pub fn (s &Object) try_cast_to[T]() ?T {
 	t := T{
 		ptr: gdf.object_cast_to(s.ptr, class_tag)
 	}
+	println('
+		t_name: ${T.name}
+		type_name: ${T.name.split('.').last()}
+		class_tag: ${class_tag}
+		t.ptr: ${t.ptr}
+		nil?: ${t.ptr == unsafe { nil }}
+	')
 
-	if t.ptr == unsafe { nil } {
-		return none
-	} else {
-		return t
-	}
+	return t
 }
 
-// TODO: unify all these misc cast/path methods
-
 pub fn (s &Object) cast_to[T]() T {
-	return s.try_cast_to[T]() or { panic('cannot cast: ${s} -> ${T.name.split('.').last()}') }
+	type_name := T.name.split('.').last()
+	return s.try_cast_to[T]() or { panic('cannot cast: ${s} -> ${type_name}') }
 }
 
 pub fn (s &Object) try_cast_to_v[T]() ?&T {
@@ -128,20 +132,18 @@ pub fn (s &Object) try_cast_to_v[T]() ?&T {
 	if v_ptr == unsafe { nil } {
 		return none
 	}
-	v := unsafe { &T(v_ptr) }
-	return v
+	return unsafe { &T(v_ptr) }
 }
 
 pub fn (s &Object) cast_to_v[T]() &T {
 	type_name := T.name.split('.').last()
-	return s.try_cast_to_v[T]() or { panic('cannot cast: ${s} -> ${type_name}') }
+	return s.try_cast_to_v[T]() or { panic('cannot cast: ${s} -> &${type_name}') }
 }
 
 pub fn (s &Node) get_node_v(path string) Node {
 	np := NodePath.new(path)
 	defer { np.deinit() }
-	node := s.get_node(np)
-	return node
+	return s.get_node(np)
 }
 
 pub fn (s &Node) get_node_as[T](path string) T {
@@ -151,6 +153,5 @@ pub fn (s &Node) get_node_as[T](path string) T {
 pub fn Callable.new(object &Object, method string) Callable {
 	sn := StringName.new(method)
 	defer { sn.deinit() }
-	c := Callable.new2(object, sn)
-	return c
+	return Callable.new2(object, sn)
 }
