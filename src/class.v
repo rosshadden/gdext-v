@@ -521,7 +521,6 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 			}
 		}
 	}
-
 	if needs_ready {
 		register_ready[T](mut ci)
 	}
@@ -562,12 +561,16 @@ fn call_func_ready[T](instance GDExtensionClassInstancePtr, args &GDExtensionCon
 				}
 			}
 		}
+
 		if attr := attrs['gd.onready'] {
 			path := if attr.arg == '' { field.name } else { attr.arg }
-			node := &Node(inst)
-			// inst.$(field.name) = node.get_node_as[field.typ](path)
-			// inst.$(field.name) = unsafe { node.get_node_v[(field.typ)](path) }
-			// idea: make an interface fn that returns a node with its type
+			node := (&Node(inst)).get_node_v(path)
+			unsafe {
+				f_ptr := &voidptr(&inst.$(field.name))
+				v_ptr := &voidptr(&node)
+				*f_ptr = *v_ptr
+				_ = f_ptr
+			}
 		}
 		if attr := attrs['gd.signal'] {
 			$if field.typ is Signal {
