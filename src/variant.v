@@ -73,7 +73,6 @@ pub fn Variant.from_f64(f &f64) Variant {
 	return result
 }
 
-
 // TODO: move to variant
 pub fn i64_to_variant(i &i64) Variant {
 	return Variant.from_i64(i)

@@ -582,7 +582,6 @@ fn call_func_ready[T](instance GDExtensionClassInstancePtr, args &GDExtensionCon
 			}
 		}
 	}
-
 	$if T is INodeReady {
 		mut v_inst := &INodeReady(inst)
 		v_inst.ready_()

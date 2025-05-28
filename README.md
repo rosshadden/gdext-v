@@ -2,13 +2,15 @@
 
 V bindings for Godot.
 
+## Examples
+
+Check out the [gdext-v-demos](https://github.com/gamma-ray-studios/babel/blob/main/src/main.v) repo for examples.
+
 ## Setup
 
 I (obviously) don't have a lot of docs yet and haven't spent time making this project user-friendly yet.
 But here are the steps that should get you started.
 These will definitely improve over time.
-
-Look at my [babel](https://github.com/gamma-ray-studios/babel/blob/main/src/main.v) project for a more detailed example for now.
 
 ### Setup library
 
@@ -87,7 +89,7 @@ patchelf --clear-exexstack lib/libvlang.so
 ```
 
 I have this stuff in a bin file that I run.
-Again, check out my [babel](https://github.com/gamma-ray-studios/babel/blob/main/bin/build.vsh) project for now until I add better docs and tooling.
+Check out my [babel](https://github.com/gamma-ray-studios/babel/blob/main/bin/build.vsh) project for now until I add better docs and tooling.
 
 ## Usage
 
