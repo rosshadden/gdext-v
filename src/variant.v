@@ -55,20 +55,33 @@ pub fn (s &Variant) to_string() string {
 	return t.to_v()
 }
 
-// TODO: move to variant
-pub fn i64_to_variant(i &i64) Variant {
+pub fn Variant.from_i64(i &i64) Variant {
 	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_i64)
 	result := Variant{}
 	to_variant(GDExtensionUninitializedVariantPtr(&result), GDExtensionTypePtr(i))
 	return result
 }
 
-// TODO: move to variant
-pub fn f64_to_variant(f &f64) Variant {
+pub fn Variant.from_int(i &int) Variant {
+	return Variant.from_i64(i64(i))
+}
+
+pub fn Variant.from_f64(f &f64) Variant {
 	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_f64)
 	result := Variant{}
 	to_variant(GDExtensionUninitializedVariantPtr(&result), GDExtensionTypePtr(f))
 	return result
+}
+
+
+// TODO: move to variant
+pub fn i64_to_variant(i &i64) Variant {
+	return Variant.from_i64(i)
+}
+
+// TODO: move to variant
+pub fn f64_to_variant(f &f64) Variant {
+	return Variant.from_f64(f)
 }
 
 // TODO: move to variant
@@ -96,13 +109,6 @@ pub fn (s &Object) try_cast_to[T]() ?T {
 	t := T{
 		ptr: gdf.object_cast_to(s.ptr, class_tag)
 	}
-	println('
-		t_name: ${T.name}
-		type_name: ${T.name.split('.').last()}
-		class_tag: ${class_tag}
-		t.ptr: ${t.ptr}
-		nil?: ${t.ptr == unsafe { nil }}
-	')
 
 	return t
 }
@@ -154,4 +160,9 @@ pub fn Callable.new(object &Object, method string) Callable {
 	sn := StringName.new(method)
 	defer { sn.deinit() }
 	return Callable.new2(object, sn)
+}
+
+pub fn (s &PackedScene) instantiate_as[T](cfg PackedScene_instantiate_Cfg) T {
+	scene := s.instantiate(cfg)
+	return scene.cast_to[T]()
 }
