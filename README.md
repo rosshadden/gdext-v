@@ -4,7 +4,7 @@ V bindings for Godot.
 
 ## Examples
 
-Check out the [gdext-v-demos](https://github.com/gamma-ray-studios/babel/blob/main/src/main.v) repo for examples.
+Check out the [demo repository](https://github.com/rosshadden/gdext-v-demos) for examples.
 
 ## Setup
 
@@ -88,8 +88,15 @@ v -shared -enable-globals -o lib/libvlang.so -d no_backtrace .
 patchelf --clear-exexstack lib/libvlang.so
 ```
 
-I have this stuff in a bin file that I run.
-Check out my [babel](https://github.com/gamma-ray-studios/babel/blob/main/bin/build.vsh) project for now until I add better docs and tooling.
+The `patchelf` step is to remove exec bit from the library, which is set by `tcc`.
+Thus if using another compiler (with the `-cc` flag) that step may be omitted.
+However, `tcc` is _leaps and bounds_ faster than `clang` or `gcc` in my testing,
+so I recommend using it throughout development and using a different compiler for release builds.
+
+I do all this and more [in a build script in the demo repo](https://github.com/rosshadden/gdext-v-demos/blob/44aec37c1ef473ec839660a97abe6a14860b362f/bin/build.vsh).
+
+Another, more minimal, repo you could reference is the [babel](https://github.com/gamma-ray-studios/babel/blob/main/bin/build.vsh) project,
+which is meant to showcase using basic functionality of many Godot language bindings, including `gdext-v`.
 
 ## Usage
 
@@ -101,15 +108,13 @@ patchelf --clear-exexstack lib/libvlang.so
 
 ## State
 
-Just about everything needed to make games with V has been implemented.
-The only things left that I am currently aware of are signal support and ~class constants~, ~both~ one of which I know exactly how to do.
-Which is why I haven't gotten to them yet---I was prioritizing things I wanted but didn't know how to do to tackle the hard problems first.
+Everything needed to make games with V has been implemented.
 
-The [Are we game yet?](https://github.com/rosshadden/gdext-v/milestone/1) milestone tracks the feasibility of using these bindings for a full game.
+~The [Are we game yet?](https://github.com/rosshadden/gdext-v/milestone/1) milestone tracks the feasibility of using these bindings for a full game~ (completed).
 The [Are we there yet?](https://github.com/rosshadden/gdext-v/milestone/3) milestone tracks how pleasant it is to work with, after which I plan to announce the project more publicly to the world and encourage devs to use it.
 I have a _lot_ of things planned, many of which should drastically improve the ergonomics of working with these bindings.
-It's not bad as is, to be honest, because I have already been spending time making certain parts ergonomic and simple to use.
-I just have a really low tolerance for friction and I want to make these really nice to work with.
+It's not bad as is, to be honest, because I have already been spending time improving parts whenever I encounter spiky edges.
+I just have a really low tolerance for friction and I want to make this project as pleasant as realistically possible to work with.
 
 ## Helpful resources
 
@@ -117,5 +122,4 @@ I just have a really low tolerance for friction and I want to make these really 
 - [godot-rust](https://github.com/godot-rust/gdext)
 - [gdext-nim](https://github.com/godot-nim/gdext-nim)
 - jcweaver997's work on his [vgdextension](https://github.com/jcweaver997/vgdextension) was invaluable to this project.
-I found it while bashing my head against the wall on something and searching Github with `path:*.v` queries.
-Had I known about it from the outset I might have used it as a starting point 😅.
+I found it while bashing my head against the wall on something specific and searching Github with `NOT is:fork path:*.v` queries (👈 pro tip).
