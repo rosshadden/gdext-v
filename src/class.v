@@ -8,12 +8,12 @@ mut:
 	virtual_methods Dictionary
 }
 
-pub interface ClassInitable {
+pub interface IClassInit {
 mut:
 	init()
 }
 
-pub interface ClassDeinitable {
+pub interface IClassDeinit {
 mut:
 	deinit()
 }
@@ -278,7 +278,7 @@ fn class_create_instance1[T](user_data voidptr) &Object {
 
 fn class_create_instance[T](user_data voidptr, notify_postinitialize &GDExtensionBool) &Object {
 	ud := unsafe { &ClassInfo(user_data) }
-	t := unsafe { &T(gdf.mem_alloc(sizeof[T]())) }
+	mut t := unsafe { &T(gdf.mem_alloc(sizeof[T]())) }
 	// copy default values:
 	t_v := T{}
 	unsafe { C.memcpy(t, &t_v, sizeof[T]()) }
@@ -290,8 +290,39 @@ fn class_create_instance[T](user_data voidptr, notify_postinitialize &GDExtensio
 	cb := GDExtensionInstanceBindingCallbacks{}
 	gdf.object_set_instance_binding(w.ptr, gdf.clp, t, cb)
 
-	$if T is ClassInitable {
-		mut ci := ClassInitable(t)
+	$for field in T.fields {
+		mut attrs := map[string]VAttribute{}
+		for attr in field.attrs {
+			parts := attr.split_n(':', 2).map(it.trim_space())
+			match parts.len {
+				1 {
+					attrs[parts[0]] = VAttribute{
+						name: parts[0]
+					}
+				}
+				2 {
+					attrs[parts[0]] = VAttribute{
+						name:    parts[0]
+						arg:     parts[1]
+						has_arg: true
+					}
+				}
+				else {
+					panic('Invalid attribute format')
+				}
+			}
+		}
+
+		if attr := attrs['gd.signal'] {
+			$if field.typ is Signal {
+				name := if attr.arg == '' { field.name } else { attr.arg }
+				t.$(field.name) = Signal.new2(&Object(t), StringName.new(name))
+			}
+		}
+	}
+
+	$if T is IClassInit {
+		mut ci := IClassInit(t)
 		ci.init()
 	}
 	return w.ptr
@@ -300,8 +331,8 @@ fn class_create_instance[T](user_data voidptr, notify_postinitialize &GDExtensio
 fn class_free_instance[T](user_data voidptr, instance GDExtensionClassInstancePtr) {
 	unsafe {
 		t := &T(instance)
-		$if T is ClassDeinitable {
-			cd := ClassDeinitable(t)
+		$if T is IClassDeinit {
+			cd := IClassDeinit(t)
 			cd.deinit()
 		}
 		gdf.mem_free(t)
@@ -322,8 +353,8 @@ fn class_recreate_instance[T](user_data voidptr, object &Object) GDExtensionClas
 	cb := GDExtensionInstanceBindingCallbacks{}
 	gdf.object_set_instance_binding(object, gdf.clp, t, cb)
 
-	$if T is ClassInitable {
-		mut ci := ClassInitable(t)
+	$if T is IClassInit {
+		mut ci := IClassInit(t)
 		ci.init()
 	}
 	return unsafe { GDExtensionClassInstancePtr(t) }
@@ -408,6 +439,10 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 				'gd.export', 'gd.expose' {
 					field_name := StringName.new(field.name)
 					hint := String.new('hint_string')
+					defer {
+						field_name.deinit()
+						hint.deinit()
+					}
 					usage := if attr.name == 'gd.export' {
 						PropertyUsageFlags.property_usage_default
 					} else {
@@ -507,17 +542,34 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 					gdf.classdb_register_extension_class_property(gdf.clp, &ci.class_name,
 						&info, &setter_name, &getter_name)
 				}
-				'gd.onready', 'gd.signal' {
+				'gd.signal' {
+					name := if attr.arg == '' { field.name } else { attr.arg }
+					path_sn := StringName.new(name)
+					field_sn := StringName.new(field.name)
+					hint := String.new('hint_string')
+					defer {
+						path_sn.deinit()
+						field_sn.deinit()
+						hint.deinit()
+					}
+
+					field_type := get_property_type(typeof(field.typ).name)
+					info := GDExtensionPropertyInfo{
+						type_:       field_type
+						name:        &field_sn
+						class_name:  &ci.class_name
+						hint:        .property_hint_none
+						hint_string: &hint
+						usage:       PropertyUsageFlags.property_usage_default
+					}
+
+					// TODO: handle signal arguments
+					gdf.classdb_register_extension_class_signal(gdf.clp, &ci.class_name, &path_sn, &info, 0)
+				}
+				'gd.onready' {
 					needs_ready = true
 				}
-				else {
-					println('
-						|T: ${T.name}
-						|field: ${field.name}
-						|attribute: ${attr.name}
-						|arg: ${attr.arg}
-					'.strip_margin())
-				}
+				else {}
 			}
 		}
 	}
@@ -535,7 +587,6 @@ fn register_ready[T](mut ci ClassInfo) {
 	ci.virtual_methods.index_set_named(sn, var) or { panic(err) }
 }
 
-// Custom ready methed.
 fn call_func_ready[T](instance GDExtensionClassInstancePtr, args &GDExtensionConstTypePtr, ret GDExtensionTypePtr) {
 	mut inst := unsafe { &T(instance) }
 
@@ -570,15 +621,6 @@ fn call_func_ready[T](instance GDExtensionClassInstancePtr, args &GDExtensionCon
 				v_ptr := &voidptr(&node)
 				*f_ptr = *v_ptr
 				_ = f_ptr
-			}
-		}
-		if attr := attrs['gd.signal'] {
-			$if field.typ is Signal {
-				name := if attr.arg == '' { field.name } else { attr.arg }
-				inst_node := &Node(inst)
-				inst_obj := &Object(inst)
-				inst_node.add_user_signal(name)
-				inst.$(field.name) = Signal.new2(inst_obj, StringName.new(name))
 			}
 		}
 	}
