@@ -170,7 +170,7 @@ pub fn (s &PackedScene) instantiate_as[T](cfg PackedScene_instantiate_Cfg) T {
 pub fn (s &SceneTree) call_group_v(group string, method string, varargs ...Variant) {
 	nodes := s.get_nodes_in_group(group)
 	defer { nodes.deinit() }
-	for i in 0..nodes.size() {
+	for i in 0 .. nodes.size() {
 		var := nodes.get(i)
 		mut node := Node.new()
 		node.from_variant(var)

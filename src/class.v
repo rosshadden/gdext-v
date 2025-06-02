@@ -320,7 +320,6 @@ fn class_create_instance[T](user_data voidptr, notify_postinitialize &GDExtensio
 			}
 		}
 	}
-
 	$if T is IClassInit {
 		mut ci := IClassInit(t)
 		ci.init()
@@ -564,7 +563,8 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 					}
 
 					// TODO: handle signal arguments
-					gdf.classdb_register_extension_class_signal(gdf.clp, &ci.class_name, &path_sn, &info, 0)
+					gdf.classdb_register_extension_class_signal(gdf.clp, &ci.class_name,
+						&path_sn, &info, 0)
 				}
 				'gd.onready' {
 					needs_ready = true
@@ -616,11 +616,25 @@ fn call_func_ready[T](instance GDExtensionClassInstancePtr, args &GDExtensionCon
 		if attr := attrs['gd.onready'] {
 			path := if attr.arg == '' { field.name } else { attr.arg }
 			node := (&Node(inst)).get_node_v(path)
-			unsafe {
-				f_ptr := &voidptr(&inst.$(field.name))
-				v_ptr := &voidptr(&node)
-				*f_ptr = *v_ptr
-				_ = f_ptr
+			$if field.typ is IClass {
+				// TODO: this works for the base custom struct, but not its own onready fields
+				println('TODO: onready field: ${T.name}#${field.name} ${typeof(field.typ).name} -> ${node}')
+				unsafe {
+					// HACK: pointer magicks
+					f_ptr := &voidptr(&inst.$(field.name))
+					v := gdf.object_get_instance_binding(node.ptr, gdf.clp, nil)
+					v_ptr := &voidptr(v)
+					*f_ptr = *v_ptr
+					_ = f_ptr
+				}
+			} $else {
+				unsafe {
+					// HACK: pointer magicks
+					f_ptr := &voidptr(&inst.$(field.name))
+					v_ptr := &voidptr(&node)
+					*f_ptr = *v_ptr
+					_ = f_ptr
+				}
 			}
 		}
 	}
@@ -628,6 +642,15 @@ fn call_func_ready[T](instance GDExtensionClassInstancePtr, args &GDExtensionCon
 		mut v_inst := &INodeReady(inst)
 		v_inst.ready_()
 	}
+}
+
+pub struct Class {
+	godot_class bool = true
+}
+
+pub interface IClass {
+	// ptr voidptr
+	godot_class bool
 }
 
 // Generic getter function for properties.
@@ -653,7 +676,10 @@ fn property_getter[T](user_data voidptr, instance GDExtensionClassInstancePtr, a
 			} $else $if field.typ is f64 {
 				result := inst.$(field.name)
 				ret.from_variant(f64_to_variant(result))
+			} $else $if field.typ is IClass {
+				// handle custom class types (ignoring them works for now, AFAICT)
 			} $else $if field.typ is ToVariant {
+				println('get variant field: ${T.name}#${field.name} ${typeof(field.typ).name}')
 				result := inst.$(field.name)
 				variant := result.to_variant()
 				ret.from_variant(variant)
