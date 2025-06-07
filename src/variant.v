@@ -55,15 +55,21 @@ pub fn (s &Variant) to_string() string {
 	return t.to_v()
 }
 
-pub fn Variant.from_i64(i &i64) Variant {
-	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_i64)
+pub fn Variant.from_bool(src bool) Variant {
 	result := Variant{}
-	to_variant(GDExtensionUninitializedVariantPtr(&result), GDExtensionTypePtr(i))
+	result.from_bool(src)
 	return result
 }
 
-pub fn Variant.from_int(i &int) Variant {
-	return Variant.from_i64(i64(i))
+pub fn Variant.from_i64(src &i64) Variant {
+	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_i64)
+	result := Variant{}
+	to_variant(GDExtensionUninitializedVariantPtr(&result), GDExtensionTypePtr(src))
+	return result
+}
+
+pub fn Variant.from_int(src &int) Variant {
+	return Variant.from_i64(i64(src))
 }
 
 pub fn Variant.from_f64(f &f64) Variant {
@@ -74,8 +80,8 @@ pub fn Variant.from_f64(f &f64) Variant {
 }
 
 // TODO: move to variant
-pub fn i64_to_variant(i &i64) Variant {
-	return Variant.from_i64(i)
+pub fn i64_to_variant(src &i64) Variant {
+	return Variant.from_i64(src)
 }
 
 // TODO: move to variant
@@ -178,4 +184,12 @@ pub fn (s &SceneTree) call_group_v(group string, method string, varargs ...Varia
 			node.call(method, ...varargs)
 		}
 	}
+}
+
+pub fn (s &String) str() string {
+	return 'String{${s.to_v()}}'
+}
+
+pub fn (s &StringName) str() string {
+	return 'StringName{${s.to_v()}}'
 }
