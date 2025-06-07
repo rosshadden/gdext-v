@@ -1,5 +1,7 @@
 module gd
 
+const no_meta = GDExtensionClassMethodArgumentMetadata.gdextension_method_argument_metadata_none
+
 pub struct ClassInfo {
 mut:
 	name            string
@@ -170,7 +172,7 @@ const prop_map = {
 
 fn get_property_type(typ string) GDExtensionVariantType {
 	// TODO: make better
-	return prop_map[typ.split('.').last()] or { return .type_nil }
+	return prop_map[typ.split('.').last()] or { return .type_object }
 }
 
 fn class_get_property_list[T](instance GDExtensionClassInstancePtr, return_count &u32) &GDExtensionPropertyInfo {
@@ -383,6 +385,34 @@ pub fn register_class_methods[T](mut ci ClassInfo) {
 		if 'gd.expose' in method.attrs {
 			method_data := method
 			method_sn := StringName.new(method.name)
+
+			mut args_info := []GDExtensionPropertyInfo{}
+			$for arg in method.params {
+				// get proper type for this argument
+				arg_class := StringName.new(typeof(arg.typ).name.split('.').last())
+				arg_type := get_property_type(typeof(arg.typ).name)
+				arg_name := StringName.new(arg.name)
+				hint := String.new('hint_string')
+				defer {
+					arg_name.deinit()
+					hint.deinit()
+				}
+				info := GDExtensionPropertyInfo{
+					type_:       arg_type
+					name:        &arg_name
+					class_name:  &arg_class
+					hint:        .property_hint_none
+					hint_string: &hint
+					usage:       .property_usage_default
+				}
+				args_info << info
+			}
+			first_arg := if args_info.len > 0 {
+				args_info.first()
+			} else {
+				GDExtensionPropertyInfo{}
+			}
+
 			// TODO: fill out arg and return info
 			info := GDExtensionClassMethodInfo{
 				name:                   &method_sn
@@ -395,9 +425,9 @@ pub fn register_class_methods[T](mut ci ClassInfo) {
 				has_return_value:       GDExtensionBool(false)
 				return_value_info:      unsafe { nil }
 				return_value_metadata:  .gdextension_method_argument_metadata_none
-				argument_count:         0
-				arguments_info:         unsafe { nil }
-				arguments_metadata:     unsafe { nil }
+				argument_count:         u32(method.args.len)
+				arguments_info:         &first_arg
+				arguments_metadata:     &no_meta
 				default_argument_count: 0
 				default_arguments:      unsafe { nil }
 			}
@@ -475,7 +505,7 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 						return_value_metadata:  .gdextension_method_argument_metadata_none
 						argument_count:         0
 						arguments_info:         unsafe { nil }
-						arguments_metadata:     unsafe { nil }
+						arguments_metadata:     &no_meta
 						default_argument_count: 0
 						default_arguments:      unsafe { nil }
 					}
@@ -491,16 +521,6 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 					arg_info_ptr := unsafe { &GDExtensionPropertyInfo(C.malloc(arg_info_size)) }
 					if unsafe { arg_info_ptr == nil } {
 						panic('Failed to allocate memory for arguments_info')
-					}
-
-					// create the argument metadata
-					setter_arg_metadata_size := int(sizeof(GDExtensionClassMethodArgumentMetadata))
-					arg_metadata_ptr := unsafe { &GDExtensionClassMethodArgumentMetadata(C.malloc(setter_arg_metadata_size)) }
-					if unsafe { arg_metadata_ptr == nil } {
-						panic('Failed to allocate memory for arguments_metadata')
-					}
-					unsafe {
-						*arg_metadata_ptr = .gdextension_method_argument_metadata_none
 					}
 					// we need a mutable version of GDExtensionPropertyInfo to set fields
 					// since struct fields are immutable by default
@@ -530,7 +550,7 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 						return_value_metadata:  .gdextension_method_argument_metadata_none
 						argument_count:         1
 						arguments_info:         arg_info_ptr
-						arguments_metadata:     arg_metadata_ptr
+						arguments_metadata:     &no_meta
 						default_argument_count: 0
 						default_arguments:      unsafe { nil }
 					}

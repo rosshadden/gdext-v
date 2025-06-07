@@ -191,7 +191,6 @@ fn (g &Generator) gen_functions() ! {
 		|		if method.name == method_data.name {
 		|			mut params := []voidptr{}
 		|			// handle params
-		|			// TODO: expand arg type coverage
 		|			// TODO: leverage `ToVariant` and `FromVariant` interfaces
 		|			mut p := 0
 		|			\$for param in method.params {
@@ -218,7 +217,7 @@ fn (g &Generator) gen_functions() ! {
 			continue
 		}
 		buf.writeln('
-			|				} \$else \$if param.typ is &${class.name} {
+			|				} \$else \$if param.typ is ${class.name} || param.typ is &${class.name} {
 			|					mut value := ${class.name}{}
 			|					value.from_variant(prm)
 			|					params << &value
@@ -227,7 +226,7 @@ fn (g &Generator) gen_functions() ! {
 
 	for class in g.api.classes {
 		buf.writeln('
-			|				} \$else \$if param.typ is &${class.name} {
+			|				} \$else \$if param.typ is ${class.name} || param.typ is &${class.name} {
 			|					mut value := ${class.name}{}
 			|					value.from_variant(prm)
 			|					params << &value
