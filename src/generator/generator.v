@@ -149,7 +149,7 @@ fn (g &Generator) gen_functions() ! {
 			buf.writeln('\targs := [${arg_list.join(', ')}]!')
 		}
 		arg_ptr := match true {
-			method.is_vararg {
+			has_args && method.is_vararg {
 				'unsafe { &args[0] }'
 			}
 			has_args {
@@ -500,7 +500,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 
 			// call
 			arg_ptr := match true {
-				method.is_vararg {
+				has_args && method.is_vararg {
 					'unsafe { &args[0] }'
 				}
 				has_args {
