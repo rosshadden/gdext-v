@@ -389,11 +389,12 @@ pub fn register_class_methods[T](mut ci ClassInfo) {
 			mut args_info := []GDExtensionPropertyInfo{}
 			$for arg in method.params {
 				// get proper type for this argument
-				arg_class := StringName.new(typeof(arg.typ).name.split('.').last())
 				arg_type := get_property_type(typeof(arg.typ).name)
+				arg_class := StringName.new(typeof(arg.typ).name.split('.').last())
 				arg_name := StringName.new(arg.name)
 				hint := String.new('hint_string')
 				defer {
+					arg_class.deinit()
 					arg_name.deinit()
 					hint.deinit()
 				}
@@ -466,26 +467,28 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 		for attr in attrs {
 			match attr.name {
 				'gd.export', 'gd.expose' {
+					// get proper type for this field
+					field_type := get_property_type(typeof(field.typ).name)
+					field_data := field
+					field_class := StringName.new(typeof(field.typ).name.split('.').last())
 					field_name := StringName.new(field.name)
 					hint := String.new('hint_string')
 					defer {
+						field_class.deinit()
 						field_name.deinit()
 						hint.deinit()
 					}
+
 					usage := if attr.name == 'gd.export' {
 						PropertyUsageFlags.property_usage_default
 					} else {
 						PropertyUsageFlags.property_usage_script_variable
 					}
 
-					// get proper type for this field
-					field_type := get_property_type(typeof(field.typ).name)
-					field_data := field
-
 					info := GDExtensionPropertyInfo{
 						type_:       field_type
 						name:        &field_name
-						class_name:  &ci.class_name
+						class_name:  &field_class
 						hint:        .property_hint_none
 						hint_string: &hint
 						usage:       usage
