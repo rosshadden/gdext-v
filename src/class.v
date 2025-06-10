@@ -178,43 +178,16 @@ fn get_property_type(typ string) GDExtensionVariantType {
 fn class_get_property_list[T](instance GDExtensionClassInstancePtr, return_count &u32) &GDExtensionPropertyInfo {
 	mut infos := []GDExtensionPropertyInfo{}
 	$for field in T.fields {
-		$if field.typ is ToVariant {
-			field_name := StringName.new(field.name)
-			class_name := StringName.new(T.name)
-			hint := String.new('hint_string')
+		field_name := StringName.new(field.name)
+		field_type := get_property_type(typeof(field.typ).name)
+		field_class := StringName.new(typeof(field.typ).name.split('.').last())
+		hint := String.new('hint_string')
 
-			type_ := get_property_type(typeof(field.typ).name)
-
+		$if field.typ is ToVariant || field.typ is f64 || field.typ is i64 {
 			info := GDExtensionPropertyInfo{
-				type_:       type_
+				type_:       field_type
 				name:        &field_name
-				class_name:  &class_name
-				hint:        .property_hint_none
-				hint_string: &hint
-				usage:       .property_usage_default
-			}
-			infos << info
-		} $else $if field.typ is f64 {
-			field_name := StringName.new(field.name)
-			class_name := StringName.new(T.name)
-			hint := unsafe { nil }
-			info := GDExtensionPropertyInfo{
-				type_:       .type_f64
-				name:        &field_name
-				class_name:  &class_name
-				hint:        .property_hint_none
-				hint_string: &hint
-				usage:       .property_usage_default
-			}
-			infos << info
-		} $else $if field.typ is i64 {
-			field_name := StringName.new(field.name)
-			class_name := StringName.new(T.name)
-			hint := unsafe { nil }
-			info := GDExtensionPropertyInfo{
-				type_:       .type_i64
-				name:        &field_name
-				class_name:  &class_name
+				class_name:  &field_class
 				hint:        .property_hint_none
 				hint_string: &hint
 				usage:       .property_usage_default
@@ -235,7 +208,7 @@ fn class_get_property_list[T](instance GDExtensionClassInstancePtr, return_count
 fn class_free_property_list[T](instance GDExtensionClassInstancePtr, info &GDExtensionPropertyInfo) {
 	mut index := 0
 	$for field in T.fields {
-		$if field.typ is ToVariant {
+		$if field.typ is ToVariant || field.typ is f64 || field.typ is i64 {
 			unsafe {
 				info[index].name.deinit()
 				info[index].class_name.deinit()
@@ -530,7 +503,7 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 					property_info := GDExtensionPropertyInfo{
 						type_:       field_type
 						name:        &value_sn
-						class_name:  &ci.class_name
+						class_name:  &field_class
 						hint:        .property_hint_none
 						hint_string: &hint
 						usage:       .property_usage_default
@@ -566,20 +539,21 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 				}
 				'gd.signal' {
 					name := if attr.arg == '' { field.name } else { attr.arg }
-					path_sn := StringName.new(name)
-					field_sn := StringName.new(field.name)
-					hint := String.new('hint_string')
-					defer {
-						path_sn.deinit()
-						field_sn.deinit()
-						hint.deinit()
-					}
-
 					field_type := get_property_type(typeof(field.typ).name)
+					field_class := StringName.new(typeof(field.typ).name.split('.').last())
+					field_name := StringName.new(field.name)
+					hint := String.new('hint_string')
+					path_name := StringName.new(name)
+					defer {
+						field_class.deinit()
+						field_name.deinit()
+						hint.deinit()
+						path_name.deinit()
+					}
 					info := GDExtensionPropertyInfo{
 						type_:       field_type
-						name:        &field_sn
-						class_name:  &ci.class_name
+						name:        &field_name
+						class_name:  &field_class
 						hint:        .property_hint_none
 						hint_string: &hint
 						usage:       PropertyUsageFlags.property_usage_default
@@ -587,7 +561,7 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 
 					// TODO: handle signal arguments
 					gdf.classdb_register_extension_class_signal(gdf.clp, &ci.class_name,
-						&path_sn, &info, 0)
+						&path_name, &info, 0)
 				}
 				'gd.onready' {
 					needs_ready = true
