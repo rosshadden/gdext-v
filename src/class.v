@@ -181,13 +181,14 @@ fn class_get_property_list[T](instance GDExtensionClassInstancePtr, return_count
 		field_name := StringName.new(field.name)
 		field_type := get_property_type(typeof(field.typ).name)
 		field_class := StringName.new(typeof(field.typ).name.split('.').last())
-		hint := String.new('hint_string')
+		hint := String.new('')
 
 		$if field.typ is ToVariant || field.typ is f64 || field.typ is i64 {
 			info := GDExtensionPropertyInfo{
-				type_:       field_type
-				name:        &field_name
-				class_name:  &field_class
+				type_:      field_type
+				name:       &field_name
+				class_name: &field_class
+				// TODO
 				hint:        .property_hint_none
 				hint_string: &hint
 				usage:       .property_usage_default
@@ -365,16 +366,17 @@ pub fn register_class_methods[T](mut ci ClassInfo) {
 				arg_type := get_property_type(typeof(arg.typ).name)
 				arg_class := StringName.new(typeof(arg.typ).name.split('.').last())
 				arg_name := StringName.new(arg.name)
-				hint := String.new('hint_string')
+				hint := String.new('')
 				defer {
 					arg_class.deinit()
 					arg_name.deinit()
 					hint.deinit()
 				}
 				info := GDExtensionPropertyInfo{
-					type_:       arg_type
-					name:        &arg_name
-					class_name:  &arg_class
+					type_:      arg_type
+					name:       &arg_name
+					class_name: &arg_class
+					// TODO
 					hint:        .property_hint_none
 					hint_string: &hint
 					usage:       .property_usage_default
@@ -410,6 +412,13 @@ pub fn register_class_methods[T](mut ci ClassInfo) {
 	}
 }
 
+fn get_property_hint(class_name string) PropertyHint {
+	return match class_name {
+		'PackedScene' { .property_hint_resource_type }
+		else { .property_hint_none }
+	}
+}
+
 pub fn register_class_properties[T](mut ci ClassInfo) {
 	mut needs_ready := false
 
@@ -437,15 +446,18 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 			}
 		}
 
+		class_name_full := typeof(field.typ).name
+		class_name := class_name_full.split('.').last()
+		field_type := get_property_type(class_name_full)
+		field_data := field
+
 		for attr in attrs {
 			match attr.name {
 				'gd.export', 'gd.expose' {
 					// get proper type for this field
-					field_type := get_property_type(typeof(field.typ).name)
-					field_data := field
-					field_class := StringName.new(typeof(field.typ).name.split('.').last())
+					field_class := StringName.new(class_name)
 					field_name := StringName.new(field.name)
-					hint := String.new('hint_string')
+					hint := String.new(class_name)
 					defer {
 						field_class.deinit()
 						field_name.deinit()
@@ -462,7 +474,7 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 						type_:       field_type
 						name:        &field_name
 						class_name:  &field_class
-						hint:        .property_hint_none
+						hint:        get_property_hint(class_name)
 						hint_string: &hint
 						usage:       usage
 					}
@@ -495,7 +507,7 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 					// create setter argument info
 					arg_info_size := int(sizeof(GDExtensionPropertyInfo))
 					arg_info_ptr := unsafe { &GDExtensionPropertyInfo(C.malloc(arg_info_size)) }
-					if unsafe { arg_info_ptr == nil } {
+					if arg_info_ptr == unsafe { nil } {
 						panic('Failed to allocate memory for arguments_info')
 					}
 					// we need a mutable version of GDExtensionPropertyInfo to set fields
@@ -504,7 +516,7 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 						type_:       field_type
 						name:        &value_sn
 						class_name:  &field_class
-						hint:        .property_hint_none
+						hint:        get_property_hint(class_name)
 						hint_string: &hint
 						usage:       .property_usage_default
 					}
@@ -539,10 +551,9 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 				}
 				'gd.signal' {
 					name := if attr.arg == '' { field.name } else { attr.arg }
-					field_type := get_property_type(typeof(field.typ).name)
 					field_class := StringName.new(typeof(field.typ).name.split('.').last())
 					field_name := StringName.new(field.name)
-					hint := String.new('hint_string')
+					hint := String.new('')
 					path_name := StringName.new(name)
 					defer {
 						field_class.deinit()
@@ -554,7 +565,7 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 						type_:       field_type
 						name:        &field_name
 						class_name:  &field_class
-						hint:        .property_hint_none
+						hint:        get_property_hint(class_name)
 						hint_string: &hint
 						usage:       PropertyUsageFlags.property_usage_default
 					}
