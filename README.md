@@ -54,7 +54,6 @@ linux.debug.x86_64 = "res://lib/libvlang.so"
 module main
 
 import gd
-import log
 import src.entities.actors
 import services
 
@@ -75,10 +74,26 @@ fn init_gdext(gpaddr fn (&i8) gd.GDExtensionInterfaceFunctionPtr, clp gd.GDExten
 	gd.setup_lib(gpaddr, clp)
 	gdnit.initialize = init_gd
 	gdnit.deinitialize = deinit_gd
+	return 1
+}
+```
+> Note: This is `export`, not to be confused with `gd.export`. This is V's built-in way of exporting to the C FFI.
+
+If you want your logs to go through Godot, you can set up the `gd.Logger`.
+```v
+import log
+
+@[export: 'gdext_v_init']
+fn init_gdext(gpaddr fn (&i8) gd.GDExtensionInterfaceFunctionPtr, clp gd.GDExtensionClassLibraryPtr, mut gdnit gd.GDExtensionInitialization) gd.GDExtensionBool {
+	// ☝️all the above setup stuff
 	log.set_logger(&gd.GodotLogger{})
 	return 1
 }
 ```
+
+This is _not necessary_, and in fact I prefer it off, because for some reason if there is a crash Godot doesn't output any logs,
+whereas logging through V's default logger works great.
+Note that the default logger has a `level` of `.info`, so I like to lower it: `log.set_level(.debug)`.
 
 3. Add your files and register them in the `init_gd` function as shown above.
 
