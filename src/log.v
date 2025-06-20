@@ -2,11 +2,11 @@ module gd
 
 import log
 
-pub struct Logger {
+pub struct Log {
 	log.Log
 }
 
-pub fn (mut l Logger) fatal(s string) {
+pub fn (mut l Log) fatal(s string) {
 	str := String.new(s)
 	v := str.to_variant()
 	defer {
@@ -16,7 +16,7 @@ pub fn (mut l Logger) fatal(s string) {
 	printerr(v)
 }
 
-pub fn (mut l Logger) error(s string) {
+pub fn (mut l Log) error(s string) {
 	str := String.new(s)
 	v := str.to_variant()
 	defer {
@@ -26,7 +26,7 @@ pub fn (mut l Logger) error(s string) {
 	printerr(v)
 }
 
-pub fn (mut l Logger) warn(s string) {
+pub fn (mut l Log) warn(s string) {
 	str := String.new(s)
 	v := str.to_variant()
 	defer {
@@ -36,7 +36,7 @@ pub fn (mut l Logger) warn(s string) {
 	print(v)
 }
 
-pub fn (mut l Logger) info(s string) {
+pub fn (mut l Log) info(s string) {
 	str := String.new(s)
 	v := str.to_variant()
 	defer {
@@ -46,7 +46,7 @@ pub fn (mut l Logger) info(s string) {
 	print(v)
 }
 
-pub fn (mut l Logger) debug(s string) {
+pub fn (mut l Log) debug(s string) {
 	str := String.new(s)
 	v := str.to_variant()
 	defer {

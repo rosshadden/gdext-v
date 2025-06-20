@@ -79,14 +79,14 @@ fn init_gdext(gpaddr fn (&i8) gd.GDExtensionInterfaceFunctionPtr, clp gd.GDExten
 ```
 > Note: This is `export`, not to be confused with `gd.export`. This is V's built-in way of exporting to the C FFI.
 
-If you want your logs to go through Godot, you can set up the `gd.Logger`.
+If you want your logs to go through Godot, you can set up the `gd.Log`.
 ```v
 import log
 
 @[export: 'gdext_v_init']
 fn init_gdext(gpaddr fn (&i8) gd.GDExtensionInterfaceFunctionPtr, clp gd.GDExtensionClassLibraryPtr, mut gdnit gd.GDExtensionInitialization) gd.GDExtensionBool {
 	// ☝️all the above setup stuff
-	log.set_logger(&gd.GodotLogger{})
+	log.set_logger(gd.Log{})
 	return 1
 }
 ```
