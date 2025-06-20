@@ -415,6 +415,7 @@ pub fn register_class_methods[T](mut ci ClassInfo) {
 fn get_property_hint(class_name string) PropertyHint {
 	return match class_name {
 		'PackedScene' { .property_hint_resource_type }
+		'Node', 'Node2D', 'Node3D' { .property_hint_node_type }
 		else { .property_hint_none }
 	}
 }
