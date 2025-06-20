@@ -178,16 +178,16 @@ fn get_property_type(typ string) GDExtensionVariantType {
 fn class_get_property_list[T](instance GDExtensionClassInstancePtr, return_count &u32) &GDExtensionPropertyInfo {
 	mut infos := []GDExtensionPropertyInfo{}
 	$for field in T.fields {
-		field_name := StringName.new(field.name)
+		field_name_sn := StringName.new(field.name)
 		field_type := get_property_type(typeof(field.typ).name)
-		field_class := StringName.new(typeof(field.typ).name.split('.').last())
+		field_class_sn := StringName.new(typeof(field.typ).name.split('.').last())
 		hint := String.new('')
 
 		$if field.typ is ToVariant || field.typ is f64 || field.typ is i64 {
 			info := GDExtensionPropertyInfo{
 				type_:      field_type
-				name:       &field_name
-				class_name: &field_class
+				name:       &field_name_sn
+				class_name: &field_class_sn
 				// TODO
 				hint:        .property_hint_none
 				hint_string: &hint
@@ -446,21 +446,25 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 			}
 		}
 
-		class_name_full := typeof(field.typ).name
-		class_name := class_name_full.split('.').last()
-		field_type := get_property_type(class_name_full)
+		field_class_full := typeof(field.typ).name
+		field_class := field_class_full.split('.').last()
+		field_type := get_property_type(field_class_full)
 		field_data := field
 
 		for attr in attrs {
 			match attr.name {
 				'gd.export', 'gd.expose' {
 					// get proper type for this field
-					field_class := StringName.new(class_name)
-					field_name := StringName.new(field.name)
-					hint := String.new(class_name)
+					field_name_sn := StringName.new(field.name)
+					field_class_sn := StringName.new(field_class)
+					empty_sn := StringName.new('')
+					empty_s := String.new('')
+					hint := String.new(field_class)
 					defer {
-						field_class.deinit()
-						field_name.deinit()
+						empty_sn.deinit()
+						empty_s.deinit()
+						field_class_sn.deinit()
+						field_name_sn.deinit()
 						hint.deinit()
 					}
 
@@ -472,9 +476,13 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 
 					info := GDExtensionPropertyInfo{
 						type_:       field_type
-						name:        &field_name
-						class_name:  &field_class
-						hint:        get_property_hint(class_name)
+						name:        &field_name_sn
+						class_name:  if field_type == .type_object {
+							&field_class_sn
+						} else {
+							&empty_sn
+						}
+						hint:        get_property_hint(field_class)
 						hint_string: &hint
 						usage:       usage
 					}
@@ -492,7 +500,7 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 						return_value_info:      &info
 						return_value_metadata:  .gdextension_method_argument_metadata_none
 						argument_count:         0
-						arguments_info:         unsafe { nil }
+						arguments_info:         &GDExtensionPropertyInfo{}
 						arguments_metadata:     &no_meta
 						default_argument_count: 0
 						default_arguments:      unsafe { nil }
@@ -500,31 +508,8 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 					gdf.classdb_register_extension_class_method(gdf.clp, &ci.class_name,
 						&getter_info)
 
-					// set up setter
-					setter_name := StringName.new('set_${field.name}')
-					value_sn := StringName.new('value')
-
-					// create setter argument info
-					arg_info_size := int(sizeof(GDExtensionPropertyInfo))
-					arg_info_ptr := unsafe { &GDExtensionPropertyInfo(C.malloc(arg_info_size)) }
-					if arg_info_ptr == unsafe { nil } {
-						panic('Failed to allocate memory for arguments_info')
-					}
-					// we need a mutable version of GDExtensionPropertyInfo to set fields
-					// since struct fields are immutable by default
-					property_info := GDExtensionPropertyInfo{
-						type_:       field_type
-						name:        &value_sn
-						class_name:  &field_class
-						hint:        get_property_hint(class_name)
-						hint_string: &hint
-						usage:       .property_usage_default
-					}
-
-					// copy the property info to our allocated memory
-					unsafe { C.memcpy(arg_info_ptr, &property_info, arg_info_size) }
-
 					// register setter method
+					setter_name := StringName.new('set_${field.name}')
 					setter_info := GDExtensionClassMethodInfo{
 						name:                   &setter_name
 						method_userdata:        &field_data
@@ -537,7 +522,7 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 						return_value_info:      unsafe { nil }
 						return_value_metadata:  .gdextension_method_argument_metadata_none
 						argument_count:         1
-						arguments_info:         arg_info_ptr
+						arguments_info:         &info
 						arguments_metadata:     &no_meta
 						default_argument_count: 0
 						default_arguments:      unsafe { nil }
@@ -550,22 +535,22 @@ pub fn register_class_properties[T](mut ci ClassInfo) {
 						&info, &setter_name, &getter_name)
 				}
 				'gd.signal' {
+					empty_sn := StringName.new('')
 					name := if attr.arg == '' { field.name } else { attr.arg }
-					field_class := StringName.new(typeof(field.typ).name.split('.').last())
-					field_name := StringName.new(field.name)
-					hint := String.new('')
+					field_name_sn := StringName.new(field.name)
+					hint := String.new('Signal')
 					path_name := StringName.new(name)
 					defer {
-						field_class.deinit()
-						field_name.deinit()
+						empty_sn.deinit()
+						field_name_sn.deinit()
 						hint.deinit()
 						path_name.deinit()
 					}
 					info := GDExtensionPropertyInfo{
 						type_:       field_type
-						name:        &field_name
-						class_name:  &field_class
-						hint:        get_property_hint(class_name)
+						name:        &field_name_sn
+						class_name:  &empty_sn
+						hint:        get_property_hint(field_class)
 						hint_string: &hint
 						usage:       PropertyUsageFlags.property_usage_default
 					}
