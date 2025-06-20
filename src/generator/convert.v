@@ -81,6 +81,14 @@ fn convert_type(_type string) string {
 	mut type := _type
 
 	type = type.replace('enum::', '')
+
+	// strip prefix if redundant
+	if _type.starts_with('enum::') && type.contains('.') && type.after('.').starts_with(type.before('.')) {
+		if idx := type.index('.') {
+			type = type[idx + 1..]
+		}
+	}
+
 	type = type.replace('.', '')
 	type = type.replace('bitfield::', '')
 	type = type.replace('const ', '')

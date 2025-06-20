@@ -45,13 +45,25 @@ fn (mut g Generator) setup() {
 	for class in g.api.classes {
 		g.class_names << convert_type(class.name)
 		for class_enum in class.enums {
-			g.enum_defaults['${class.name}${class_enum.name}'] = convert_name(class_enum.values.first().name)
+			// strip prefix if redundant
+			key := if class_enum.name.starts_with(class.name) {
+				class_enum.name
+			} else {
+				'${class.name}${class_enum.name}'
+			}
+			g.enum_defaults[key] = convert_name(class_enum.values.first().name)
 		}
 	}
 	for class in g.api.builtin_classes {
 		g.builtin_names << convert_type(class.name)
 		for class_enum in class.enums {
-			g.enum_defaults['${class.name}${class_enum.name}'] = convert_name(class_enum.values.first().name)
+			// strip prefix if redundant
+			key := if class_enum.name.starts_with(class.name) {
+				class_enum.name
+			} else {
+				'${class.name}${class_enum.name}'
+			}
+			g.enum_defaults[key] = convert_name(class_enum.values.first().name)
 		}
 	}
 }
@@ -294,8 +306,12 @@ fn (g &Generator) gen_builtin_classes() ! {
 		// enums
 		for enm in class.enums {
 			mut bits := []i64{cap: enm.values.len}
+			mut enum_name := enm.name
+			if !enm.name.starts_with(class_name) {
+				enum_name = '${class_name}${enm.name}'
+			}
 			buf.writeln('')
-			buf.writeln('pub enum ${class.name}${enm.name} as i64 {')
+			buf.writeln('pub enum ${enum_name} as i64 {')
 
 			for val in enm.values {
 				if val.value !in bits {
@@ -671,8 +687,12 @@ fn (g &Generator) gen_classes() ! {
 		// enums
 		for enm in class.enums {
 			mut bits := []i64{cap: enm.values.len}
+			mut enum_name := enm.name
+			if !enm.name.starts_with(class.name) {
+				enum_name = '${class.name}${enm.name}'
+			}
 			buf.writeln('')
-			buf.writeln('pub enum ${class.name}${enm.name} as i64 {')
+			buf.writeln('pub enum ${enum_name} as i64 {')
 
 			for val in enm.values {
 				if val.value !in bits {
