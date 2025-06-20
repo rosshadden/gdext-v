@@ -1,7 +1,5 @@
 module gd
 
-import log
-
 __global (
 	gdf = &GdExtensionInterfaceFunctions(unsafe { nil })
 )
@@ -44,75 +42,6 @@ pub fn (s &String) to_v() string {
 		array << u8(pba.index(i))
 	}
 	return array.bytestr()
-}
-
-pub struct GodotLogger {
-mut:
-	level log.Level
-}
-
-pub fn (l GodotLogger) get_level() log.Level {
-	return l.level
-}
-
-pub fn (mut l GodotLogger) fatal(s string) {
-	str := String.new(s)
-	v := str.to_variant()
-	defer {
-		str.deinit()
-		v.deinit()
-	}
-	printerr(v)
-}
-
-pub fn (mut l GodotLogger) error(s string) {
-	str := String.new(s)
-	v := str.to_variant()
-	defer {
-		str.deinit()
-		v.deinit()
-	}
-	printerr(v)
-}
-
-pub fn (mut l GodotLogger) warn(s string) {
-	str := String.new(s)
-	v := str.to_variant()
-	defer {
-		str.deinit()
-		v.deinit()
-	}
-	print(v)
-}
-
-pub fn (mut l GodotLogger) info(s string) {
-	str := String.new(s)
-	v := str.to_variant()
-	defer {
-		str.deinit()
-		v.deinit()
-	}
-	print(v)
-}
-
-pub fn (mut l GodotLogger) debug(s string) {
-	str := String.new(s)
-	v := str.to_variant()
-	defer {
-		str.deinit()
-		v.deinit()
-	}
-	dump(v)
-}
-
-pub fn (mut l GodotLogger) set_level(level log.Level) {
-	l.level = level
-}
-
-pub fn (mut l GodotLogger) set_always_flush(should_flush bool) {
-}
-
-pub fn (mut l GodotLogger) free() {
 }
 
 @[heap]
