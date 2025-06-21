@@ -83,7 +83,8 @@ fn convert_type(_type string) string {
 	type = type.replace('enum::', '')
 
 	// strip prefix if redundant
-	if _type.starts_with('enum::') && type.contains('.') && type.after('.').starts_with(type.before('.')) {
+	if _type.starts_with('enum::') && type.contains('.')
+		&& type.after('.').starts_with(type.before('.')) {
 		if idx := type.index('.') {
 			type = type[idx + 1..]
 		}

@@ -3,7 +3,7 @@
 module main
 
 import os
-import src.generator { Generator }
+import generator { Generator }
 
 fn main() {
 	println('Generating V bindings...')
