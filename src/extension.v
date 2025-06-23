@@ -1,9 +1,5 @@
 module gd
 
-__global (
-	gdf = &GDExtensionInterfaceFunctions(unsafe { nil })
-)
-
 pub fn get_gdf() &GDExtensionInterfaceFunctions {
 	if gdf == unsafe { nil } {
 		panic('GDExtensionInterfaceFunctions is not initialized. Call setup_lib first.')

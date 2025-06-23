@@ -2,7 +2,12 @@ module gdext
 
 import gd
 
+__global (
+	gdf = &gd.GDExtensionInterfaceFunctions(unsafe { nil })
+)
+
 pub struct GDExt {
+	gd.GDExtensionInterfaceFunctions
 	// gdext proc address
 	gpaddr fn (&i8) gd.GDExtensionInterfaceFunctionPtr @[required]
 	// gdext class library pointer
@@ -11,11 +16,6 @@ pub struct GDExt {
 
 pub fn setup(gpaddr fn (&i8) gd.GDExtensionInterfaceFunctionPtr, clp gd.GDExtensionClassLibraryPtr) GDExt {
 	C._vinit(0, unsafe { nil })
-
-	g := GDExt{
-		gpaddr: gpaddr
-		clp:    clp
-	}
 
 	gdf = &gd.GDExtensionInterfaceFunctions{
 		gpaddr:                                             gpaddr
@@ -161,6 +161,10 @@ pub fn setup(gpaddr fn (&i8) gd.GDExtensionInterfaceFunctionPtr, clp gd.GDExtens
 		get_library_path:                                   unsafe { gd.GDExtensionInterfaceGetLibraryPath(gpaddr(c'get_library_path')) }
 		editor_add_plugin:                                  unsafe { gd.GDExtensionInterfaceEditorAddPlugin(gpaddr(c'editor_add_plugin')) }
 		editor_remove_plugin:                               unsafe { gd.GDExtensionInterfaceEditorRemovePlugin(gpaddr(c'editor_remove_plugin')) }
+	}
+
+	g := GDExt{
+		GDExtensionInterfaceFunctions: gdf
 	}
 
 	enable_hot_reload()
