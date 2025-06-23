@@ -1,9 +1,9 @@
+module gdext
+
 // Prevents TLS destructors from being registered on Linux to support hot reloading.
 //
 // Adapted from godot-rust workaround:
 // https://fasterthanli.me/articles/so-you-want-to-live-reload-rust#what-can-prevent-dlclose-from-unloading-a-library
-module gd
-
 import dl
 
 type ThreadAtexitFn = fn (voidptr, voidptr, voidptr)

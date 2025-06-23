@@ -54,10 +54,11 @@ linux.debug.x86_64 = "res://lib/libvlang.so"
 module main
 
 import gd
+import gd.gdext
 import src.entities.actors
 import services
 
-pub fn init_gd(v voidptr, l gd.GDExtensionInitializationLevel) {
+pub fn init(v voidptr, l gd.GDExtensionInitializationLevel) {
 	if l == .initialization_level_scene {
 		// This is where you register your classes
 		gd.register_class[actors.Player]('Node2D')
@@ -65,15 +66,15 @@ pub fn init_gd(v voidptr, l gd.GDExtensionInitializationLevel) {
 	}
 }
 
-pub fn deinit_gd(v voidptr, l gd.GDExtensionInitializationLevel) {
+pub fn deinit(v voidptr, l gd.GDExtensionInitializationLevel) {
 	if l == .initialization_level_scene {}
 }
 
 @[export: 'gdext_v_init']
 fn init_gdext(gpaddr fn (&i8) gd.GDExtensionInterfaceFunctionPtr, clp gd.GDExtensionClassLibraryPtr, mut gdnit gd.GDExtensionInitialization) gd.GDExtensionBool {
-	gd.setup_lib(gpaddr, clp)
-	gdnit.initialize = init_gd
-	gdnit.deinitialize = deinit_gd
+	gdext.setup(gpaddr, clp)
+	gdnit.initialize = init
+	gdnit.deinitialize = deinit
 	return 1
 }
 ```

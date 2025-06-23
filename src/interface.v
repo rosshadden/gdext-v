@@ -474,12 +474,14 @@ pub struct GDExtensionScriptInstanceInfo3 {
 	free_func                      GDExtensionScriptInstanceFree                   = unsafe { nil }
 }
 
+pub type GDExtensionInitFn = fn (voidptr, GDExtensionInitializationLevel)
+
 pub struct GDExtensionInitialization {
 	minimum_initialization_level GDExtensionInitializationLevel
 	userdata                     voidptr
 pub mut:
-	initialize   fn (voidptr, GDExtensionInitializationLevel) = unsafe { nil }
-	deinitialize fn (voidptr, GDExtensionInitializationLevel) = unsafe { nil }
+	initialize   GDExtensionInitFn = unsafe { nil }
+	deinitialize GDExtensionInitFn = unsafe { nil }
 }
 
 pub type GDExtensionInterfaceFunctionPtr = fn ()
