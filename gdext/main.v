@@ -8,10 +8,8 @@ __global (
 
 pub struct GDExt {
 	gd.GDExtensionInterfaceFunctions
-	// gdext proc address
-	gpaddr fn (&i8) gd.GDExtensionInterfaceFunctionPtr @[required]
-	// gdext class library pointer
-	clp gd.GDExtensionClassLibraryPtr @[required]
+mut:
+	reload Reload
 }
 
 pub fn setup(gpaddr fn (&i8) gd.GDExtensionInterfaceFunctionPtr, clp gd.GDExtensionClassLibraryPtr) GDExt {
@@ -163,11 +161,11 @@ pub fn setup(gpaddr fn (&i8) gd.GDExtensionInterfaceFunctionPtr, clp gd.GDExtens
 		editor_remove_plugin:                               unsafe { gd.GDExtensionInterfaceEditorRemovePlugin(gpaddr(c'editor_remove_plugin')) }
 	}
 
-	g := GDExt{
+	mut g := GDExt{
 		GDExtensionInterfaceFunctions: gdf
 	}
 
-	enable_hot_reload()
+	g.enable_hot_reload()
 
 	return g
 }

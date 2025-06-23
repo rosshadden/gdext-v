@@ -8,26 +8,26 @@ import dl
 
 type ThreadAtexitFn = fn (voidptr, voidptr, voidptr)
 
-__global (
-	hot_reload_enabled bool
-	lib_handle         voidptr
-)
-
-pub fn enable_hot_reload() {
-	hot_reload_enabled = true
-
-	// open the handle
-	lib_path := get_library_path()
-	lib_handle = dl.open(lib_path, dl.rtld_lazy | dl.rtld_nodelete)
+struct Reload {
+mut:
+	enabled bool
+	handle  voidptr
 }
 
-pub fn disable_hot_reload() {
-	hot_reload_enabled = false
+pub fn (mut g GDExt) enable_hot_reload() {
+	g.reload.enabled = true
+
+	// open the handle
+	g.reload.handle = dl.open(get_library_path(), dl.rtld_lazy | dl.rtld_nodelete)
+}
+
+pub fn (mut g GDExt) disable_hot_reload() {
+	g.reload.enabled = false
 
 	// close the handle
-	if lib_handle != unsafe { nil } {
-		dl.close(lib_handle)
-		lib_handle = unsafe { nil }
+	if g.reload.handle != unsafe { nil } {
+		dl.close(g.reload.handle)
+		g.reload.handle = unsafe { nil }
 	}
 }
 
@@ -36,8 +36,8 @@ fn get_library_path() string {
 }
 
 @[export: '__cxa_thread_atexit_impl']
-pub fn cxa_thread_atexit(func voidptr, obj voidptr, dso voidptr) {
-	if hot_reload_enabled {
+pub fn (mut g GDExt) cxa_thread_atexit(func voidptr, obj voidptr, dso voidptr) {
+	if g.reload.enabled {
 		return
 	}
 
