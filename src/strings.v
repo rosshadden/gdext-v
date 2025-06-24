@@ -39,3 +39,11 @@ pub fn (s &String) to_v() string {
 	}
 	return array.bytestr()
 }
+
+pub fn (s &String) str() string {
+	return 'String{${s.to_v()}}'
+}
+
+pub fn (s &StringName) str() string {
+	return 'StringName{${s.to_v()}}'
+}
