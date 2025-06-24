@@ -118,7 +118,7 @@ pub struct APIVersion {
 	version_status    string @[required]
 	version_build     string @[required]
 	version_full_name string @[required]
-	precision         string @[required]
+	precision         string
 }
 
 pub struct API {
