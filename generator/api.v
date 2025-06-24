@@ -111,17 +111,19 @@ pub:
 	}
 }
 
+pub struct APIVersion {
+	version_major     int    @[required]
+	version_minor     int    @[required]
+	version_patch     int    @[required]
+	version_status    string @[required]
+	version_build     string @[required]
+	version_full_name string @[required]
+	precision         string @[required]
+}
+
 pub struct API {
 pub mut:
-	header struct {
-		version_major     int    @[required]
-		version_minor     int    @[required]
-		version_patch     int    @[required]
-		version_status    string @[required]
-		version_build     string @[required]
-		version_full_name string @[required]
-		precision         string @[required]
-	} @[required]
+	header APIVersion @[required]
 
 	builtin_class_sizes []struct {
 		build_configuration string           @[required]

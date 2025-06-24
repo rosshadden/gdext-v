@@ -3,6 +3,8 @@ module generator
 import json
 import os
 import strings
+import time
+import v.vmod
 
 // 64bit
 const platform_index = 1
@@ -26,13 +28,14 @@ pub fn Generator.new(api_dump string) Generator {
 pub fn (mut g Generator) run() ! {
 	g.setup()
 
-	g.gen_gdext()!
+	g.gen_gdext_info()!
+	g.gen_gdext_functions()!
 	g.gen_functions()!
 	g.gen_enums()!
 	g.gen_builtin_classes()!
 	g.gen_classes()!
 	g.gen_structs()!
-	g.gen_virtual_methods()!
+	g.gen_gdext_virtual()!
 }
 
 // makes useful mappings
@@ -69,7 +72,42 @@ fn (mut g Generator) setup() {
 	}
 }
 
-fn (g &Generator) gen_gdext() ! {
+fn (g &Generator) gen_gdext_info() ! {
+	mut buf := strings.new_builder(1024)
+	mod := vmod.decode(@VMOD_FILE) or { panic(err) }
+	version := mod.version.split('.')
+	buf.writeln("
+		|module gdext
+		|
+		|import time
+		|
+		|pub fn (g GDExt) info() Info {
+		|	return Info{
+		|		version: InfoVersion{
+		|			major: ${version[0].int()}
+		|			minor: ${version[1].int()}
+		|			patch: ${version[2].int()}
+		|			name: 'v${mod.version}'
+		|			time: time.unix(${time.now().unix()})
+		|		}
+		|		godot_version: InfoVersion{
+		|			major: ${g.api.header.version_major}
+		|			minor: ${g.api.header.version_minor}
+		|			patch: ${g.api.header.version_patch}
+		|			name: '${g.api.header.version_full_name}'
+		|			status: '${g.api.header.version_status}'
+		|			build: '${g.api.header.version_build}'
+		|		}
+		|	}
+		|}
+	".strip_margin().trim('\n'))
+
+	mut f := os.create('gdext/__info.v')!
+	defer { f.close() }
+	f.write(buf)!
+}
+
+fn (g &Generator) gen_gdext_functions() ! {
 	mut buf := strings.new_builder(1024)
 	buf.writeln('
 		|module gdext
@@ -1076,7 +1114,7 @@ fn (g &Generator) class_to_variant_type(class_name string) string {
 	}
 }
 
-fn (g &Generator) gen_virtual_methods() ! {
+fn (g &Generator) gen_gdext_virtual() ! {
 	mut buf := strings.new_builder(1024)
 	buf.writeln('
 		|module gdext

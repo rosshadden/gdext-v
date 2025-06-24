@@ -1,9 +1,10 @@
 module gdext
 
 import gd
+import time
 
 __global (
-	gdf = &gd.GDExtensionInterfaceFunctions(unsafe { nil })
+	gdf = &GDExt(unsafe { nil })
 )
 
 pub struct GDExt {
@@ -12,10 +13,10 @@ mut:
 	reload Reload
 }
 
-pub fn setup(gpaddr fn (&i8) gd.GDExtensionInterfaceFunctionPtr, clp gd.GDExtensionClassLibraryPtr) GDExt {
+pub fn setup(gpaddr fn (&i8) gd.GDExtensionInterfaceFunctionPtr, clp gd.GDExtensionClassLibraryPtr) &GDExt {
 	C._vinit(0, unsafe { nil })
 
-	gdf = &gd.GDExtensionInterfaceFunctions{
+	interface_fns := &gd.GDExtensionInterfaceFunctions{
 		gpaddr:                                             gpaddr
 		clp:                                                clp
 		get_godot_version:                                  unsafe { gd.GDExtensionInterfaceGetGodotVersion(gpaddr(c'get_godot_version')) }
@@ -161,11 +162,26 @@ pub fn setup(gpaddr fn (&i8) gd.GDExtensionInterfaceFunctionPtr, clp gd.GDExtens
 		editor_remove_plugin:                               unsafe { gd.GDExtensionInterfaceEditorRemovePlugin(gpaddr(c'editor_remove_plugin')) }
 	}
 
-	mut g := GDExt{
-		GDExtensionInterfaceFunctions: gdf
+	gdf = &GDExt{
+		GDExtensionInterfaceFunctions: interface_fns
 	}
 
-	g.enable_hot_reload()
+	gdf.enable_hot_reload()
 
-	return g
+	return gdf
+}
+
+pub struct InfoVersion {
+	major  int
+	minor  int
+	patch  int
+	name   string
+	time   time.Time
+	status string
+	build  string
+}
+
+pub struct Info {
+	version       InfoVersion
+	godot_version InfoVersion
 }
