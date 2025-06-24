@@ -54,6 +54,7 @@ const keywords = [
 	'union',
 	'unsafe',
 	'volatile',
+	'voidptr',
 ]
 
 const genwords = [
@@ -76,8 +77,13 @@ fn convert_name(_name string) string {
 	return name
 }
 
+@[params]
+struct ConvertCfg {
+	ns string // namespace module
+}
+
 // convert type from C++ to V
-fn convert_type(_type string) string {
+fn convert_type(_type string, cfg ConvertCfg) string {
 	mut type := _type
 
 	type = type.replace('enum::', '')
@@ -123,7 +129,7 @@ fn convert_type(_type string) string {
 	type = type.replace('::', '')
 
 	for type.ends_with('*') {
-		type = '&${type[..type.len - 1]}'
+		type = '&${type[..type.len - 1]}'.trim_space_right()
 	}
 
 	if type.replace('&', '') == 'int' {
@@ -132,6 +138,15 @@ fn convert_type(_type string) string {
 
 	if type.replace('&', '') == 'float' {
 		type = type.replace('float', 'f64')
+	}
+
+	// inject namespace if needed
+	type_stripped := type.replace('&', '')
+	if cfg.ns != '' && type_stripped !in numbers && type_stripped !in keywords {
+		type = '${cfg.ns}.${type_stripped}'
+		if indirections := type.last_index('&') {
+			type = '${type[..indirections]}${type}'
+		}
 	}
 
 	return type

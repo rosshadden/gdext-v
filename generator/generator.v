@@ -26,6 +26,7 @@ pub fn Generator.new(api_dump string) Generator {
 pub fn (mut g Generator) run() ! {
 	g.setup()
 
+	g.gen_gdext()!
 	g.gen_functions()!
 	g.gen_enums()!
 	g.gen_builtin_classes()!
@@ -68,27 +69,111 @@ fn (mut g Generator) setup() {
 	}
 }
 
-fn (g &Generator) gen_enums() ! {
+fn (g &Generator) gen_gdext() ! {
 	mut buf := strings.new_builder(1024)
-	buf.writeln('module gd')
+	buf.writeln('
+		|module gdext
+		|
+		|import gd
+	'.strip_margin().trim('\n'))
 
-	for enm in g.api.global_enums {
-		name := convert_type(enm.name)
-		buf.writeln('')
-		buf.writeln('pub enum ${name} as i64 {')
-		mut bits := []i64{cap: enm.values.len}
+	// call_func
+	buf.writeln('
+		|// TODO: see if we can leverage the passed-in FunctionData
+		|fn call_func[T](user_data voidptr, instance gd.GDExtensionClassInstancePtr, args &&gd.Variant, arg_count gd.GDExtensionInt, ret &gd.Variant, err &gd.GDExtensionCallError) {
+		|	mut inst := unsafe { &T(instance) }
+		|	method_data := unsafe { &FunctionData(user_data) }
+		|	// HACK: there is no way this nested `\$for` is actually necessary...
+		|	\$for method in T.methods {
+		|		if method.name == method_data.name {
+		|			mut params := []voidptr{}
+		|			// handle params
+		|			// TODO: leverage `gd.ToVariant` and `gd.FromVariant` interfaces
+		|			mut p := 0
+		|			\$for param in method.params {
+		|				prm := unsafe { &args[p] }
+		|				\$if param.typ is &bool {
+		|					value := prm.to_bool()
+		|					params << &value
+		|				} \$else \$if param.typ is &string {
+		|					value := prm.to_string()
+		|					params << &value
+		|				} \$else \$if param.typ is &int {
+		|					value := prm.to_int()
+		|					params << &value
+		|				} \$else \$if param.typ is &i64 {
+		|					value := gd.i64_from_variant(prm)
+		|					params << &value
+		|				} \$else \$if param.typ is &f64 {
+		|					value := gd.f64_from_variant(prm)
+		|					params << &value
+	'.strip_margin().trim_right('\n'))
 
-		for val in enm.values {
-			if val.value !in bits {
-				bits << val.value
-				buf.writeln('\t${val.name.to_lower()} = ${val.value}')
-			}
+	for class in g.api.builtin_classes {
+		if class.name.is_lower() {
+			continue
 		}
-
-		buf.writeln('}')
+		class_name := convert_type(class.name, ns: 'gd')
+		buf.writeln('
+			|				} \$else \$if param.typ is ${class_name} || param.typ is &${class_name} {
+			|					mut value := ${class_name}{}
+			|					value.from_variant(prm)
+			|					params << &value
+		'.strip_margin().trim('\n'))
 	}
 
-	mut f := os.create('src/__enums.v')!
+	for class in g.api.classes {
+		class_name := convert_type(class.name, ns: 'gd')
+		buf.writeln('
+			|				} \$else \$if param.typ is ${class_name} || param.typ is &${class_name} {
+			|					mut value := ${class_name}{}
+			|					value.from_variant(prm)
+			|					params << &value
+		'.strip_margin().trim('\n'))
+	}
+
+	buf.writeln("
+		|				} \$else {
+		|					params << &prm
+		|				}
+		|				p += 1
+		|			}
+		|			if p != arg_count {
+		|				panic('call_func: argument count mismatch')
+		|			}
+		|			// handle return value
+		|			\$if method.return_type is bool {
+		|				result := inst.\$method(...params)
+		|				ret.from_bool(result)
+		|			} \$else \$if method.return_type is string {
+		|				result := inst.\$method(...params)
+		|				str := String.new(result)
+		|				variant := str.to_variant()
+		|				ret.from_variant(variant)
+		|			} \$else \$if method.return_type is int {
+		|				result := inst.\$method(...params)
+		|				ret.from_int(result)
+		|			} \$else \$if method.return_type is i64 {
+		|				result := inst.\$method(...params)
+		|				ret.from_variant(gd.i64_to_variant(result))
+		|			} \$else \$if method.return_type is f64 {
+		|				result := inst.\$method(...params)
+		|				ret.from_variant(gd.f64_to_variant(result))
+		|			} \$else \$if method.return_type is gd.ToVariant {
+		|				result := inst.\$method(...params)
+		|				variant := result.to_variant()
+		|				ret.from_variant(variant)
+		|			} \$else {
+		|				// TODO: \$if method.return_type == 1
+		|				// void
+		|				inst.\$method(...params)
+		|			}
+		|		}
+		|	}
+		|}
+	".strip_margin().trim('\n'))
+
+	mut f := os.create('gdext/__functions.v')!
 	defer { f.close() }
 	f.write(buf)!
 }
@@ -192,101 +277,32 @@ fn (g &Generator) gen_functions() ! {
 		buf.writeln('}')
 	}
 
-	// call_func
-	buf.writeln('
-		|// TODO: see if we can leverage the passed-in FunctionData
-		|fn call_func[T](user_data voidptr, instance GDExtensionClassInstancePtr, args &&Variant, arg_count GDExtensionInt, ret &Variant, err &GDExtensionCallError) {
-		|	mut inst := unsafe { &T(instance) }
-		|	method_data := unsafe { &FunctionData(user_data) }
-		|	// HACK: there is no way this nested `\$for` is actually necessary...
-		|	\$for method in T.methods {
-		|		if method.name == method_data.name {
-		|			mut params := []voidptr{}
-		|			// handle params
-		|			// TODO: leverage `ToVariant` and `FromVariant` interfaces
-		|			mut p := 0
-		|			\$for param in method.params {
-		|				prm := unsafe { &args[p] }
-		|				\$if param.typ is &bool {
-		|					value := prm.to_bool()
-		|					params << &value
-		|				} \$else \$if param.typ is &string {
-		|					value := prm.to_string()
-		|					params << &value
-		|				} \$else \$if param.typ is &int {
-		|					value := prm.to_int()
-		|					params << &value
-		|				} \$else \$if param.typ is &i64 {
-		|					value := i64_from_variant(prm)
-		|					params << &value
-		|				} \$else \$if param.typ is &f64 {
-		|					value := f64_from_variant(prm)
-		|					params << &value
-	'.strip_margin().trim_right('\n'))
-
-	for class in g.api.builtin_classes {
-		if class.name.is_lower() {
-			continue
-		}
-		buf.writeln('
-			|				} \$else \$if param.typ is ${class.name} || param.typ is &${class.name} {
-			|					mut value := ${class.name}{}
-			|					value.from_variant(prm)
-			|					params << &value
-		'.strip_margin().trim('\n'))
-	}
-
-	for class in g.api.classes {
-		buf.writeln('
-			|				} \$else \$if param.typ is ${class.name} || param.typ is &${class.name} {
-			|					mut value := ${class.name}{}
-			|					value.from_variant(prm)
-			|					params << &value
-		'.strip_margin().trim('\n'))
-	}
-
-	buf.writeln("
-		|				} \$else {
-		|					params << &prm
-		|				}
-		|				p += 1
-		|			}
-		|			if p != arg_count {
-		|				panic('call_func: argument count mismatch')
-		|			}
-		|			// handle return value
-		|			\$if method.return_type is bool {
-		|				result := inst.\$method(...params)
-		|				ret.from_bool(result)
-		|			} \$else \$if method.return_type is string {
-		|				result := inst.\$method(...params)
-		|				str := String.new(result)
-		|				variant := str.to_variant()
-		|				ret.from_variant(variant)
-		|			} \$else \$if method.return_type is int {
-		|				result := inst.\$method(...params)
-		|				ret.from_int(result)
-		|			} \$else \$if method.return_type is i64 {
-		|				result := inst.\$method(...params)
-		|				ret.from_variant(i64_to_variant(result))
-		|			} \$else \$if method.return_type is f64 {
-		|				result := inst.\$method(...params)
-		|				ret.from_variant(f64_to_variant(result))
-		|			} \$else \$if method.return_type is ToVariant {
-		|				result := inst.\$method(...params)
-		|				variant := result.to_variant()
-		|				ret.from_variant(variant)
-		|			} \$else {
-		|				// TODO: \$if method.return_type == 1
-		|				// void
-		|				inst.\$method(...params)
-		|			}
-		|		}
-		|	}
-		|}
-	".strip_margin().trim('\n'))
-
 	mut f := os.create('src/__functions.v')!
+	defer { f.close() }
+	f.write(buf)!
+}
+
+fn (g &Generator) gen_enums() ! {
+	mut buf := strings.new_builder(1024)
+	buf.writeln('module gd')
+
+	for enm in g.api.global_enums {
+		name := convert_type(enm.name)
+		buf.writeln('')
+		buf.writeln('pub enum ${name} as i64 {')
+		mut bits := []i64{cap: enm.values.len}
+
+		for val in enm.values {
+			if val.value !in bits {
+				bits << val.value
+				buf.writeln('\t${val.name.to_lower()} = ${val.value}')
+			}
+		}
+
+		buf.writeln('}')
+	}
+
+	mut f := os.create('src/__enums.v')!
 	defer { f.close() }
 	f.write(buf)!
 }
@@ -705,7 +721,7 @@ fn (g &Generator) gen_classes() ! {
 
 		// struct
 		buf.writeln('')
-		buf.writeln('@[noinit]')
+		// buf.writeln('@[noinit]')
 		buf.writeln('pub struct ${class.name} {')
 		if class.inherits == '' {
 			buf.writeln('pub mut:')
@@ -1062,7 +1078,11 @@ fn (g &Generator) class_to_variant_type(class_name string) string {
 
 fn (g &Generator) gen_virtual_methods() ! {
 	mut buf := strings.new_builder(1024)
-	buf.writeln('module gd')
+	buf.writeln('
+		|module gdext
+		|
+		|import gd
+	'.strip_margin().trim('\n'))
 
 	// methods
 	for class in g.api.classes {
@@ -1075,11 +1095,13 @@ fn (g &Generator) gen_virtual_methods() ! {
 			virt_name := '${convert_name(method.name[1..])}_'
 
 			buf.writeln('')
-			buf.writeln('fn ${convert_type(class.name).to_lower()}_${convert_name(method.name)}[T] (inst GDExtensionClassInstancePtr, args &GDExtensionConstTypePtr, ret GDExtensionTypePtr) {')
-			buf.writeln('\tmut v_inst := &${name}(unsafe{&T(inst)})')
+			buf.writeln('fn ${convert_type(class.name).to_lower()}_${convert_name(method.name)}[T] (inst gd.GDExtensionClassInstancePtr, args &gd.GDExtensionConstTypePtr, ret gd.GDExtensionTypePtr) {')
+			buf.writeln('\tmut v_inst := &gd.${name}(unsafe{&T(inst)})')
 
 			for i, arg in method.arguments {
-				buf.writeln('\t${convert_name(arg.name)} := unsafe{&${convert_type(arg.type)}(args[${i}])}')
+				buf.writeln('\t${convert_name(arg.name)} := unsafe{&${convert_type(arg.type,
+					ns: 'gd'
+				)}(args[${i}])}')
 			}
 
 			buf.write_string('\t')
@@ -1113,13 +1135,13 @@ fn (g &Generator) gen_virtual_methods() ! {
 
 			// HACK: force function generation
 			buf.writeln('
-				|	\$if T is ${name} {
+				|	\$if T is gd.${name} {
 				|		// HACK: force function generation
 				|		if false { unsafe { ${full_name}[T](nil, nil, nil) } }
 				|		func := ${full_name}[T]
 				|		ivar := i64(func)
-				|		var := i64_to_variant(ivar)
-				|		sn := StringName.new("${method.name}")
+				|		var := gd.i64_to_variant(ivar)
+				|		sn := gd.StringName.new("${method.name}")
 				|		defer { sn.deinit() }
 				|		ci.virtual_methods.index_set_named(sn, var) or {panic(err)}
 				|	}
@@ -1128,7 +1150,7 @@ fn (g &Generator) gen_virtual_methods() ! {
 	}
 	buf.writeln('}')
 
-	mut f := os.create('src/__virtual.v')!
+	mut f := os.create('gdext/__virtual.v')!
 	defer { f.close() }
 	f.write(buf)!
 }

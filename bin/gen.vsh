@@ -7,7 +7,7 @@ import generator { Generator }
 
 fn main() {
 	println('Generating V bindings...')
-	execute('rm src/_*.v')
+	execute('rm */_*.v')
 
 	mut api_dump_file := 'data/extension_api.json'
 
