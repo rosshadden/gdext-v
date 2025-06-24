@@ -84,19 +84,23 @@ fn (g &Generator) gen_gdext_info() ! {
 		|pub fn (g GDExt) info() Info {
 		|	return Info{
 		|		version: InfoVersion{
-		|			major: ${version[0].int()}
-		|			minor: ${version[1].int()}
-		|			patch: ${version[2].int()}
-		|			name: 'v${mod.version}'
-		|			time: time.unix(${time.now().unix()})
+		|			name:        '${mod.name}'
+		|			description: '${mod.description}'
+		|			major:       ${version[0].int()}
+		|			minor:       ${version[1].int()}
+		|			patch:       ${version[2].int()}
+		|			full:        'v${mod.version}'
+		|			time:        time.unix(${time.now().unix()})
 		|		}
-		|		godot_version: InfoVersion{
-		|			major: ${g.api.header.version_major}
-		|			minor: ${g.api.header.version_minor}
-		|			patch: ${g.api.header.version_patch}
-		|			name: '${g.api.header.version_full_name}'
-		|			status: '${g.api.header.version_status}'
-		|			build: '${g.api.header.version_build}'
+		|		godot: InfoVersion{
+		|			name:        'Godot Engine'
+		|			description: 'Multi-platform 2D and 3D game engine'
+		|			major:       ${g.api.header.version_major}
+		|			minor:       ${g.api.header.version_minor}
+		|			patch:       ${g.api.header.version_patch}
+		|			full:        '${g.api.header.version_full_name}'
+		|			status:      '${g.api.header.version_status}'
+		|			build:       '${g.api.header.version_build}'
 		|		}
 		|	}
 		|}

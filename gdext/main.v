@@ -172,16 +172,18 @@ pub fn setup(gpaddr fn (&i8) gd.GDExtensionInterfaceFunctionPtr, clp gd.GDExtens
 }
 
 pub struct InfoVersion {
-	major  int
-	minor  int
-	patch  int
-	name   string
-	time   time.Time
-	status string
-	build  string
+	name        string
+	description string
+	major       int
+	minor       int
+	patch       int
+	full        string
+	time        time.Time
+	status      string
+	build       string
 }
 
 pub struct Info {
-	version       InfoVersion
-	godot_version InfoVersion
+	version InfoVersion
+	godot   InfoVersion
 }
