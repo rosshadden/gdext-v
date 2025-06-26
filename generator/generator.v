@@ -497,7 +497,11 @@ fn (g &Generator) gen_builtin_classes() ! {
 						continue
 					}
 					field_name := convert_name(arg.name)
-					field_type := convert_strings(convert_type(arg.type))
+					field_type := if arg.type == 'Variant' {
+						'ToVariant'
+					} else {
+						convert_strings(convert_type(arg.type))
+					}
 					field_value := if val := convert_dumb_value(arg.type, arg.default_value) {
 						' = ${val}'
 					} else {
@@ -526,14 +530,18 @@ fn (g &Generator) gen_builtin_classes() ! {
 				if a != 0 {
 					buf.write_string(', ')
 				}
-				buf.write_string('${convert_name(arg.name)} ${convert_type(arg.type)}')
+				if arg.type == 'Variant' {
+					buf.write_string('${convert_name(arg.name)}_ ToVariant')
+				} else {
+					buf.write_string('${convert_name(arg.name)} ${convert_type(arg.type)}')
+				}
 			}
 			// varargs get tacked on to the end
 			if method.is_vararg {
 				if has_args {
 					buf.write_string(', ')
 				}
-				buf.write_string('varargs ...Variant')
+				buf.write_string('varargs ...ToVariant')
 			}
 
 			// trailing struct
@@ -552,10 +560,11 @@ fn (g &Generator) gen_builtin_classes() ! {
 			}
 
 			// body
-			buf.writeln('\tfnname := StringName.new("${method.name}")')
-			buf.writeln('\tdefer { fnname.deinit() }')
-
-			buf.writeln('\tf := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_${class.name.to_lower()}, voidptr(&fnname), ${method.hash})')
+			buf.writeln('
+			|	fnname := StringName.new("${method.name}")
+			|	defer { fnname.deinit() }
+			|	f := gdf.variant_get_ptr_builtin_method(GDExtensionVariantType.type_${class.name.to_lower()}, voidptr(&fnname), ${method.hash})
+			'.strip_margin().trim('\n'))
 
 			// args
 			// NOTE: this won't handle optionals + varargs if any were ever added
@@ -567,10 +576,20 @@ fn (g &Generator) gen_builtin_classes() ! {
 				buf.writeln('\tmut args := unsafe { [${method.arguments.len}]voidptr{} }')
 				for a, arg in method.arguments {
 					name := convert_name(arg.name)
-					name_prefix := if has_optionals && arg.default_value != '' {
+					mut name_prefix := if has_optionals && arg.default_value != '' {
 						'cfg.'
 					} else {
 						''
+					}
+					name_suffix := if arg.type == 'Variant' && name_prefix != '' {
+						''
+					} else {
+						'_'
+					}
+					// Variant -> ToVariant
+					if arg.type == 'Variant' {
+						buf.writeln('\t${name} := ${name_prefix}${name}${name_suffix}.to_variant()')
+						name_prefix = ''
 					}
 					buf.writeln('\targs[${a}] = &${name_prefix}${name}')
 				}
@@ -579,7 +598,8 @@ fn (g &Generator) gen_builtin_classes() ! {
 				// add each vararg
 				buf.writeln('
 					|	for i in 0..varargs.len {
-					|		args << &varargs[i]
+					|		vararg := varargs[i].to_variant()
+					|		args << &vararg
 					|	}
 				'.strip_margin().trim('\n'))
 			}
