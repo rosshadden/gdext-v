@@ -397,7 +397,7 @@ pub fn register_class_methods[T](mut ci ClassInfo) {
 				method_userdata:        &method_data
 				call_func:              call_func[T]
 				ptrcall_func:           fn (user_data voidptr, instance gd.GDExtensionClassInstancePtr, args &gd.GDExtensionConstTypePtr, ret gd.GDExtensionTypePtr) {
-					dump('ptrcall_func')
+					dump('TODO: ptrcall_func')
 				}
 				method_flags:           .gdextension_method_flag_normal
 				has_return_value:       gd.GDExtensionBool(false)

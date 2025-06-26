@@ -533,7 +533,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 				if arg.type == 'Variant' {
 					buf.write_string('${convert_name(arg.name)}_ ToVariant')
 				} else {
-					buf.write_string('${convert_name(arg.name)} ${convert_type(arg.type)}')
+					buf.write_string('${convert_name(arg.name)} ${convert_strings(convert_type(arg.type))}')
 				}
 			}
 			// varargs get tacked on to the end
@@ -569,29 +569,63 @@ fn (g &Generator) gen_builtin_classes() ! {
 			// args
 			// NOTE: this won't handle optionals + varargs if any were ever added
 			if method.is_vararg {
-				// varargs can't used a fixed-size array
+				// varargs can't use a fixed-size array
 				buf.writeln('\ttotal_args := ${method.arguments.len} + varargs.len')
 				buf.writeln('\tmut args := []voidptr{cap: total_args}')
 			} else if has_args {
-				buf.writeln('\tmut args := unsafe { [${method.arguments.len}]voidptr{} }')
-				for a, arg in method.arguments {
-					name := convert_name(arg.name)
-					mut name_prefix := if has_optionals && arg.default_value != '' {
-						'cfg.'
-					} else {
-						''
+				buf.writeln('\tmut args := []voidptr{cap: ${method.arguments.len}}')
+			}
+			// add the fixed arguments
+			for a, arg in method.arguments {
+				name := convert_name(arg.name)
+				mut name_prefix := if has_optionals && arg.default_value != '' {
+					'cfg.'
+				} else {
+					''
+				}
+				name_suffix := if arg.type == 'Variant' && name_prefix != '' {
+					''
+				} else {
+					'_'
+				}
+				// Variant -> ToVariant
+				if arg.type == 'Variant' {
+					buf.writeln('\t${name} := ${name_prefix}${name}${name_suffix}.to_variant()')
+					name_prefix = ''
+				}
+				// TODO: I think if I pull out the arg value before adding, I can make all the vararg stuff happen in one place
+				match true {
+					arg.type in strings {
+						buf.writeln('\targ${a} := ${arg.type}.new(${name_prefix}${name})')
+						buf.writeln('\tdefer { arg${a}.deinit() }')
+						if method.is_vararg {
+							buf.writeln('\targ${a}_var := arg${a}.to_variant()')
+							buf.writeln('\tdefer { arg${a}_var.deinit() }')
+							buf.writeln('\targs << &arg${a}_var')
+						} else {
+							buf.writeln('\targs << &arg${a}')
+						}
 					}
-					name_suffix := if arg.type == 'Variant' && name_prefix != '' {
-						''
-					} else {
-						'_'
+					convert_type(arg.type) in g.class_names {
+						buf.writeln('\targ${a} := ${name_prefix}${name}.ptr')
+						if method.is_vararg {
+							println('TODO: varargs for classes: ${class.name}#${method.name}')
+						}
+						buf.writeln('\targs << &arg${a}')
 					}
-					// Variant -> ToVariant
-					if arg.type == 'Variant' {
-						buf.writeln('\t${name} := ${name_prefix}${name}${name_suffix}.to_variant()')
-						name_prefix = ''
+					arg.type.starts_with('enum::') || arg.type.starts_with('bitfield::') {
+						buf.writeln('\ti64_${name} := i64(${name_prefix}${name})')
+						buf.writeln('\targs << &i64_${name}')
+						if method.is_vararg {
+							println('TODO: varargs for enums: ${class.name}#${method.name}')
+						}
 					}
-					buf.writeln('\targs[${a}] = &${name_prefix}${name}')
+					else {
+						buf.writeln('\targs << unsafe{&${name_prefix}${name}}')
+						if method.is_vararg {
+							println('TODO: varargs for else: ${class.name}#${method.name}')
+						}
+					}
 				}
 			}
 			if method.is_vararg {
@@ -610,13 +644,13 @@ fn (g &Generator) gen_builtin_classes() ! {
 					'unsafe { &args[0] }'
 				}
 				has_args {
-					'&args[0]'
+					'unsafe { &args[0] }'
 				}
 				else {
 					'unsafe{nil}'
 				}
 			}
-			return_ptr := if has_return {
+			ret_ptr := if has_return {
 				'voidptr(&result)'
 			} else {
 				'unsafe{nil}'
@@ -626,11 +660,9 @@ fn (g &Generator) gen_builtin_classes() ! {
 					g.enum_defaults)}')
 			}
 			if method.is_vararg {
-				// buf.writeln('\tmut err := GDExtensionCallError{}')
-				// buf.writeln('\tgdf.object_method_bind_call(mb, ${ptr}, voidptr(${arg_ptr}), total_args, ${ret_ptr}, &err)')
-				buf.writeln('\tf(${ptr}, ${arg_ptr}, ${return_ptr}, total_args)')
+				buf.writeln('\tf(${ptr}, ${arg_ptr}, ${ret_ptr}, total_args)')
 			} else {
-				buf.writeln('\tf(${ptr}, ${arg_ptr}, ${return_ptr}, ${method.arguments.len})')
+				buf.writeln('\tf(${ptr}, ${arg_ptr}, ${ret_ptr}, ${method.arguments.len})')
 			}
 
 			// return
@@ -987,12 +1019,10 @@ fn (g &Generator) gen_classes() ! {
 			// args
 			// NOTE: this won't handle optionals + varargs if any were ever added
 			if method.is_vararg {
-				// varargs can't used a fixed-size array
+				// varargs can't use a fixed-size array
 				buf.writeln('\ttotal_args := ${method.arguments.len} + varargs.len')
 				buf.writeln('\tmut args := []voidptr{cap: total_args}')
 			} else if has_args {
-				// TODO: try to unroll unsafe like with util fns
-				// buf.writeln('\tmut args := unsafe { [${method.arguments.len}]voidptr{} }')
 				buf.writeln('\tmut args := []voidptr{cap: ${method.arguments.len}}')
 			}
 			// add the fixed arguments
@@ -1030,7 +1060,6 @@ fn (g &Generator) gen_classes() ! {
 						buf.writeln('\targ${a} := ${name_prefix}${name}.ptr')
 						if method.is_vararg {
 							println('TODO: varargs for classes: ${class.name}#${method.name}')
-						} else {
 						}
 						buf.writeln('\targs << &arg${a}')
 					}
@@ -1061,7 +1090,7 @@ fn (g &Generator) gen_classes() ! {
 
 			// call
 			arg_ptr := match true {
-				method.is_vararg {
+				has_args && method.is_vararg {
 					'unsafe { &args[0] }'
 				}
 				has_args {

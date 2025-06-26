@@ -68,7 +68,7 @@ pub fn (s &PackedScene) instantiate_as[T](cfg PackedScene_instantiate_Cfg) T {
 }
 
 // TEMP: workaround for SceneTree#call_group crashing
-pub fn (s &SceneTree) call_group_v(group string, method string, varargs ...Variant) {
+pub fn (s &SceneTree) call_group_v(group string, method string, varargs ...ToVariant) {
 	nodes := s.get_nodes_in_group(group)
 	defer { nodes.deinit() }
 	for i in 0 .. nodes.size() {
