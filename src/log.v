@@ -55,3 +55,15 @@ pub fn (mut l Log) debug(s string) {
 	}
 	dump(s)
 }
+
+pub interface Stringy {
+	str() string
+}
+
+pub fn p(args ...Stringy) {
+	println(args.map(it.str()).join(' '))
+}
+
+pub fn pt(args ...Stringy) {
+	println(args.map(it.str()).join('\t'))
+}
