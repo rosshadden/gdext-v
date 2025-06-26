@@ -239,14 +239,18 @@ fn (g &Generator) gen_functions() ! {
 			if a != 0 {
 				buf.write_string(', ')
 			}
-			buf.write_string('${convert_name(arg.name)} ${convert_type(arg.type)}')
+			if arg.type == 'Variant' {
+				buf.write_string('${convert_name(arg.name)}_ ToVariant')
+			} else {
+				buf.write_string('${convert_name(arg.name)} ${convert_type(arg.type)}')
+			}
 		}
 		// varargs get tacked on to the end
 		if method.is_vararg {
 			if method.arguments.len > 0 {
 				buf.write_string(', ')
 			}
-			buf.write_string('varargs ...Variant')
+			buf.write_string('varargs ...ToVariant')
 		}
 
 		// return signature
@@ -267,19 +271,27 @@ fn (g &Generator) gen_functions() ! {
 			|	f := gdf.variant_get_ptr_utility_function(voidptr(&fnname), ${method.hash})
 		'.strip_margin().trim('\n'))
 
+		// Variant -> ToVariant
+		for arg in method.arguments {
+			if arg.type == 'Variant' {
+				buf.writeln('\t${convert_name(arg.name)} := ${convert_name(arg.name)}_.to_variant()')
+			}
+		}
+
 		// args
 		if method.is_vararg {
 			// varargs can't used a fixed-size array
 			buf.writeln('\ttotal_args := ${method.arguments.len} + varargs.len')
 			buf.writeln('\tmut args := []voidptr{cap: total_args}')
 			// add the fixed arguments
-			for arg in method.arguments[..method.arguments.len] {
+			for arg in method.arguments {
 				buf.writeln('\targs << voidptr(&${convert_name(arg.name)})')
 			}
 			// add each vararg
 			buf.writeln('
 				|	for i in 0..varargs.len {
-				|		args << voidptr(&varargs[i])
+				|		vararg := varargs[i].to_variant()
+				|		args << voidptr(&vararg)
 				|	}
 			'.strip_margin().trim('\n'))
 		} else if has_args {
