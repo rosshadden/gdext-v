@@ -437,27 +437,68 @@ fn (g &Generator) gen_builtin_classes() ! {
 		}
 
 		// constructors
-		for constructor in class.constructors {
+		for method in class.constructors {
+			has_args := method.arguments.len > 0
+
+			// fn def
 			buf.writeln('')
-			buf.write_string('pub fn ${class.name}.new${constructor.index}(')
-			for a, arg in constructor.arguments {
+			buf.write_string('pub fn ${class.name}.new${method.index}(')
+			for a, arg in method.arguments {
 				if a != 0 {
 					buf.write_string(', ')
 				}
-				buf.write_string('${arg.name} &${convert_type(arg.type)}')
+				if arg.type == 'Variant' {
+					buf.write_string('${convert_name(arg.name)}_ ToVariant')
+				} else {
+					buf.write_string('${convert_name(arg.name)} ${convert_strings(convert_type(arg.type))}')
+				}
 			}
 			buf.writeln(') ${class.name} {')
 			buf.writeln('\tmut inst := ${class.name}{}')
-			buf.writeln('\tconstructor := gdf.variant_get_ptr_constructor(GDExtensionVariantType.type_${class.name.to_lower()}, ${constructor.index})')
-			if constructor.arguments.len > 0 {
-				buf.writeln('\tmut args := unsafe { [${constructor.arguments.len}]voidptr{} }')
-				for a, arg in constructor.arguments {
-					buf.writeln('\targs[${a}] = ${arg.name}')
-				}
-				buf.writeln('\tconstructor(voidptr(&inst), voidptr(&args[0]))')
-			} else {
-				buf.writeln('\tconstructor(voidptr(&inst), unsafe{nil})')
+			buf.writeln('\tconstructor := gdf.variant_get_ptr_constructor(GDExtensionVariantType.type_${class.name.to_lower()}, ${method.index})')
+
+			// args
+			if has_args {
+				buf.writeln('\tmut args := []voidptr{cap: ${method.arguments.len}}')
 			}
+			for a, arg in method.arguments {
+				name := convert_name(arg.name)
+				// Variant -> ToVariant
+				if arg.type == 'Variant' {
+					buf.writeln('\t${name} := ${name}_.to_variant()')
+				}
+				match true {
+					arg.type in strings {
+						buf.writeln('\targ${a} := ${arg.type}.new(${name})')
+						buf.writeln('\tdefer { arg${a}.deinit() }')
+						buf.writeln('\targs << &arg${a}')
+					}
+					convert_type(arg.type) in g.class_names {
+						buf.writeln('\targ${a} := ${name}.ptr')
+						buf.writeln('\targs << &arg${a}')
+					}
+					arg.type.starts_with('enum::') || arg.type.starts_with('bitfield::') {
+						buf.writeln('\ti64_${name} := i64(${name})')
+						buf.writeln('\targs << &i64_${name}')
+					}
+					else {
+						buf.writeln('\targs << unsafe{&${name}}')
+					}
+				}
+			}
+
+			// call
+			arg_ptr := match true {
+				has_args {
+					'unsafe { &args[0] }'
+				}
+				else {
+					'unsafe{nil}'
+				}
+			}
+			buf.writeln('\tconstructor(voidptr(&inst), ${arg_ptr})')
+
+			// return
 			buf.writeln('\treturn inst')
 			buf.writeln('}')
 		}
@@ -1090,9 +1131,6 @@ fn (g &Generator) gen_classes() ! {
 
 			// call
 			arg_ptr := match true {
-				has_args && method.is_vararg {
-					'unsafe { &args[0] }'
-				}
 				has_args {
 					'unsafe { &args[0] }'
 				}

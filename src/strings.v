@@ -1,21 +1,17 @@
 module gd
 
-pub fn String.new(str string) String {
+pub fn String.new(value string) String {
 	result := String{}
-	gdf.string_new_with_utf8_chars_and_len2(voidptr(&result), str.str, str.len)
+	gdf.string_new_with_utf8_chars_and_len2(voidptr(&result), value.str, value.len)
 	return result
 }
 
-pub fn StringName.new(str string) StringName {
-	s := String.new(str)
-	defer { s.deinit() }
-	return StringName.new2(s)
+pub fn StringName.new(value string) StringName {
+	return StringName.new2(value)
 }
 
-pub fn NodePath.new(path string) NodePath {
-	s := String.new(path)
-	defer { s.deinit() }
-	return NodePath.new2(s)
+pub fn NodePath.new(value string) NodePath {
+	return NodePath.new2(value)
 }
 
 pub fn (s &StringName) to_v() string {

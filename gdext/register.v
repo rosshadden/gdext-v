@@ -294,7 +294,7 @@ fn class_create_instance[T](user_data voidptr, notify_postinitialize &gd.GDExten
 		if attr := attrs['gd.signal'] {
 			$if field.typ is gd.Signal {
 				name := if attr.arg == '' { field.name } else { attr.arg }
-				t.$(field.name) = gd.Signal.new2(&gd.Object(t), gd.StringName.new(name))
+				t.$(field.name) = gd.Signal.new2(&gd.Object(t), name)
 			}
 		}
 	}

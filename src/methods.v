@@ -57,9 +57,7 @@ pub fn (s &Node) get_node_as[T](path string) T {
 }
 
 pub fn Callable.new(object &Object, method string) Callable {
-	sn := StringName.new(method)
-	defer { sn.deinit() }
-	return Callable.new2(object, sn)
+	return Callable.new2(object, method)
 }
 
 pub fn (s &PackedScene) instantiate_as[T](cfg PackedScene_instantiate_Cfg) T {
