@@ -891,7 +891,11 @@ fn (g &Generator) gen_classes() ! {
 						continue
 					}
 					field_name := convert_name(arg.name)
-					field_type := convert_strings(convert_type(arg.type))
+					field_type := if arg.type == 'Variant' {
+						'ToVariant'
+					} else {
+						convert_strings(convert_type(arg.type))
+					}
 					field_value := if val := convert_dumb_value(arg.type, arg.default_value) {
 						' = ${val}'
 					} else {
@@ -920,14 +924,18 @@ fn (g &Generator) gen_classes() ! {
 				if a != 0 {
 					buf.write_string(', ')
 				}
-				buf.write_string('${convert_name(arg.name)} ${convert_strings(convert_type(arg.type))}')
+				if arg.type == 'Variant' {
+					buf.write_string('${convert_name(arg.name)}_ ToVariant')
+				} else {
+					buf.write_string('${convert_name(arg.name)} ${convert_strings(convert_type(arg.type))}')
+				}
 			}
 			// varargs get tacked on to the end
 			if method.is_vararg {
 				if method.arguments.len > 0 {
 					buf.write_string(', ')
 				}
-				buf.write_string('varargs ...Variant')
+				buf.write_string('varargs ...ToVariant')
 			}
 
 			// trailing struct
@@ -954,7 +962,7 @@ fn (g &Generator) gen_classes() ! {
 			|		fnname.deinit()
 			|	}
 			|	mb := gdf.classdb_get_method_bind(&classname, &fnname, ${method.hash})
-		'.strip_margin().trim('\n'))
+			'.strip_margin().trim('\n'))
 
 			// args
 			// NOTE: this won't handle optionals + varargs if any were ever added
@@ -970,10 +978,20 @@ fn (g &Generator) gen_classes() ! {
 			// add the fixed arguments
 			for a, arg in method.arguments {
 				name := convert_name(arg.name)
-				name_prefix := if has_optionals && arg.default_value != '' {
+				mut name_prefix := if has_optionals && arg.default_value != '' {
 					'cfg.'
 				} else {
 					''
+				}
+				name_suffix := if arg.type == 'Variant' && name_prefix != '' {
+					''
+				} else {
+					'_'
+				}
+				// Variant -> ToVariant
+				if arg.type == 'Variant' {
+					buf.writeln('\t${name} := ${name_prefix}${name}${name_suffix}.to_variant()')
+					name_prefix = ''
 				}
 				// TODO: I think if I pull out the arg value before adding, I can make all the vararg stuff happen in one place
 				match true {
@@ -1015,7 +1033,8 @@ fn (g &Generator) gen_classes() ! {
 				// add each vararg
 				buf.writeln('
 					|	for i in 0..varargs.len {
-					|		args << &varargs[i]
+					|		vararg := varargs[i].to_variant()
+					|		args << &vararg
 					|	}
 				'.strip_margin().trim('\n'))
 			}
