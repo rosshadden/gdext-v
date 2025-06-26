@@ -117,11 +117,11 @@ fn class_get_func[T](instance gd.GDExtensionClassInstancePtr, name &gd.StringNam
 				handled = true
 			} $else $if field.typ is f64 {
 				t := unsafe { &T(instance) }
-				variant = gd.f64_to_variant(&t.$(field.name))
+				variant = gd.f64_to_variant(t.$(field.name))
 				handled = true
 			} $else $if field.typ is i64 {
 				t := unsafe { &T(instance) }
-				variant = gd.i64_to_variant(&t.$(field.name))
+				variant = gd.i64_to_variant(t.$(field.name))
 				handled = true
 			}
 		}
