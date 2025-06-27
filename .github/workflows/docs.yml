@@ -41,14 +41,19 @@ jobs:
         run: |
           v doc -m -o docs -f html .
 
-      - name: PAGES:CONFIGURE
-        uses: actions/configure-pages@v5
-
-      - name: PAGES:UPLOAD
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v3
+        id: deployment
         with:
           path: './docs'
 
-      - name: PAGES:DEPLOY
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/deploy-pages@v4
         id: deployment
-        uses: actions/deploy-pages@v4
