@@ -33,10 +33,6 @@ jobs:
           unzip -q /tmp/v.zip -d /tmp
           echo /tmp/v >> "$GITHUB_PATH"
 
-      - name: V:DEBUG
-        run: |
-          v version
-
       - name: APP.DOCS
         run: |
           v doc -m -o docs -f html .
