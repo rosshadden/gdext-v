@@ -40,6 +40,7 @@ jobs:
       - name: APP.DOCS
         run: |
           v doc -m -o docs -f html .
+          cp ./.github/templates/index.html docs/
 
       - uses: actions/upload-pages-artifact@v3
         id: deployment
