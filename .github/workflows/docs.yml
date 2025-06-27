@@ -1,0 +1,54 @@
+name: docs
+
+on:
+  push:
+    branches: [ $default-branch ]
+  pull_request:
+    branches: [ $default-branch ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: V:INSTALL
+        run: |
+          wget -qO /tmp/v.zip https://github.com/vlang/v/releases/latest/download/v_linux.zip
+          unzip -q /tmp/v.zip -d /tmp
+          echo /tmp/v >> "$GITHUB_PATH"
+
+      - name: V:DEBUG
+        run: |
+          v version
+
+      - name: APP.DOCS
+        run: |
+          v doc -m -o docs -f html .
+
+      - name: PAGES:CONFIGURE
+        uses: actions/configure-pages@v5
+
+      - name: PAGES:UPLOAD
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './docs'
+
+      - name: PAGES:DEPLOY
+        id: deployment
+        uses: actions/deploy-pages@v4
