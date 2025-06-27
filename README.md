@@ -122,15 +122,21 @@ v -shared -enable-globals -o lib/libvlang.so -d no_backtrace .
 patchelf --clear-exexstack lib/libvlang.so
 ```
 
+## Documentation
+
+Check out the [generated API docs](https://rosshadden.github.io/gdext-v/).
+
+Or generate your own locally:
+```v
+v doc -m -o docs -f html .
+cp .github/templates/index.html docs/
+```
+
 ## State
 
 Everything needed to make games with V has been implemented.
-
-~The [Are we game yet?](https://github.com/rosshadden/gdext-v/milestone/1) milestone tracks the feasibility of using these bindings for a full game~ (completed).
-The [Are we there yet?](https://github.com/rosshadden/gdext-v/milestone/3) milestone tracks how pleasant it is to work with, after which I plan to announce the project more publicly to the world and encourage devs to use it.
-I have a _lot_ of things planned, many of which should drastically improve the ergonomics of working with these bindings.
-It's not bad as is, to be honest, because I have already been spending time improving parts whenever I encounter spiky edges.
-I just have a really low tolerance for friction and I want to make this project as pleasant as realistically possible to work with.
+And it's pretty damn ergonomic.
+I have a really low tolerance for friction and I want to make this project as pleasant as realistically possible to work with.
 
 ## Helpful resources
 
