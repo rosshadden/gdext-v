@@ -31,4 +31,5 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "v${version}" \
-            --generate-notes
+            --generate-notes \
+            --fail-on-no-commits
