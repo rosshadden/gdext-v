@@ -37,9 +37,10 @@ struct APIBuiltinClass {
 		type string @[required]
 	}
 	constants            []struct {
-		name  string @[required]
-		type  string @[required]
-		value string @[required]
+		name        string @[required]
+		type        string @[required]
+		value       string @[required]
+		description string @[required]
 	}
 	enums                []struct {
 		name   string          @[required]
@@ -106,8 +107,9 @@ pub:
 	}
 
 	constants []struct {
-		name  string @[required]
-		value int    @[required]
+		name        string @[required]
+		value       int    @[required]
+		description string @[required]
 	}
 }
 

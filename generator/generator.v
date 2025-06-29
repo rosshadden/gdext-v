@@ -427,13 +427,14 @@ fn (g &Generator) gen_builtin_classes() ! {
 		for constant in class.constants {
 			const_name := '${class.name.to_lower()}_${convert_name(constant.name)}'
 			value := convert_dumb_value(class.name, constant.value) or { 'none' }
+			buf.writeln('\n${g.build_docstring(constant.description)}')
 			buf.writeln('
 				|pub const ${const_name} = ${value}
 				|@[inline]
 				|pub fn ${class.name}.${convert_name(constant.name)}() ${constant.type} {
 				|	return ${const_name}
 				|}
-			'.strip_margin().trim_right('\n'))
+			'.strip_margin().trim('\n'))
 		}
 
 		// constructors

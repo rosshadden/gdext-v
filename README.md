@@ -27,7 +27,7 @@ ln -s /absolute/path/to/gdext-v ~/.vmodules/gd
 3. Dump the extension API from Godot into `./data/`:
 ```bash
 cd data
-godot --headless --dump-extension-api
+godot --headless --dump-extension-api-with-docs
 cd ..
 ```
 
