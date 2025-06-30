@@ -4,15 +4,15 @@ on:
   push:
     branches: [ main, lab ]
     paths:
-      - '**.v'
-      - '**.vsh'
-      - '**.vtmpl'
+      - "**.v"
+      - "**.vsh"
+      - "**.vtmpl"
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
     paths:
-      - '**.v'
-      - '**.vsh'
-      - '**.vtmpl'
+      - "**.v"
+      - "**.vsh"
+      - "**.vtmpl"
   workflow_dispatch:
 
 permissions:
@@ -21,7 +21,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: false
 
 jobs:
@@ -35,13 +35,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: V:INSTALL
+      - name: v:install
         run: |
           wget -qO /tmp/v.zip https://github.com/vlang/v/releases/latest/download/v_linux.zip
           unzip -q /tmp/v.zip -d /tmp
           echo /tmp/v >> "$GITHUB_PATH"
 
-      - name: APP.DOCS
+      - name: app.docs
         run: |
           v doc -m -o docs -f html .
           cp .github/templates/index.html docs/
@@ -49,7 +49,7 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         id: deployment
         with:
-          path: './docs'
+          path: ./docs
 
   deploy:
     needs: build

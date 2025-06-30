@@ -2,11 +2,11 @@ name: tests
 
 on:
   pull_request_target:
-    branches: [ "main" ]
+    branches: [ main ]
     paths:
-      - '**.v'
-      - '**.vsh'
-      - '**.vtmpl'
+      - "**.v"
+      - "**.vsh"
+      - "**.vtmpl"
   workflow_dispatch:
 
 jobs:
@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: V:INSTALL
+      - name: v:install
         run: |
           wget -qO /tmp/v.zip https://github.com/vlang/v/releases/latest/download/v_linux.zip
           unzip -q /tmp/v.zip -d /tmp
@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: APP:BUILD
+      - name: app:build
         run: |
           ./bin/gen.vsh
 
@@ -36,6 +36,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: APP:TEST
+      - name: app:test
         run: |
           v test .

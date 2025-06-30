@@ -2,17 +2,17 @@ name: release
 
 on:
   push:
-    branches: [ "main" ]
-    paths: [ "v.mod" ]
+    branches: [ main ]
+    paths: [ v.mod ]
   pull_request:
-    branches: [ "main" ]
-    paths: [ "v.mod" ]
+    branches: [ main ]
+    paths: [ v.mod ]
 
 permissions:
   contents: write
 
 concurrency:
-  group: "release"
+  group: release
   cancel-in-progress: true
 
 jobs:
@@ -22,11 +22,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: ENV.SET
+      - name: env.set
         run: |
           echo "version=$(grep 'version:' v.mod | grep -oP '\d+\.\d+\.\d+')" >> $GITHUB_ENV
 
-      - name: REPO.RELEASE
+      - name: repo.release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
