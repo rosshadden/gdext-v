@@ -24,16 +24,18 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
+env:
+  GODOT_VERSION: 4.5
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
       - uses: actions/checkout@v4
+        with:
+          filter: tree:0
+          fetch-depth: 0
 
       - name: v:install
         run: |
@@ -41,8 +43,21 @@ jobs:
           unzip -q /tmp/v.zip -d /tmp
           echo /tmp/v >> "$GITHUB_PATH"
 
+      - uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.5.0-beta1
+          use-dotnet: false
+
+      - name: godot:dump
+        run: |
+          mkdir data
+          cd data
+          godot --headless --dump-extension-api-with-docs
+          cd ../
+
       - name: app.docs
         run: |
+          ./bin/gen.vsh
           v doc -m -o docs -f html .
           cp .github/templates/index.html docs/
 
