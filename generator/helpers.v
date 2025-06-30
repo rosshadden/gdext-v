@@ -1,5 +1,8 @@
 module generator
 
+// TODO: make `TODO` et al look nice
+
+// TODO: make V support `///` for docstrings
 // TODO: fix V stripping `#.*` from comments
 // TODO: fix V not working with the first item in a list
 
