@@ -70,6 +70,7 @@ fn gen_operator(mut buf strings.Builder, class_name string, op_name string, op_t
 	// use $tmpl which will have access to all the variables we've defined
 	code := $tmpl('./templates/operator.vtmpl').trim_space_right()
 	buf.writeln('')
+	buf.write_string(docstring(op.description, after: '\n'))
 	buf.writeln(code)
 }
 
@@ -88,6 +89,7 @@ fn gen_operators(mut buf strings.Builder, class_name string, operators []APIOper
 		if op.right_type == class_name && op.name !in ['!=', '>', '<=', '>='] {
 			gen_operator(mut buf, class_name, '${op.name} ', op_type, op, is_binary: is_binary)
 		}
+
 		// different type operators
 		if op.right_type != 'Variant' {
 			gen_operator(mut buf, class_name, op_prefixes[op.name], op_type, op,

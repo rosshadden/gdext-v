@@ -407,7 +407,8 @@ fn (g &Generator) gen_builtin_classes() ! {
 			// TODO: is sorting necessary?
 			sorted_mem := offsets.members.sorted(a.offset < b.offset)
 			buf.writeln('pub mut:')
-			for mem in sorted_mem {
+			for m, mem in sorted_mem {
+				buf.write_string(docstring(class.members[m].description, before: '\t', after: '\n'))
 				if mem.meta in ['int32', 'float'] {
 					defined_size += 4
 				} else {
@@ -453,6 +454,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 
 			// fn def
 			buf.writeln('')
+			buf.write_string(docstring(method.description, after: '\n'))
 			buf.write_string('pub fn ${class.name}.new${method.index}(')
 			for a, arg in method.arguments {
 				if a != 0 {
@@ -566,6 +568,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 
 			// fn def
 			buf.writeln('')
+			buf.write_string(docstring(method.description, after: '\n'))
 			if method.is_static {
 				buf.write_string('pub fn ${class.name}.${method_name}(')
 			} else {

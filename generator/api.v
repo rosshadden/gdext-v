@@ -4,6 +4,7 @@ struct APIOperator {
 	name        string @[required]
 	right_type  string
 	return_type string @[required]
+	description string
 }
 
 struct APIBuiltinClass {
@@ -17,6 +18,7 @@ struct APIBuiltinClass {
 
 	constructors []struct {
 		index     int @[required]
+		description string
 		arguments []struct {
 			name string @[required]
 			type string @[required]
@@ -30,6 +32,7 @@ struct APIBuiltinClass {
 		is_const    bool @[required]
 		is_static   bool @[required]
 		hash        u64  @[required]
+		description string
 		arguments   []struct {
 			name          string @[required]
 			type          string @[required]
