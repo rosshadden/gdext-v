@@ -6,7 +6,18 @@ module generator
 // TODO: fix V stripping `#.*` from comments
 // TODO: fix V not working with the first item in a list
 
-fn (g &Generator) build_docstring(comments string) string {
+@[params]
+struct DocstringCfg {
+	// Add text before valid docstrings.
+	before string
+	// Add text after valid docstrings.
+	after string
+}
+
+// Creates a doc comment string from the given comments.
+// Converts some bbcode to markdown.
+fn docstring(comments string, cfg DocstringCfg) string {
+	if comments == '' { return '' }
 	mut lines := []string{}
 	for comment in comments.split_into_lines() {
 		line := comment
@@ -16,5 +27,5 @@ fn (g &Generator) build_docstring(comments string) string {
 			.replace('[/code]', '`')
 		lines << '// ${line}'
 	}
-	return lines.join('\n')
+	return cfg.before + lines.join('\n') + cfg.after
 }

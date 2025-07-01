@@ -156,6 +156,7 @@ pub mut:
 		values      []struct {
 			name  string @[required]
 			value i64    @[required]
+			description string
 		} @[required]
 	} @[required]
 
@@ -169,6 +170,7 @@ pub mut:
 			name string @[required]
 			type string @[required]
 		}
+		description string
 	} @[required]
 
 	builtin_classes []APIBuiltinClass @[required]

@@ -232,6 +232,7 @@ fn (g &Generator) gen_functions() ! {
 
 		// fn def
 		buf.writeln('')
+		buf.write_string(docstring(method.description, after: '\n'))
 		buf.write_string('pub fn ${method_name}(')
 
 		// args
@@ -349,6 +350,7 @@ fn (g &Generator) gen_enums() ! {
 		for val in enm.values {
 			if val.value !in bits {
 				bits << val.value
+				buf.write_string(docstring(val.description, before: '\t', after: '\n'))
 				buf.writeln('\t${val.name.to_lower()} = ${val.value}')
 			}
 		}
@@ -427,16 +429,14 @@ fn (g &Generator) gen_builtin_classes() ! {
 		for constant in class.constants {
 			const_name := '${class.name.to_lower()}_${convert_name(constant.name)}'
 			value := convert_dumb_value(class.name, constant.value) or { 'none' }
-			if constant.description != '' {
-				buf.writeln('\n${docstring(constant.description)}')
-			}
 			buf.writeln('
+				${docstring(constant.description, before: '|')}
 				|pub const ${const_name} = ${value}
 				|@[inline]
 				|pub fn ${class.name}.${convert_name(constant.name)}() ${constant.type} {
 				|	return ${const_name}
 				|}
-			'.strip_margin().trim('\n'))
+			'.strip_margin().trim_right('\n'))
 		}
 
 		// constructors
@@ -885,6 +885,7 @@ fn (g &Generator) gen_classes() ! {
 		for constant in class.constants {
 			const_name := '${class.name.to_lower()}_${convert_name(constant.name)}'
 			buf.writeln('
+				${docstring(constant.description, before: '|')}
 				|pub const ${const_name} = ${constant.value}
 				|@[inline]
 				|pub fn ${class.name}.${convert_name(constant.name)}() int {
