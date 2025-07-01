@@ -17,9 +17,9 @@ struct APIBuiltinClass {
 	description          string
 
 	constructors []struct {
-		index     int @[required]
+		index       int @[required]
 		description string
-		arguments []struct {
+		arguments   []struct {
 			name string @[required]
 			type string @[required]
 		}
@@ -91,6 +91,7 @@ pub:
 		is_virtual  bool   @[required]
 		hash        u64    @[required]
 		is_required bool
+		description string
 
 		return_value struct {
 			type string @[required]
@@ -106,16 +107,19 @@ pub:
 	}
 
 	properties []struct {
-		type   string @[required]
-		name   string @[required]
-		setter string
-		getter string @[required]
-		index  int
+		type string @[required]
+		name string @[required]
+		// TODO: should we use setter/getter? some names like `get_` vs `has_` are different
+		setter      string
+		getter      string @[required]
+		description string
+		index       int
 	}
 
 	signals []struct {
-		name      string @[required]
-		arguments []struct {
+		name        string @[required]
+		description string
+		arguments   []struct {
 			name string @[required]
 			type string @[required]
 		}

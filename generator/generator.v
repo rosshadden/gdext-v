@@ -997,6 +997,7 @@ fn (g &Generator) gen_classes() ! {
 			// create trailing struct for optional arguments
 			if has_optionals {
 				buf.writeln('')
+				buf.writeln('// Optional parameters for ${class.name}#${method_name}')
 				buf.writeln('@[params]')
 				buf.writeln('pub struct ${class.name}_${method_name}_Cfg {')
 				buf.writeln('pub:')
@@ -1023,6 +1024,7 @@ fn (g &Generator) gen_classes() ! {
 
 			// fn def
 			buf.writeln('')
+			buf.write_string(docstring(method.description, after: '\n'))
 			if method.is_static {
 				buf.write_string('pub fn ${class.name}.${method_name}(')
 			} else {
