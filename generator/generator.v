@@ -427,7 +427,9 @@ fn (g &Generator) gen_builtin_classes() ! {
 		for constant in class.constants {
 			const_name := '${class.name.to_lower()}_${convert_name(constant.name)}'
 			value := convert_dumb_value(class.name, constant.value) or { 'none' }
-			buf.writeln('\n${g.build_docstring(constant.description)}')
+			if constant.description != '' {
+				buf.writeln('\n${docstring(constant.description)}')
+			}
 			buf.writeln('
 				|pub const ${const_name} = ${value}
 				|@[inline]
