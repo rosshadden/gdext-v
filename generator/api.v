@@ -45,8 +45,9 @@ struct APIBuiltinClass {
 	enums                []struct {
 		name   string          @[required]
 		values []struct {
-			name  string @[required]
-			value i64    @[required]
+			name        string @[required]
+			value       i64    @[required]
+			description string
 		} @[required]
 	}
 }
@@ -63,8 +64,9 @@ pub:
 		name        string           @[required]
 		is_bitfield bool             @[required]
 		values      []struct {
-			name  string @[required]
-			value i64    @[required]
+			name        string @[required]
+			value       i64    @[required]
+			description string
 		} @[required]
 	}
 
@@ -154,8 +156,8 @@ pub mut:
 		name        string           @[required]
 		is_bitfield bool             @[required]
 		values      []struct {
-			name  string @[required]
-			value i64    @[required]
+			name        string @[required]
+			value       i64    @[required]
 			description string
 		} @[required]
 	} @[required]

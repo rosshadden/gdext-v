@@ -12,12 +12,18 @@ struct DocstringCfg {
 	before string
 	// Add text after valid docstrings.
 	after string
+	// Add text before each line.
+	prefix string
+	// Add text after each line.
+	suffix string
 }
 
 // Creates a doc comment string from the given comments.
 // Converts some bbcode to markdown.
 fn docstring(comments string, cfg DocstringCfg) string {
-	if comments == '' { return '' }
+	if comments == '' {
+		return ''
+	}
 	mut lines := []string{}
 	for comment in comments.split_into_lines() {
 		line := comment
@@ -25,7 +31,7 @@ fn docstring(comments string, cfg DocstringCfg) string {
 			.replace('[/codeblock]', '```')
 			.replace('[code]', '`')
 			.replace('[/code]', '`')
-		lines << '// ${line}'
+		lines << '${cfg.prefix}// ${line}${cfg.suffix}'
 	}
 	return cfg.before + lines.join('\n') + cfg.after
 }

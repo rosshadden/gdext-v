@@ -388,6 +388,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 			for val in enm.values {
 				if val.value !in bits {
 					bits << val.value
+					buf.write_string(docstring(val.description, before: '\t', after: '\n'))
 					buf.writeln('\t${val.name.to_lower()} = ${val.value}')
 				}
 			}
@@ -430,7 +431,7 @@ fn (g &Generator) gen_builtin_classes() ! {
 			const_name := '${class.name.to_lower()}_${convert_name(constant.name)}'
 			value := convert_dumb_value(class.name, constant.value) or { 'none' }
 			buf.writeln('
-				${docstring(constant.description, before: '|')}
+				${docstring(constant.description, prefix: '|')}
 				|pub const ${const_name} = ${value}
 				|@[inline]
 				|pub fn ${class.name}.${convert_name(constant.name)}() ${constant.type} {
@@ -863,6 +864,7 @@ fn (g &Generator) gen_classes() ! {
 			for val in enm.values {
 				if val.value !in bits {
 					bits << val.value
+					buf.write_string(docstring(val.description, before: '\t', after: '\n'))
 					buf.writeln('\t${val.name.to_lower()} = ${val.value}')
 				}
 			}
@@ -885,7 +887,7 @@ fn (g &Generator) gen_classes() ! {
 		for constant in class.constants {
 			const_name := '${class.name.to_lower()}_${convert_name(constant.name)}'
 			buf.writeln('
-				${docstring(constant.description, before: '|')}
+				${docstring(constant.description, prefix: '|')}
 				|pub const ${const_name} = ${constant.value}
 				|@[inline]
 				|pub fn ${class.name}.${convert_name(constant.name)}() int {
