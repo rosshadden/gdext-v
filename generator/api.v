@@ -7,19 +7,23 @@ struct APIOperator {
 }
 
 struct APIBuiltinClass {
-	name                 string          @[required]
-	is_keyed             bool            @[required]
-	operators            []APIOperator   @[required]
-	constructors         []struct {
+	name                 string        @[required]
+	is_keyed             bool          @[required]
+	operators            []APIOperator @[required]
+	has_destructor       bool          @[required]
+	indexing_return_type string
+	brief_description    string
+	description          string
+
+	constructors []struct {
 		index     int @[required]
 		arguments []struct {
 			name string @[required]
 			type string @[required]
 		}
 	} @[required]
-	has_destructor       bool @[required]
-	indexing_return_type string
-	methods              []struct {
+
+	methods []struct {
 		name        string @[required]
 		return_type string
 		is_vararg   bool @[required]
@@ -32,17 +36,21 @@ struct APIBuiltinClass {
 			default_value string
 		}
 	}
-	members              []struct {
-		name string @[required]
-		type string @[required]
+
+	members []struct {
+		name        string @[required]
+		type        string @[required]
+		description string
 	}
-	constants            []struct {
+
+	constants []struct {
 		name        string @[required]
 		type        string @[required]
 		value       string @[required]
 		description string
 	}
-	enums                []struct {
+
+	enums []struct {
 		name   string          @[required]
 		values []struct {
 			name        string @[required]
@@ -54,11 +62,13 @@ struct APIBuiltinClass {
 
 struct APIClass {
 pub:
-	name            string @[required]
-	is_refcounted   bool   @[required]
-	is_instantiable bool   @[required]
-	inherits        string
-	api_type        string @[required]
+	name              string @[required]
+	is_refcounted     bool   @[required]
+	is_instantiable   bool   @[required]
+	inherits          string
+	api_type          string @[required]
+	brief_description string
+	description       string
 
 	enums []struct {
 		name        string           @[required]

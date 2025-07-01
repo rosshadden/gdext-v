@@ -397,11 +397,15 @@ fn (g &Generator) gen_builtin_classes() ! {
 
 		// struct
 		buf.writeln('')
+		buf.write_string(docstring(class.brief_description, after: '\n//\n'))
+		buf.write_string(docstring(class.description, after: '\n'))
 		buf.writeln('@[packed]')
 		buf.writeln('pub struct ${class.name} {')
 		mut defined_size := 0
-		if members := g.api.builtin_class_member_offsets[platform_index].classes.filter(it.name == class.name)[0] {
-			sorted_mem := members.members.sorted(a.offset < b.offset)
+		// TODO: is using builtin_class_member_offsets necessary?
+		if offsets := g.api.builtin_class_member_offsets[platform_index].classes.filter(it.name == class.name)[0] {
+			// TODO: is sorting necessary?
+			sorted_mem := offsets.members.sorted(a.offset < b.offset)
 			buf.writeln('pub mut:')
 			for mem in sorted_mem {
 				if mem.meta in ['int32', 'float'] {
@@ -430,9 +434,12 @@ fn (g &Generator) gen_builtin_classes() ! {
 		for constant in class.constants {
 			const_name := '${class.name.to_lower()}_${convert_name(constant.name)}'
 			value := convert_dumb_value(class.name, constant.value) or { 'none' }
+			doc := docstring(constant.description, prefix: '|')
 			buf.writeln('
-				${docstring(constant.description, prefix: '|')}
+				${doc}
 				|pub const ${const_name} = ${value}
+				|
+				${doc}
 				|@[inline]
 				|pub fn ${class.name}.${convert_name(constant.name)}() ${constant.type} {
 				|	return ${const_name}
@@ -873,6 +880,9 @@ fn (g &Generator) gen_classes() ! {
 
 		// struct
 		buf.writeln('')
+		buf.write_string(docstring(class.brief_description, after: '\n//\n'))
+		// FIX: this breaks rendering of the page
+		// buf.write_string(docstring(class.description, after: '\n'))
 		// buf.writeln('@[noinit]')
 		buf.writeln('pub struct ${class.name} {')
 		if class.inherits == '' {
@@ -886,9 +896,12 @@ fn (g &Generator) gen_classes() ! {
 		// constants
 		for constant in class.constants {
 			const_name := '${class.name.to_lower()}_${convert_name(constant.name)}'
+			doc := docstring(constant.description, prefix: '|')
 			buf.writeln('
-				${docstring(constant.description, prefix: '|')}
+				${doc}
 				|pub const ${const_name} = ${constant.value}
+				|
+				${doc}
 				|@[inline]
 				|pub fn ${class.name}.${convert_name(constant.name)}() int {
 				|	return ${const_name}
