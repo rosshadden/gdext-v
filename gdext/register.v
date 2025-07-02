@@ -385,10 +385,10 @@ pub fn register_class_methods[T](mut ci ClassInfo) {
 				}
 				args_info << info
 			}
-			first_arg := if args_info.len > 0 {
-				args_info.first()
+			args_ptr := if args_info.len > 0 {
+				unsafe { &args_info[0] }
 			} else {
-				gd.GDExtensionPropertyInfo{}
+				&gd.GDExtensionPropertyInfo{}
 			}
 
 			// TODO: fill out arg and return info
@@ -403,8 +403,8 @@ pub fn register_class_methods[T](mut ci ClassInfo) {
 				has_return_value:       gd.GDExtensionBool(false)
 				return_value_info:      unsafe { nil }
 				return_value_metadata:  .gdextension_method_argument_metadata_none
-				argument_count:         u32(method.args.len)
-				arguments_info:         &first_arg
+				argument_count:         u32(args_info.len)
+				arguments_info:         args_ptr
 				arguments_metadata:     &no_meta
 				default_argument_count: 0
 				default_arguments:      unsafe { nil }
