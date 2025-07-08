@@ -86,7 +86,7 @@ pub fn (s &SceneTree) call_group_v(group string, method string, varargs ...ToVar
 // Get the list of signals on an object.
 pub fn (s &Object) get_signal_list_v() []string {
 	mut signals := []string{}
-	dicts := s.get_signal_list().to_v().map(Dictionary.from_variant(it))
+	dicts := s.get_signal_list().to_v[Dictionary]()
 	sn := String.new('name')
 	for dict in dicts {
 		name := dict.get(sn, default: String{})
@@ -101,6 +101,7 @@ pub fn (s &Object) get_signal_list_v() []string {
 // cb := gd.Callable.new2(s.obj(), 'on_tree_exited')
 // s.animator.signals()['tree_exited'].connect(cb)
 // ```
+// TODO: this should reuse return or something
 pub fn (s &Object) signals() map[string]Signal {
 	signals := s.get_signal_list_v()
 	mut result := map[string]Signal{}
@@ -110,11 +111,11 @@ pub fn (s &Object) signals() map[string]Signal {
 	return result
 }
 
-// Convert a GD Array (of Variants) to a V Array (of Variants).
-pub fn (s &Array) to_v() []Variant {
-	mut result := []Variant{cap: int(s.size())}
+// Convert a GD Array of Variants to a generic V array.
+pub fn (s &Array) to_v[T]() []T {
+	mut result := []T{cap: int(s.size())}
 	for i in 0 .. s.size() {
-		result << s.get(i)
+		result << T.from_variant(s.get(i))
 	}
 	return result
 }
