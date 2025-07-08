@@ -1,5 +1,9 @@
 module gd
 
+pub fn (s Object) obj() Object {
+	return s
+}
+
 // TODO: unify all these misc cast/path methods
 
 pub fn (s &Object) try_cast_to[T]() ?T {
