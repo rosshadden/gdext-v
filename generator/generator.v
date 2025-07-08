@@ -746,6 +746,14 @@ fn (g &Generator) gen_builtin_classes() ! {
 			|	variant_to_type(voidptr(&s), variant)
 			|}
 		'.strip_margin().trim_right('\n'))
+		buf.writeln('
+			|pub fn ${class.name}.from_variant(variant &Variant) ${class.name} {
+			|	mut s := ${class.name}{}
+			|	variant_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_${class.name.to_lower()})
+			|	variant_to_type(voidptr(&s), variant)
+			|	return s
+			|}
+		'.strip_margin().trim_right('\n'))
 
 		if class.indexing_return_type != '' {
 			return_type := convert_type(class.indexing_return_type)
@@ -955,6 +963,14 @@ fn (g &Generator) gen_classes() ! {
 			|pub fn (mut s ${class.name}) from_variant(variant &Variant) {
 			|	variant_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_object)
 			|	variant_to_type(voidptr(&s.ptr), variant)
+			|}
+		'.strip_margin().trim_right('\n'))
+		buf.writeln('
+			|pub fn ${class.name}.from_variant(variant &Variant) ${class.name} {
+			|	mut s := ${class.name}{}
+			|	variant_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_object)
+			|	variant_to_type(voidptr(&s.ptr), variant)
+			|	return s
 			|}
 		'.strip_margin().trim_right('\n'))
 

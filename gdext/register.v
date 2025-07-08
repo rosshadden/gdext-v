@@ -375,10 +375,9 @@ pub fn register_class_methods[T](mut ci ClassInfo) {
 					hint.deinit()
 				}
 				info := gd.GDExtensionPropertyInfo{
-					type_:      arg_type
-					name:       &arg_name
-					class_name: &arg_class
-					// TODO
+					type_:       arg_type
+					name:        &arg_name
+					class_name:  &arg_class
 					hint:        .property_hint_none
 					hint_string: &hint
 					usage:       .property_usage_default
@@ -391,7 +390,7 @@ pub fn register_class_methods[T](mut ci ClassInfo) {
 				&gd.GDExtensionPropertyInfo{}
 			}
 
-			// TODO: fill out arg and return info
+			// TODO: fill out return info
 			info := gd.GDExtensionClassMethodInfo{
 				name:                   &method_sn
 				method_userdata:        &method_data
@@ -624,6 +623,7 @@ fn call_func_ready[T](instance gd.GDExtensionClassInstancePtr, args &gd.GDExtens
 					_ = f_ptr
 				}
 			} $else {
+				// TODO: this only works for Nodes, so make that clear in the conditional and try adding support for other types
 				unsafe {
 					// HACK: pointer magicks
 					f_ptr := &voidptr(&inst.$(field.name))
