@@ -95,22 +95,6 @@ pub fn (s &Object) get_signal_list_v() []string {
 	return signals
 }
 
-// Get a map of all signals on an object.
-// This allows connecting to them directly:
-// ```v
-// cb := gd.Callable.new2(s.obj(), 'on_tree_exited')
-// s.animator.signals()['tree_exited'].connect(cb)
-// ```
-// TODO: this should reuse return or something
-pub fn (s &Object) signals() map[string]Signal {
-	signals := s.get_signal_list_v()
-	mut result := map[string]Signal{}
-	for name in signals {
-		result[name] = Signal.new2(s, name)
-	}
-	return result
-}
-
 // Convert a GD Array of Variants to a generic V array.
 pub fn (s &Array) to_v[T]() []T {
 	mut result := []T{cap: int(s.size())}

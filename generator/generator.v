@@ -947,6 +947,17 @@ fn (g &Generator) gen_classes() ! {
 			".strip_margin().trim_right('\n'))
 		}
 
+		// signals
+		for signal in class.signals {
+			doc := docstring(signal.description, prefix: '|')
+			buf.writeln('
+				${doc}
+				|pub fn (s &${class.name}) ${convert_name(signal.name)}() Signal {
+				|	return Signal.new2(s.obj(), "${signal.name}")
+				|}
+			'.strip_margin().trim_right('\n'))
+		}
+
 		// to Variant
 		buf.writeln('
 			|pub fn (s &${class.name}) to_variant() Variant {
