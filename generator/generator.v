@@ -301,6 +301,7 @@ fn (g &Generator) gen_functions() ! {
 			buf.writeln('\targs := [${arg_list.join(', ')}]!')
 		}
 		arg_ptr := match true {
+			// FIX: this may have the same issue classes did with (no args) + (varargs)
 			has_args && method.is_vararg {
 				'unsafe { &args[0] }'
 			}
@@ -695,27 +696,30 @@ fn (g &Generator) gen_builtin_classes() ! {
 
 			// call
 			arg_ptr := match true {
-				has_args && method.is_vararg {
-					'unsafe { &args[0] }'
-				}
-				has_args {
+				has_args || method.is_vararg {
 					'unsafe { &args[0] }'
 				}
 				else {
-					'unsafe{nil}'
+					'unsafe{ nil }'
 				}
 			}
 			ret_ptr := if has_return {
 				'voidptr(&result)'
 			} else {
-				'unsafe{nil}'
+				'unsafe{ nil }'
 			}
 			if has_return {
 				buf.writeln('\tmut result := ${convert_return(return_type, method.return_type,
 					g.enum_defaults)}')
 			}
 			if method.is_vararg {
-				buf.writeln('\tf(${ptr}, ${arg_ptr}, ${ret_ptr}, total_args)')
+				buf.writeln('
+					|	if total_args > 0 {
+					|		f(${ptr}, ${arg_ptr}, ${ret_ptr}, total_args)
+					|	} else {
+					|		f(${ptr}, unsafe { nil }, ${ret_ptr}, total_args)
+					|	}
+				'.strip_margin().trim_right('\n'))
 			} else {
 				buf.writeln('\tf(${ptr}, ${arg_ptr}, ${ret_ptr}, ${method.arguments.len})')
 			}
