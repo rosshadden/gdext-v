@@ -142,6 +142,7 @@ pub fn setup(gpaddr fn (&i8) gd.GDExtensionInterfaceFunctionPtr, clp gd.GDExtens
 		ref_set_object:                                     unsafe { gd.GDExtensionInterfaceRefSetObject(gpaddr(c'ref_set_object')) }
 		script_instance_create:                             unsafe { gd.GDExtensionInterfaceScriptInstanceCreate(gpaddr(c'script_instance_create')) }
 		script_instance_create3:                            unsafe { gd.GDExtensionInterfaceScriptInstanceCreate3(gpaddr(c'script_instance_create3')) }
+		callable_custom_create2:                            unsafe { gd.GDExtensionInterfaceCallableCustomCreate2(gpaddr(c'callable_custom_create2')) }
 		classdb_construct_object:                           unsafe { gd.GDExtensionInterfaceClassdbConstructObject(gpaddr(c'classdb_construct_object')) }
 		classdb_construct_object2:                          unsafe { gd.GDExtensionInterfaceClassdbConstructObject2(gpaddr(c'classdb_construct_object2')) }
 		classdb_get_method_bind:                            unsafe { gd.GDExtensionInterfaceClassdbGetMethodBind(gpaddr(c'classdb_get_method_bind')) }

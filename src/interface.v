@@ -367,6 +367,47 @@ pub:
 	default_arguments      &&Variant
 }
 
+pub struct GDExtensionCallableCustomInfo2 {
+	callable_userdata       voidptr
+	token                   GDExtensionClassLibraryPtr
+	object_id               GDObjectInstanceID
+	call_func               CallableCustomCall             = unsafe { nil }
+	is_valid_func           CallableCustomIsValid          = unsafe { nil }
+	free_func               CallableCustomFree             = unsafe { nil }
+	hash_func               CallableCustomHash             = unsafe { nil }
+	equal_func              CallableCustomEqual            = unsafe { nil }
+	less_than_func          CallableCustomLessThan         = unsafe { nil }
+	to_string_func          CallableCustomToString         = unsafe { nil }
+	get_argument_count_func CallableCustomGetArgumentCount = unsafe { nil }
+}
+
+// pub type CallableFn = fn ()
+
+// pub type CallableFn = fn (Variant)
+
+pub type CallableFn = fn (...ToVariant)
+
+@[heap]
+struct CallableCtx {
+	func CallableFn = unsafe { nil }
+}
+
+pub type CallableCustomCall = fn (voidptr, &&Variant, GDExtensionInt, &Variant, &GDExtensionCallError)
+
+pub type CallableCustomIsValid = fn (voidptr) GDExtensionBool
+
+pub type CallableCustomFree = fn (voidptr)
+
+pub type CallableCustomHash = fn (voidptr) u32
+
+pub type CallableCustomEqual = fn (voidptr, voidptr) GDExtensionBool
+
+pub type CallableCustomLessThan = fn (voidptr, voidptr) GDExtensionBool
+
+pub type CallableCustomToString = fn (voidptr, &GDExtensionBool, GDExtensionUninitializedStringPtr)
+
+pub type CallableCustomGetArgumentCount = fn (voidptr, &GDExtensionBool) GDExtensionInt
+
 pub type GDExtensionScriptInstanceDataPtr = usize
 pub type GDExtensionScriptInstanceSet = fn (GDExtensionScriptInstanceDataPtr, &StringName, &Variant) GDExtensionBool
 
@@ -765,6 +806,8 @@ pub type GDExtensionInterfaceScriptInstanceCreate = fn (&GDExtensionScriptInstan
 
 pub type GDExtensionInterfaceScriptInstanceCreate3 = fn (&GDExtensionScriptInstanceInfo3, GDExtensionScriptInstanceDataPtr) GDExtensionScriptInstancePtr
 
+pub type GDExtensionInterfaceCallableCustomCreate2 = fn (GDExtensionUninitializedTypePtr, &GDExtensionCallableCustomInfo2)
+
 pub type GDExtensionInterfaceClassdbConstructObject = fn (&StringName) &Object
 
 pub type GDExtensionInterfaceClassdbConstructObject2 = fn (&StringName) &Object
@@ -929,6 +972,7 @@ pub:
 	ref_set_object                                     GDExtensionInterfaceRefSetObject                                  @[required]
 	script_instance_create                             GDExtensionInterfaceScriptInstanceCreate                          @[required]
 	script_instance_create3                            GDExtensionInterfaceScriptInstanceCreate3                         @[required]
+	callable_custom_create2                            GDExtensionInterfaceCallableCustomCreate2                         @[required]
 	classdb_construct_object                           GDExtensionInterfaceClassdbConstructObject                        @[required]
 	classdb_construct_object2                          GDExtensionInterfaceClassdbConstructObject2                       @[required]
 	classdb_get_method_bind                            GDExtensionInterfaceClassdbGetMethodBind                          @[required]

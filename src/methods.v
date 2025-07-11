@@ -68,6 +68,63 @@ pub fn Callable.new(object ToObject, method string) Callable {
 	return Callable.new2(object.obj(), method)
 }
 
+fn callable_func(data voidptr, args &&Variant, arg_count GDExtensionInt, ret &Variant, err &GDExtensionCallError) {
+	ctx := unsafe { &CallableCtx(data) }
+	println('ctx: ${ctx}')
+	println('args: ${args}')
+	f := ctx.func
+	// f()
+	f(Bool(true))
+	// f(Int(26).to_variant())
+}
+
+pub fn Callable.new_v(method CallableFn) Callable {
+	ctx := &CallableCtx{
+		func: method
+	}
+
+	info := GDExtensionCallableCustomInfo2{
+		callable_userdata:       ctx
+		token:                   gdf.clp
+		object_id:               0
+		call_func:               callable_func
+		is_valid_func:           fn (_ voidptr) GDExtensionBool {
+			println('is_valid_func')
+			return GDExtensionBool(true)
+		}
+		free_func:               fn (_ voidptr) {
+			println('free_func')
+		}
+		hash_func:               fn (data voidptr) u32 {
+			println('hash_func')
+			ctx := unsafe { &CallableCtx(data) }
+			return u32(&ctx)
+		}
+		equal_func:              fn (_ voidptr, _ voidptr) GDExtensionBool {
+			println('equal_func')
+			return GDExtensionBool(true)
+		}
+		less_than_func:          fn (_ voidptr, _ voidptr) GDExtensionBool {
+			println('less_than_func')
+			return GDExtensionBool(false)
+		}
+		to_string_func:          fn (_ voidptr, _ &GDExtensionBool, _ GDExtensionUninitializedStringPtr) {
+			println('to_string_func')
+		}
+		get_argument_count_func: fn (data voidptr, ret &GDExtensionBool) GDExtensionInt {
+			println('get_argument_count_func')
+			unsafe {
+				*ret = GDExtensionBool(true)
+			}
+			return GDExtensionInt(1)
+		}
+	}
+
+	callable := Callable.new0()
+	gdf.callable_custom_create2(GDExtensionUninitializedTypePtr(&callable), &info)
+	return callable
+}
+
 pub fn (s &PackedScene) instantiate_as[T](cfg PackedScene_instantiate_Cfg) T {
 	scene := s.instantiate(cfg)
 	return scene.cast_to[T]()
