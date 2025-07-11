@@ -1,5 +1,9 @@
 module gd
 
+pub interface ToObject {
+	obj() Object
+}
+
 pub fn (s Object) obj() Object {
 	return s
 }
@@ -60,8 +64,8 @@ pub fn (s &Node) get_node_as[T](path string) T {
 	return s.get_node_v(path).cast_to[T]()
 }
 
-pub fn Callable.new(object &Object, method string) Callable {
-	return Callable.new2(object, method)
+pub fn Callable.new(object ToObject, method string) Callable {
+	return Callable.new2(object.obj(), method)
 }
 
 pub fn (s &PackedScene) instantiate_as[T](cfg PackedScene_instantiate_Cfg) T {
