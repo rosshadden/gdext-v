@@ -64,10 +64,6 @@ pub fn (s &Node) get_node_as[T](path string) T {
 	return s.get_node_v(path).cast_to[T]()
 }
 
-pub fn Callable.new(object ToObject, method string) Callable {
-	return Callable.new2(object.obj(), method)
-}
-
 pub fn (s &PackedScene) instantiate_as[T](cfg PackedScene_instantiate_Cfg) T {
 	scene := s.instantiate(cfg)
 	return scene.cast_to[T]()
@@ -107,3 +103,8 @@ pub fn (s &Array) to_v[T]() []T {
 	}
 	return result
 }
+
+pub fn Callable.new(object ToObject, method string) Callable {
+	return Callable.new2(object.obj(), method)
+}
+
