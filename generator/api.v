@@ -1,5 +1,10 @@
 module generator
 
+struct APIArg {
+	name string @[required]
+	type string @[required]
+}
+
 struct APIOperator {
 	name        string @[required]
 	right_type  string
@@ -19,10 +24,7 @@ struct APIBuiltinClass {
 	constructors []struct {
 		index       int @[required]
 		description string
-		arguments   []struct {
-			name string @[required]
-			type string @[required]
-		}
+		arguments   []APIArg
 	} @[required]
 
 	methods []struct {
@@ -74,8 +76,8 @@ pub:
 	description       string
 
 	enums []struct {
-		name        string           @[required]
-		is_bitfield bool             @[required]
+		name        string          @[required]
+		is_bitfield bool            @[required]
 		values      []struct {
 			name        string @[required]
 			value       i64    @[required]
@@ -119,10 +121,7 @@ pub:
 	signals []struct {
 		name        string @[required]
 		description string
-		arguments   []struct {
-			name string @[required]
-			type string @[required]
-		}
+		arguments   []APIArg
 	}
 
 	constants []struct {
@@ -185,10 +184,7 @@ pub mut:
 		category    string @[required]
 		is_vararg   bool   @[required]
 		hash        u64    @[required]
-		arguments   []struct {
-			name string @[required]
-			type string @[required]
-		}
+		arguments   []APIArg
 		description string
 	} @[required]
 

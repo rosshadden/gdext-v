@@ -35,3 +35,34 @@ fn docstring(comments string, cfg DocstringCfg) string {
 	}
 	return cfg.before + lines.join('\n') + cfg.after
 }
+
+@[params]
+struct SignatureCfg {
+	return      string
+	strip_names bool
+}
+
+// Determines the function signature string from the given arguments.
+// Also returns a name generated from the signature.
+fn signature(args []APIArg, cfg SignatureCfg) (string, string) {
+	ret_sig := ' ${cfg.return}'.trim_space_right()
+	args_sig := args.map(fn [cfg] (arg APIArg) string {
+		type := convert_type(arg.type)
+		if cfg.strip_names {
+			return type
+		}
+		return '${arg.name} ${type}'
+	}).join(', ')
+
+	sig := 'fn (${args_sig})${ret_sig}'
+	name := sig
+		.replace('fn ', 'SignalFn void ')
+		.replace('(', '')
+		.replace(')', '')
+		.replace(',', '')
+		.replace(':', '')
+		.trim_space_right()
+		.replace(' ', '_')
+		.replace('_void_', '_')
+	return sig, name
+}

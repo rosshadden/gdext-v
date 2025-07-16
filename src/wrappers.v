@@ -1,12 +1,5 @@
 module gd
 
-pub type AnimationPlayerCurrentAnimationChangedFn = fn (name String)
-
-pub type AnimationPlayerCurrentAnimationChangedFn2 = fn (name StringName)
-
-pub type SignalFn = AnimationPlayerCurrentAnimationChangedFn
-	| AnimationPlayerCurrentAnimationChangedFn2
-
 pub struct VSignal[T] {
 	Signal
 }
@@ -14,16 +7,6 @@ pub struct VSignal[T] {
 @[heap]
 struct SignalCtx {
 	f SignalFn
-}
-
-fn signal_func[T](data voidptr, args &&Variant, arg_count GDExtensionInt, ret &Variant, err &GDExtensionCallError) {
-	ctx := unsafe { &SignalCtx(data) }
-	f := ctx.f
-
-	if f is AnimationPlayerCurrentAnimationChangedFn {
-		name := unsafe { String.from_variant(args[0]) }
-		f(name)
-	}
 }
 
 fn make_callable[T](f SignalFn) Callable {

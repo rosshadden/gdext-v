@@ -22,7 +22,7 @@ pub fn (s Variant) to_variant() Variant {
 	return s
 }
 
-pub fn (s &Variant) from_variant(src &Variant) {
+pub fn (s &Variant) from_variant(src Variant) {
 	unsafe {
 		C.memcpy(&s.data_, &src.data_, sizeof(s.data_))
 	}
@@ -41,6 +41,13 @@ pub fn (s &Variant) from_bool(src bool) {
 }
 
 pub fn (s &Variant) to_int() int {
+	var_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_i64)
+	t := 0
+	var_to_type(voidptr(&t), s)
+	return t
+}
+
+pub fn (s &Variant) to_i64() i64 {
 	var_to_type := gdf.get_variant_to_type_constructor(GDExtensionVariantType.type_i64)
 	t := 0
 	var_to_type(voidptr(&t), s)
@@ -87,6 +94,12 @@ pub fn Variant.from_f64(src f64) Variant {
 	to_variant := gdf.get_variant_from_type_constructor(GDExtensionVariantType.type_f64)
 	result := Variant{}
 	to_variant(GDExtensionUninitializedVariantPtr(&result), GDExtensionTypePtr(&src))
+	return result
+}
+
+pub fn Variant.from_variant(src Variant) Variant {
+	result := Variant{}
+	result.from_variant(src)
 	return result
 }
 

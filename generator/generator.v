@@ -14,7 +14,7 @@ pub struct Generator {
 mut:
 	class_names   []string
 	builtin_names []string
-	enum_defaults map[string]string = map[string]string{}
+	enum_defaults map[string]string
 }
 
 pub fn Generator.new(api_dump string) Generator {
@@ -32,6 +32,7 @@ pub fn (mut g Generator) run() ! {
 	g.gen_gdext_functions()!
 	g.gen_functions()!
 	g.gen_enums()!
+	g.gen_signals()!
 	g.gen_builtin_classes()!
 	g.gen_classes()!
 	g.gen_structs()!
@@ -360,6 +361,68 @@ fn (g &Generator) gen_enums() ! {
 	}
 
 	mut f := os.create('src/__enums.v')!
+	defer { f.close() }
+	f.write(buf)!
+}
+
+// Generate signals for each class.
+fn (mut g Generator) gen_signals() ! {
+	mut buf := strings.new_builder(1024)
+	buf.writeln('module gd')
+
+	mut clauses := []string{}
+	mut sigs := map[string]bool{}
+
+	for class in g.api.classes {
+		for signal in class.signals {
+			sig, sig_name := signature(signal.arguments, strip_names: true)
+
+			if sig_name in sigs {
+				continue
+			}
+
+			sigs[sig_name] = true
+			buf.writeln('')
+			buf.writeln('pub type ${sig_name} = ${sig}')
+
+			mut clause := 'if f is ${sig_name} {'
+			mut arg_list := []string{cap: signal.arguments.len}
+			for a, arg in signal.arguments {
+				type := convert_type(arg.type)
+				match type {
+					'bool' {
+						clause += '\n|		arg${a} := unsafe { args[${a}].to_bool() }'
+					}
+					'i64' {
+						clause += '\n|		arg${a} := unsafe { args[${a}].to_i64() }'
+					}
+					'f64' {
+						clause += '\n|		arg${a} := unsafe { args[${a}].to_f64() }'
+					}
+					else {
+						clause += '\n|		arg${a} := unsafe { ${type}.from_variant(args[${a}]) }'
+					}
+				}
+				arg_list << 'arg${a}'
+			}
+			clause += '\n|		f(${arg_list.join(', ')})'
+			clause += '\n|	}'
+			clauses << clause
+		}
+	}
+
+	buf.writeln('
+		|pub type SignalFn = ${sigs.keys().join(' | ')}
+		|
+		|fn signal_func[T](data voidptr, args &&Variant, arg_count GDExtensionInt, ret &Variant, err &GDExtensionCallError) {
+		|	ctx := unsafe { &SignalCtx(data) }
+		|	f := ctx.f
+		|
+		|	${clauses.join(' else ')}
+		|}
+	'.strip_margin().trim_right('\n'))
+
+	mut f := os.create('src/__signals.v')!
 	defer { f.close() }
 	f.write(buf)!
 }
@@ -954,10 +1017,12 @@ fn (g &Generator) gen_classes() ! {
 		// signals
 		for signal in class.signals {
 			doc := docstring(signal.description, prefix: '|')
+			_, sig_name := signature(signal.arguments, strip_names: true)
 			buf.writeln('
 				${doc}
-				|pub fn (s &${class.name}) ${convert_name(signal.name)}() Signal {
-				|	return Signal.new2(s.obj(), "${signal.name}")
+				|pub fn (s &${class.name}) ${convert_name(signal.name)}() VSignal[${sig_name}] {
+				|	signal := Signal.new2(s.obj(), "${signal.name}")
+				|	return VSignal[${sig_name}]{signal}
 				|}
 			'.strip_margin().trim_right('\n'))
 		}
@@ -997,7 +1062,7 @@ fn (g &Generator) gen_classes() ! {
 			method_name := convert_name(method.name)
 			has_optionals := method.arguments.any(it.default_value != '')
 			ptr := match true {
-				method.is_static { 'unsafe{nil}' }
+				method.is_static { 'unsafe { nil }' }
 				class.name in g.class_names { 's.ptr' }
 				else { 'voidptr(s)' }
 			}
