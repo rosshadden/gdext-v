@@ -47,7 +47,7 @@ struct SignatureCfg {
 fn signature(args []APIArg, cfg SignatureCfg) (string, string) {
 	ret_sig := ' ${cfg.return}'.trim_space_right()
 	args_sig := args.map(fn [cfg] (arg APIArg) string {
-		type := convert_type(arg.type)
+		type := convert_strings(convert_type(arg.type))
 		if cfg.strip_names {
 			return type
 		}

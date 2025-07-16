@@ -388,16 +388,22 @@ fn (mut g Generator) gen_signals() ! {
 			mut clause := 'if f is ${sig_name} {'
 			mut arg_list := []string{cap: signal.arguments.len}
 			for a, arg in signal.arguments {
-				type := convert_type(arg.type)
+				type := convert_strings(convert_type(arg.type))
 				match type {
 					'bool' {
 						clause += '\n|		arg${a} := unsafe { args[${a}].to_bool() }'
+					}
+					'string' {
+						clause += '\n|		arg${a} := unsafe { args[${a}].to_string() }'
 					}
 					'i64' {
 						clause += '\n|		arg${a} := unsafe { args[${a}].to_i64() }'
 					}
 					'f64' {
 						clause += '\n|		arg${a} := unsafe { args[${a}].to_f64() }'
+					}
+					'Variant' {
+						clause += '\n|		arg${a} := unsafe { args[${a}] }'
 					}
 					else {
 						clause += '\n|		arg${a} := unsafe { ${type}.from_variant(args[${a}]) }'
