@@ -1,7 +1,7 @@
 Module {
 	name: 'gd'
 	description: 'V bindings for Godot.'
-	version: '0.2.1'
+	version: '0.3.0'
 	license: 'MIT'
 	dependencies: []
 }
