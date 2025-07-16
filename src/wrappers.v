@@ -52,8 +52,14 @@ fn make_callable[T](f SignalFn) Callable {
 	return callable
 }
 
+// Connect a function to the signal.
+// May be a Callable, an anonymous function, or a lambda expression.
 pub fn (s &VSignal[T]) connect(f SignalFn) Callable {
-	cb := make_callable[T](f)
+	cb := if f is Callable {
+		f
+	} else {
+		make_callable[T](f)
+	}
 	s.Signal.connect(cb)
 	return cb
 }

@@ -370,8 +370,8 @@ fn (mut g Generator) gen_signals() ! {
 	mut buf := strings.new_builder(1024)
 	buf.writeln('module gd')
 
-	mut clauses := []string{}
 	mut sigs := map[string]bool{}
+	mut clauses := []string{}
 
 	for class in g.api.classes {
 		for signal in class.signals {
@@ -418,7 +418,7 @@ fn (mut g Generator) gen_signals() ! {
 	}
 
 	buf.writeln('
-		|pub type SignalFn = ${sigs.keys().join(' | ')}
+		|pub type SignalFn = Callable | ${sigs.keys().join(' | ')}
 		|
 		|fn signal_func[T](data voidptr, args &&Variant, arg_count GDExtensionInt, ret &Variant, err &GDExtensionCallError) {
 		|	ctx := unsafe { &SignalCtx(data) }
