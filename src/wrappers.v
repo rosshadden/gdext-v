@@ -1,5 +1,9 @@
 module gd
 
+pub fn Callable.new(object ToObject, method string) Callable {
+	return Callable.new2(object.obj(), method)
+}
+
 pub struct VSignal[T] {
 	Signal
 }
@@ -9,7 +13,7 @@ struct SignalCtx {
 	f SignalFn
 }
 
-fn make_callable[T](f SignalFn) Callable {
+pub fn Callable.new_fn[T](f SignalFn) Callable {
 	ctx := &SignalCtx{f}
 
 	info := GDExtensionCallableCustomInfo2{
@@ -70,7 +74,7 @@ pub fn (s &VSignal[T]) connect(f SignalFn, cfg VSignalCfg) Callable {
 			f
 		}
 		else {
-			make_callable[T](f)
+			Callable.new_fn[T](f)
 		}
 	}
 	s.Signal.connect(cb)

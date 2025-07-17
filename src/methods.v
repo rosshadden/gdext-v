@@ -103,8 +103,3 @@ pub fn (s &Array) to_v[T]() []T {
 	}
 	return result
 }
-
-pub fn Callable.new(object ToObject, method string) Callable {
-	return Callable.new2(object.obj(), method)
-}
-
