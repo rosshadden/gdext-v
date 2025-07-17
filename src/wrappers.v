@@ -52,13 +52,26 @@ fn make_callable[T](f SignalFn) Callable {
 	return callable
 }
 
+@[params]
+pub struct VSignalCfg {
+pub:
+	// Only used if `f` is a string.
+	node &ToObject = unsafe { nil }
+}
+
 // Connect a function to the signal.
-// May be a Callable, an anonymous function, or a lambda expression.
-pub fn (s &VSignal[T]) connect(f SignalFn) Callable {
-	cb := if f is Callable {
-		f
-	} else {
-		make_callable[T](f)
+// May be a Callable, an anonymous function, a lambda expression, or a string (requires `node`).
+pub fn (s &VSignal[T]) connect(f SignalFn, cfg VSignalCfg) Callable {
+	cb := match f {
+		string {
+			Callable.new(cfg.node, f)
+		}
+		Callable {
+			f
+		}
+		else {
+			make_callable[T](f)
+		}
 	}
 	s.Signal.connect(cb)
 	return cb

@@ -418,7 +418,7 @@ fn (mut g Generator) gen_signals() ! {
 	}
 
 	buf.writeln('
-		|pub type SignalFn = Callable | ${sigs.keys().join(' | ')}
+		|pub type SignalFn = string | Callable | ${sigs.keys().join(' | ')}
 		|
 		|fn signal_func[T](data voidptr, args &&Variant, arg_count GDExtensionInt, ret &Variant, err &GDExtensionCallError) {
 		|	ctx := unsafe { &SignalCtx(data) }
