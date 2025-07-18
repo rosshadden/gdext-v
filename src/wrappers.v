@@ -61,6 +61,8 @@ pub struct VSignalCfg {
 pub:
 	// Only used if `f` is a string.
 	node &ToObject = unsafe { nil }
+	// Object.ConnectFlags
+	flags ObjectConnectFlags
 }
 
 // Connect a function to the signal.
@@ -77,6 +79,6 @@ pub fn (s &VSignal[T]) connect(f SignalFn, cfg VSignalCfg) Callable {
 			Callable.new_fn[T](f)
 		}
 	}
-	s.Signal.connect(cb)
+	s.Signal.connect(cb, flags: i64(cfg.flags))
 	return cb
 }
