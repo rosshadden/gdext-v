@@ -422,11 +422,20 @@ fn (mut g Generator) gen_signals() ! {
 		|
 		|fn signal_func[T](data voidptr, args &&Variant, arg_count GDExtensionInt, ret &Variant, err &GDExtensionCallError) {
 		|	ctx := unsafe { &SignalCtx(data) }
-		|	f := ctx.f
 		|
-		|	${clauses.join(' else ')}
+		|	match ctx.kind {
+		|		.string {
+		|		}
+		|		.callable {
+		|		}
+		|		.func_void {
+		|			ctx.func_void()
+		|		}
+		|	}
+		|
 		|}
 	'.strip_margin().trim_right('\n'))
+	// |	${clauses.join(' else ')}
 
 	mut f := os.create('src/__signals.v')!
 	defer { f.close() }
@@ -1026,9 +1035,9 @@ fn (g &Generator) gen_classes() ! {
 			_, sig_name := signature(signal.arguments, strip_names: true)
 			buf.writeln('
 				${doc}
-				|pub fn (s &${class.name}) ${convert_name(signal.name)}() VSignal[${sig_name}] {
+				|pub fn (s &${class.name}) ${convert_name(signal.name)}() &VSignal[${sig_name}] {
 				|	signal := Signal.new2(s.obj(), "${signal.name}")
-				|	return VSignal[${sig_name}]{signal}
+				|	return &VSignal[${sig_name}]{signal}
 				|}
 			'.strip_margin().trim_right('\n'))
 		}
